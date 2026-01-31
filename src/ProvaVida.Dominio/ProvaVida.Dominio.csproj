@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ProvaVida.Dominio</RootNamespace>
+    <AssemblyName>ProvaVida.Dominio</AssemblyName>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ProvaVida.Dominio.Tests" />
+  </ItemGroup>
+
+</Project>
