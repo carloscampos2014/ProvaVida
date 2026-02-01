@@ -43,7 +43,7 @@ public class Program
         servicos.AddControllers();
 
         // 📚 Swagger/OpenAPI
-        servicos.AddOpenApi();
+        //servicos.AddOpenApi();
         servicos.AddSwagger();
 
         // 🔐 CORS (se necessário para frontend)
@@ -113,23 +113,23 @@ public class Program
         }
 
         // 🛡️ HTTPS redirection
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
 
         // 🔓 CORS
         app.UseCors("PermitirTodos");
 
+        // ⚠️ MIDDLEWARE GLOBAL DE EXCEÇÃO (ORDEM IMPORTA: ANTES de routing)
+        app.UseGlobalExceptionMiddleware();
+
         // 🚦 Roteamento
         app.UseRouting();
+
+        // 🔗 Endpoints
+        app.MapControllers();
 
         // 🔐 Autenticação/Autorização (futura - JWT)
         // app.UseAuthentication();
         // app.UseAuthorization();
-
-        // ⚠️ MIDDLEWARE GLOBAL DE EXCEÇÃO (ORDEM IMPORTA: ANTES de routing)
-        app.UseGlobalExceptionMiddleware();
-
-        // 🔗 Endpoints
-        app.MapControllers();
 
         // 📊 Logging simples
         app.Logger.LogInformation("🚀 ProvaVida API iniciada em {Ambiente}", app.Environment.EnvironmentName);
