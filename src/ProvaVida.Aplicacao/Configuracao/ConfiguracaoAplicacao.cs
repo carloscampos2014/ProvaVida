@@ -34,12 +34,14 @@ public static class ConfiguracaoAplicacao
         if (servicos == null)
             throw new ArgumentNullException(nameof(servicos), "Coleção de serviços não pode ser nula.");
 
-        // 📝 Serviços de Aplicação (Scoped = uma instância por requisição HTTP)
+
+        // �📝 Serviços de Aplicação (Scoped = uma instância por requisição HTTP)
         servicos.AddScoped<IAutenticacaoService, AutenticacaoService>();
         servicos.AddScoped<ICheckInService, CheckInService>();
+        servicos.AddScoped<IContatoEmergenciaService, ContatoEmergenciaService>();
+        
         // Serviços futuros:
         // servicos.AddScoped<INotificacaoService, NotificacaoService>();
-        // servicos.AddScoped<IContatoEmergenciaService, ContatoEmergenciaService>();
 
         return servicos;
     }

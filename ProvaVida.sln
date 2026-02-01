@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{676D47E2-A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvaVida.Aplicacao.Tests", "test\ProvaVida.Aplicacao.Tests\ProvaVida.Aplicacao.Tests.csproj", "{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvaVida.API", "src\ProvaVida.API\ProvaVida.API.csproj", "{94DB8205-9015-4401-88BB-D211DF1777C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94DB8205-9015-4401-88BB-D211DF1777C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94DB8205-9015-4401-88BB-D211DF1777C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94DB8205-9015-4401-88BB-D211DF1777C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94DB8205-9015-4401-88BB-D211DF1777C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,6 +67,7 @@ Global
 		{F5C4F3CA-1572-4246-B098-21C76C91E1CE} = {5A534B3B-B494-4431-A007-0217279453AC}
 		{0689B731-0234-4BE0-A397-479A7EC0B6BF} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2} = {676D47E2-A6E6-444A-B8B7-5CAA21FCEF92}
+		{94DB8205-9015-4401-88BB-D211DF1777C2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33DBE39E-CB92-489B-97D1-B05F16D11B28}

@@ -30,6 +30,15 @@ public interface IRepositorioContatoEmergencia
     Task<IEnumerable<Entidades.ContatoEmergencia>> ObterPorUsuarioIdAsync(Guid usuarioId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Obtém um contato de emergência pelo seu email.
+    /// Útil para validar se um email já está registrado como contato.
+    /// </summary>
+    /// <param name="email">O email do contato.</param>
+    /// <param name="cancellationToken">Token de cancelamento para operações assíncronas.</param>
+    /// <returns>O contato encontrado, ou null se não existir.</returns>
+    Task<Entidades.ContatoEmergencia?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Atualiza um contato de emergência existente no repositório.
     /// </summary>
     /// <param name="contato">O contato com os dados atualizados.</param>

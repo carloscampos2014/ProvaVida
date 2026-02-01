@@ -1,0 +1,223 @@
+### Configuração de Ambiente
+@baseUrl = http://localhost:5176
+@contentType = application/json
+
+### Variáveis globais para testes
+@usuarioId = 550e8400-e29b-41d4-a716-446655440000
+@contatoId = 660e8400-e29b-41d4-a716-446655440111
+
+---
+# 🎯 ProvaVida API - Suite de Testes
+# Endpoints para testar registro, autenticação, check-ins e contatos
+
+---
+
+## 📝 AUTH - REGISTRO DE NOVO USUÁRIO
+
+### ✅ 1. Registrar novo usuário (sucesso)
+POST {{baseUrl}}/auth/registrar
+Content-Type: {{contentType}}
+
+{
+  "nome": "João Silva",
+  "email": "joao@exemplo.com",
+  "telefone": "11987654321",
+  "senha": "SenhaForte@123",
+  "contatoEmergencia": {
+    "nome": "Maria Silva",
+    "email": "maria@exemplo.com",
+    "whatsApp": "11987654322",
+    "prioridade": 1
+  }
+}
+
+### ❌ 2. Registrar com senha fraca (deve falhar)
+POST {{baseUrl}}/auth/registrar
+Content-Type: {{contentType}}
+
+{
+  "nome": "Carlos Santos",
+  "email": "carlos@exemplo.com",
+  "telefone": "11987654323",
+  "senha": "123456",
+  "contatoEmergencia": {
+    "nome": "Ana Santos",
+    "email": "ana@exemplo.com",
+    "whatsApp": "11987654324",
+    "prioridade": 1
+  }
+}
+
+### ❌ 3. Registrar sem contato de emergência (deve falhar)
+POST {{baseUrl}}/auth/registrar
+Content-Type: {{contentType}}
+
+{
+  "nome": "Pedro Oliveira",
+  "email": "pedro@exemplo.com",
+  "telefone": "11987654325",
+  "senha": "SenhaForte@123"
+}
+
+### ❌ 4. Registrar com telefone inválido (deve falhar)
+POST {{baseUrl}}/auth/registrar
+Content-Type: {{contentType}}
+
+{
+  "nome": "Lucas Pereira",
+  "email": "lucas@exemplo.com",
+  "telefone": "1234567890",
+  "senha": "SenhaForte@123",
+  "contatoEmergencia": {
+    "nome": "Fabio Pereira",
+    "email": "fabio@exemplo.com",
+    "whatsApp": "11987654326",
+    "prioridade": 1
+  }
+}
+
+### ❌ 5. Registrar com email duplicado (deve falhar)
+POST {{baseUrl}}/auth/registrar
+Content-Type: {{contentType}}
+
+{
+  "nome": "Outro João",
+  "email": "joao@exemplo.com",
+  "telefone": "11987654327",
+  "senha": "SenhaForte@123",
+  "contatoEmergencia": {
+    "nome": "Outro Maria",
+    "email": "outra@exemplo.com",
+    "whatsApp": "11987654328",
+    "prioridade": 1
+  }
+}
+
+---
+
+## 🔐 AUTH - LOGIN
+
+### ✅ 6. Fazer login com credenciais válidas
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "joao@exemplo.com",
+  "senha": "SenhaForte@123"
+}
+
+### ❌ 7. Fazer login com senha incorreta (deve falhar)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "joao@exemplo.com",
+  "senha": "SenhaErrada@123"
+}
+
+### ❌ 8. Fazer login com usuário inexistente (deve falhar)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "naoexiste@exemplo.com",
+  "senha": "QualquerSenha@123"
+}
+
+---
+
+## 📍 CHECK-INS
+
+### ✅ 9. Registrar novo check-in (com contato obrigatório registrado antes)
+POST {{baseUrl}}/check-ins/registrar
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": "{{usuarioId}}",
+  "latitude": -23.5505,
+  "longitude": -46.6333,
+  "descricao": "Check-in na Avenida Paulista"
+}
+
+### ✅ 10. Obter histórico de check-ins do usuário
+GET {{baseUrl}}/check-ins/historico/{{usuarioId}}
+Accept: {{contentType}}
+
+---
+
+## 📱 CONTATOS DE EMERGÊNCIA
+
+### ✅ 11. Criar novo contato de emergência
+POST {{baseUrl}}/contatos
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": "{{usuarioId}}",
+  "nome": "Contato Adicional",
+  "email": "contato.extra@exemplo.com",
+  "whatsApp": "11987654329",
+  "prioridade": 2
+}
+
+### ❌ 12. Criar contato com email duplicado (deve falhar)
+POST {{baseUrl}}/contatos
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": "{{usuarioId}}",
+  "nome": "Duplicado",
+  "email": "maria@exemplo.com",
+  "whatsApp": "11987654330",
+  "prioridade": 3
+}
+
+### ✅ 13. Listar todos os contatos de um usuário
+GET {{baseUrl}}/contatos/{{usuarioId}}
+Accept: {{contentType}}
+
+### ✅ 14. Obter um contato específico
+GET {{baseUrl}}/contatos/{{contatoId}}
+Accept: {{contentType}}
+
+### ✅ 15. Atualizar contato de emergência
+PUT {{baseUrl}}/contatos/{{contatoId}}
+Content-Type: {{contentType}}
+
+{
+  "nome": "Maria Silva Atualizado",
+  "email": "maria.atualizado@exemplo.com",
+  "whatsApp": "11987654331",
+  "prioridade": 1
+}
+
+### ✅ 16. Deletar contato de emergência
+DELETE {{baseUrl}}/contatos/{{contatoId}}
+
+---
+
+## 📋 NOTAS IMPORTANTES
+
+# Para testar a API:
+# 1. Execute: dotnet run --project src/ProvaVida.API/
+# 2. A API estará disponível em: http://localhost:5176
+# 3. Swagger disponível em: http://localhost:5176/swagger
+# 4. Copie as operações abaixo e cola no VS Code com REST Client extension
+# 5. Ou use Postman, Insomnia, ou Thunder Client
+
+# 🔑 FLUXO RECOMENDADO DE TESTES:
+# 1. Execute #1 (registrar) - pegue o usuarioId da resposta
+# 2. Substitua @usuarioId pelo ID retornado
+# 3. Execute #6 (login) - para validar credenciais
+# 4. Execute #11 (criar contato)
+# 5. Execute #13 (listar contatos) - note o contatoId
+# 6. Substitua @contatoId pelo ID retornado
+# 7. Execute #15 (atualizar) e #16 (deletar)
+# 8. Execute #9 (check-in) e #10 (histórico)
+
+# 🚨 TESTES DE ERRO:
+# - #2: Senha fraca (menos de 8 chars, sem uppercase, digit, special)
+# - #3: Sem contato de emergência (obrigatório)
+# - #4: Telefone inválido (não é celular brasileiro com 9º digito = 9)
+# - #5: Email duplicado
+# - #7 e #8: Credenciais inválidas
+# - #12: Email de contato duplicado

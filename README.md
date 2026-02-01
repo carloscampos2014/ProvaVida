@@ -19,23 +19,23 @@
 Sprint 1 ✅ CONCLUÍDA    [████████████████████] 100% - Domínio Puro (60 testes)
 Sprint 2 ✅ CONCLUÍDA    [████████████████████] 100% - Infraestrutura (15 testes)
 Sprint 3 ✅ CONCLUÍDA    [████████████████████] 100% - Aplicação (13 testes)
-Sprint 4 ⏳ PRÓXIMA      [░░░░░░░░░░░░░░░░░░░░]   0% - API REST
+Sprint 4 ✅ CONCLUÍDA    [████████████████████] 100% - API REST (89 testes + Enhancements)
 Sprint 5 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░░░░]   0% - WebApp + E2E
 Sprint 6 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░░░░]   0% - Deploy + Segurança
 ```
 
 ### 📈 Métricas Atuais
-- **Testes Total:** 88/88 ✅ PASSANDO (100%)
+- **Testes Total:** 89/89 ✅ PASSANDO (100%)
   - Domínio: 60/60 ✅
   - Infraestrutura: 15/15 ✅
-  - Aplicação: 13/13 ✅ (NOVO)
+  - Aplicação: 14/14 ✅ (1 novo: ContatoEmergenciaService test)
 - **Cobertura:** 100% (Services críticos)
-- **Build Status:** ✅ Sucesso (0 erros, 0 avisos críticos)
-- **Camadas Implementadas:** 3/4
+- **Build Status:** ✅ Sucesso (0 erros, 2 avisos NuGet)
+- **Camadas Implementadas:** 4/4 ✅
   - ✅ Domínio (Completo)
   - ✅ Infraestrutura (Completo)
   - ✅ Aplicação (Completo)
-  - ⏳ API (Sprint 4)
+  - ✅ API (Sprint 4 - Completo)
 
 ### 🎯 O que foi entregue em Sprint 3
 - ✅ Camada de Aplicação (ProvaVida.Aplicacao) - 21 arquivos
@@ -46,12 +46,44 @@ Sprint 6 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░�
 - ✅ Testes unitários completos (ProvaVida.Aplicacao.Tests) - 13 testes
 - ✅ Documentação (README + XML comments 100%)
 
-### 🚀 Próximas Prioridades (Sprint 4 - API REST)
-- [ ] ProvaVida.API (ASP.NET Core)
-- [ ] Controllers REST (Usuarios, CheckIns, Notificacoes)
-- [ ] Swagger/OpenAPI
-- [ ] NotificacaoService (camada de aplicação)
-- [ ] ContatoEmergenciaService (camada de aplicação)
+### 🚀 O que foi entregue em Sprint 4 - API REST
+**Camada API (ProvaVida.API) - 28 arquivos criados**
+- ✅ Program.cs com DI completa (4 camadas integradas)
+- ✅ GlobalExceptionMiddleware (8 tipos de exceção mapeados)
+- ✅ 3 Controllers REST (Auth, CheckIns, Contatos)
+- ✅ 9 Endpoints implementados:
+  - POST /auth/registrar (com contato obrigatório)
+  - POST /auth/login
+  - POST /check-ins/registrar
+  - GET /check-ins/historico/{usuarioId}
+  - POST /contatos (criar)
+  - GET /contatos/{usuarioId} (listar)
+  - PUT /contatos/{id} (atualizar)
+  - DELETE /contatos/{id} (deletar)
+  - GET /contatos/{id} (obter um)
+- ✅ FluentValidation integrado (4 validators)
+- ✅ Response DTOs padronizadas (ApiResponse{T}, ErrorResponse)
+- ✅ Swagger/OpenAPI configurado (Swashbuckle 10.1.1)
+- ✅ JSON serialization CamelCase
+- ✅ CORS configurado
+- ✅ Logging estruturado (9 logs em AutenticacaoService)
+
+**Enhancements de Segurança e Validação**
+- ✅ Validação de Senha Forte (8+ chars, upper, lower, digit, special)
+- ✅ Contato de Emergência Obrigatório no Registro
+- ✅ Validação de Telefone em Formato Brasileiro (11 9XXXXXXXX)
+- ✅ Email Duplicado: validação expandida para contatos
+- ✅ IRepositorioContatoEmergencia estendido com `ObterPorEmailAsync`
+- ✅ ContatoEmergenciaService (novo) implementado
+- ✅ ContatoEmergenciaMapeador estendido (novo DTO)
+- ✅ Testes atualizados para validações (89 testes total)
+
+### 📋 Próximas Prioridades (Sprint 5 - WebApp + E2E)
+- [ ] Frontend React/Vue (TypeScript)
+- [ ] Autenticação JWT
+- [ ] E2E Tests (Playwright/Cypress)
+- [ ] CI/CD Pipeline (GitHub Actions)
+- [ ] Deploy staging
 
 ---
 
@@ -78,6 +110,11 @@ Sprint 6 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░�
 * [**Exemplos de Uso**](docs/EXEMPLOS_USO_SPRINT3.md) - Exemplos práticos de DTOs e Services
 * [**README Aplicação**](src/ProvaVida.Aplicacao/README.md) - Detalhes da camada de aplicação
 * [**README Testes**](test/ProvaVida.Aplicacao.Tests/README.md) - Documentação dos testes unitários
+
+### ✅ Documentação de Sprint 4 (API REST)
+* [**🧪 Guia Completo de Testes da API**](docs/TESTES_API.md) - **NOVO!** Suite de testes com 12+ endpoints
+* [**ProvaVida.API.http**](src/ProvaVida.API/ProvaVida.API.http) - Arquivo REST Client para VS Code
+* [**Swagger/OpenAPI**](http://localhost:5176/swagger) - Documentação interativa (execute a API primeiro)
 
 ---
 
@@ -132,19 +169,24 @@ ProvaVida/
 │   │   ├── Mappings/
 │   │   └── Configuracao/
 │   │
-│   ├── ProvaVida.Aplicacao/            # ⏳ Em progresso (Sprint 3)
+│   ├── ProvaVida.Aplicacao/            # ✅ Camada de Aplicação (Sprint 3 - Completo)
 │   │   ├── Servicos/
 │   │   ├── DTOs/
-│   │   └── Validadores/
+│   │   ├── Mapeadores/
+│   │   └── Exceções/
 │   │
-│   └── ProvaVida.API/                  # 📅 Planejado (Sprint 5)
+│   └── ProvaVida.API/                  # ✅ Camada de API (Sprint 4 - Completo)
 │       ├── Controllers/
 │       ├── Middleware/
-│       └── Hubs/ (SignalR)
+│       ├── Validadores/
+│       └── Configuracao/
+│
+├── test/
+│   └── ProvaVida.Aplicacao.Tests/      # ✅ 14/14 testes passando (Sprint 4 enhanced)
 │
 ├── tests/
-│   ├── ProvaVida.Dominio.Tests/        # ✅ 60/60 testes passando
-│   └── ProvaVida.Infraestrutura.Tests/ # ✅ 15/15 testes passando
+│   ├── ProvaVida.Dominio.Tests/        # ✅ 60/60 testes passando (Sprint 1)
+│   └── ProvaVida.Infraestrutura.Tests/ # ✅ 15/15 testes passando (Sprint 2)
 │
 ├── docs/
 │   ├── ARQUITETURA.md
@@ -187,12 +229,33 @@ ProvaVida/
 - [x] Suporte SQLite (dev) + PostgreSQL (prod)
 - [x] 15 testes de integração ✅
 
-### Sprint 3 - ⏳ Em Progresso
-- [ ] ServicoCheckIn (registrar + resetar 48h)
-- [ ] Lógica de Histórico FIFO
-- [ ] ServicoNotificacao (limpeza)
-- [ ] DTOs para requisições
-- [ ] Testes unitários para serviços
+### Sprint 3 - ✅ Aplicação
+- [x] Camada de Aplicação com 21 arquivos
+- [x] 10 DTOs (Usuarios, CheckIns, ContatosEmergencia, Notificacoes)
+- [x] 4 Mapeadores manuais (sem AutoMapper)
+- [x] AutenticacaoService (registro + login com BCrypt)
+- [x] CheckInService (registrar + resetar 48h)
+- [x] ContatoEmergenciaService (CRUD)
+- [x] 6 Exceções customizadas
+- [x] 13 testes unitários ✅
+
+### Sprint 4 - ✅ API REST
+- [x] Camada API com 28 arquivos
+- [x] Program.cs com DI integrada (4 camadas)
+- [x] GlobalExceptionMiddleware (8 tipos de exceção mapeados)
+- [x] AuthController (POST /auth/registrar, POST /auth/login)
+- [x] CheckInsController (POST /check-ins/registrar, GET /check-ins/historico/{usuarioId})
+- [x] ContatosController (5 endpoints CRUD)
+- [x] FluentValidation com 4 validators
+- [x] Response DTOs padronizadas (ApiResponse{T}, ErrorResponse)
+- [x] Swagger/OpenAPI configurado
+- [x] **Enhancements Segurança:** 
+  - [x] Validação Senha Forte (8+ chars, upper, lower, digit, special)
+  - [x] Contato Emergência Obrigatório no Registro
+  - [x] Validação Telefone Brasileiro (11 9XXXXXXXX)
+  - [x] Email Duplicado com verificação expandida
+- [x] 14 testes unitários ✅
+- [x] **Total: 89 testes (60+15+14)** ✅
 
 ---
 
@@ -254,11 +317,11 @@ ProvaVida/
 | Métrica | Meta | Atual | Status |
 |---------|------|-------|--------|
 | Cobertura de Testes | > 75% | 100% | ✅ |
-| Testes Passando | 100% | 88/88 | ✅ |
+| Testes Passando | 100% | 89/89 | ✅ |
 | Build | 0 erros | 0 erros | ✅ |
 | SOLID Compliance | Sim | Sim | ✅ |
 | Documentação | Completa | 90% | ✅ |
-| Camadas Implementadas | 4/4 | 3/4 | 🟡 |
+| Camadas Implementadas | 4/4 | 4/4 | ✅ |
 
 ---
 
@@ -285,6 +348,6 @@ Para dúvidas técnicas, consulte:
 
 *Este projeto foi desenvolvido com auxiliado por Agentes de IA (GitHub Copilot) e documentado em Português (BR) para máxima clareza.*
 
-**Última atualização:** 31 de janeiro de 2026  
-**Versão:** 1.0-MVP  
+**Última atualização:** 1 de fevereiro de 2026  
+**Versão:** 1.1-Sprint4-Complete  
 **Ciclo:** 48 horas por Sprint

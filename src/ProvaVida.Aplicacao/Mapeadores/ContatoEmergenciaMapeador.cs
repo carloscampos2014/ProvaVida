@@ -1,4 +1,5 @@
 using ProvaVida.Aplicacao.Dtos.ContatosEmergencia;
+using ProvaVida.Aplicacao.Dtos.Usuarios;
 using ProvaVida.Dominio.Entidades;
 
 namespace ProvaVida.Aplicacao.Mapeadores;
@@ -35,6 +36,27 @@ public static class ContatoEmergenciaMapeador
     /// Factory valida: usuarioId, nome, email, whatsapp, prioridade.
     /// </summary>
     public static ContatoEmergencia ParaDominio(this ContatoRegistroDto dto, Guid usuarioId)
+    {
+        if (dto == null)
+            throw new ArgumentNullException(nameof(dto), "DTO de contato não pode ser nulo.");
+
+        if (usuarioId == Guid.Empty)
+            throw new ArgumentException("ID do usuário é obrigatório.", nameof(usuarioId));
+
+        return ContatoEmergencia.Criar(
+            usuarioId: usuarioId,
+            nome: dto.Nome,
+            email: dto.Email,
+            whatsapp: dto.WhatsApp,
+            prioridade: dto.Prioridade ?? 1
+        );
+    }
+
+    /// <summary>
+    /// Mapeia ContatoEmergenciaNovoDto (aninhado em UsuarioRegistroDto) para ContatoEmergencia (Entidade).
+    /// Sobrecarga para uso durante registro de novo usuário.
+    /// </summary>
+    public static ContatoEmergencia ParaDominio(this ContatoEmergenciaNovoDto dto, Guid usuarioId)
     {
         if (dto == null)
             throw new ArgumentNullException(nameof(dto), "DTO de contato não pode ser nulo.");

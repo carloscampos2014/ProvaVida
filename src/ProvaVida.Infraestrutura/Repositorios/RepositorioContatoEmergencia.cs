@@ -32,7 +32,20 @@ public class RepositorioContatoEmergencia : RepositorioBase<ContatoEmergencia>, 
     }
 
     /// <summary>
-    /// Obtém um contato específico pelo email.
+    /// Obtém um contato específico pelo email (busca global, sem filtrar por usuário).
+    /// Útil para validar se um email já está registrado como contato em qualquer usuário.
+    /// </summary>
+    public async Task<ContatoEmergencia?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return null;
+
+        return await DbSet
+            .FirstOrDefaultAsync(c => c.Email.Valor == email, cancellationToken);
+    }
+
+    /// <summary>
+    /// Obtém um contato específico pelo email dentro de um usuário.
     /// </summary>
     public async Task<ContatoEmergencia?> ObterPorEmailAsync(Guid usuarioId, string email, CancellationToken cancellationToken = default)
     {

@@ -61,6 +61,26 @@ public static class RepositorioMocks
     }
 
     /// <summary>
+    /// Cria um mock do repositório de contatos de emergência.
+    /// </summary>
+    public static Mock<IRepositorioContatoEmergencia> CriarRepositorioContatoEmergenciaMock()
+    {
+        var mock = new Mock<IRepositorioContatoEmergencia>();
+        
+        // Setup padrão: sem contatos
+        mock.Setup(r => r.ObterPorIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ContatoEmergencia?)null);
+        
+        mock.Setup(r => r.ObterPorEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ContatoEmergencia?)null);
+        
+        mock.Setup(r => r.ObterPorUsuarioIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ContatoEmergencia>());
+        
+        return mock;
+    }
+
+    /// <summary>
     /// Cria um mock do serviço de hash de senha.
     /// </summary>
     public static Mock<IServicoHashSenha> CriarServicoHashSenhaMock()
