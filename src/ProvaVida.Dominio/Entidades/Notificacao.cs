@@ -4,12 +4,16 @@ namespace ProvaVida.Dominio.Entidades;
 
 /// <summary>
 /// Entidade de Domínio que representa uma notificação (alerta ou lembrete).
-/// Notificações podem ser: lembretes (-6h, -2h) ou emergências (pós-vencimento).
+/// 
+/// Tipos:
+/// - LembreteUsuario: Notificações simples para o próprio usuário (4h antes + no vencimento).
+/// - EmergenciaContatos: Notificações para contatos de emergência (reenvios a cada 6h por 48h).
 /// 
 /// Invariantes:
 /// - O histórico de notificações é limitado a 5 registros por contato (FIFO)
 /// - Uma notificação passa pelos estados: Pendente → Enviada ou Pendente → Erro
-/// - Uma notificação pode ser Cancelada se o usuário fizer check-in antes do envio
+/// - DataProximoReenvio é calculada apenas para EmergenciaContatos (6h após cada envio)
+/// - Notificações de emergência param após 48h desde o primeiro envio
 /// </summary>
 public sealed class Notificacao
 {
@@ -19,7 +23,7 @@ public sealed class Notificacao
     public Guid Id { get; private set; }
 
     /// <summary>
-    /// ID do contato de emergência destinatário.
+    /// ID do contato de emergência destinatário (Guid.Empty para lembretes do próprio usuário).
     /// </summary>
     public Guid ContatoEmergenciaId { get; private set; }
 
@@ -29,7 +33,7 @@ public sealed class Notificacao
     public Guid UsuarioId { get; private set; }
 
     /// <summary>
-    /// Tipo de notificação (Lembrete6h, Lembrete2h, Emergencia).
+    /// Tipo de notificação (LembreteUsuario ou EmergenciaContatos).
     /// </summary>
     public TipoNotificacao TipoNotificacao { get; private set; }
 
@@ -39,14 +43,21 @@ public sealed class Notificacao
     public MeioNotificacao MeioNotificacao { get; private set; }
 
     /// <summary>
-    /// Data e hora quando a notificação foi criada/enviada.
+    /// Data e hora quando a notificação foi criada.
     /// </summary>
-    public DateTime DataEnvio { get; private set; }
+    public DateTime DataCriacao { get; private set; }
 
     /// <summary>
     /// Status atual da notificação (Pendente, Enviada, Erro, Cancelada).
     /// </summary>
     public StatusNotificacao Status { get; private set; }
+
+    /// <summary>
+    /// Data e hora do próximo reenvio (APENAS para EmergenciaContatos).
+    /// Calculada como DataEnvio + 6 horas a cada reenvio.
+    /// Null para LembreteUsuario.
+    /// </summary>
+    public DateTime? DataProximoReenvio { get; private set; }
 
     /// <summary>
     /// Mensagem de erro, se houver.
@@ -56,67 +67,75 @@ public sealed class Notificacao
     private Notificacao() { }
 
     /// <summary>
-    /// Factory para criar uma nova notificação de lembrete.
+    /// Factory para criar uma notificação de LEMBRETE para o PRÓPRIO USUÁRIO.
+    /// Disparado 4 horas antes do vencimento ou no momento do vencimento.
     /// </summary>
     /// <param name="usuarioId">ID do usuário.</param>
-    /// <param name="contatoEmergenciaId">ID do contato a notificar.</param>
-    /// <param name="tipoNotificacao">Tipo do lembrete (Lembrete6h ou Lembrete2h).</param>
-    /// <param name="meioNotificacao">Meio de envio (Email ou WhatsApp).</param>
+    /// <param name="meioNotificacao">Meio de envio (Email).</param>
     /// <returns>Nova notificação de lembrete no estado Pendente.</returns>
-    public static Notificacao CriarLembrete(
+    public static Notificacao CriarLembreteUsuario(
         Guid usuarioId,
-        Guid contatoEmergenciaId,
-        TipoNotificacao tipoNotificacao,
         MeioNotificacao meioNotificacao)
     {
-        if (tipoNotificacao == TipoNotificacao.Emergencia)
-            throw new InvalidOperationException("Use CriarEmergencia para notificações de emergência.");
-
         return new Notificacao
         {
             Id = Guid.NewGuid(),
             UsuarioId = usuarioId,
-            ContatoEmergenciaId = contatoEmergenciaId,
-            TipoNotificacao = tipoNotificacao,
+            ContatoEmergenciaId = Guid.Empty,  // Sem contato de emergência
+            TipoNotificacao = TipoNotificacao.LembreteUsuario,
             MeioNotificacao = meioNotificacao,
-            DataEnvio = DateTime.UtcNow,
+            DataCriacao = DateTime.UtcNow,
             Status = StatusNotificacao.Pendente,
+            DataProximoReenvio = null,  // Lembretes não são reenviados
             MensagemErro = null
         };
     }
 
     /// <summary>
-    /// Factory para criar uma nova notificação de emergência.
+    /// Factory para criar uma notificação de EMERGÊNCIA para CONTATOS.
+    /// Disparado quando o usuário não faz check-in por 24h.
+    /// Reenvios automáticos a cada 6 horas por até 48 horas.
     /// </summary>
     /// <param name="usuarioId">ID do usuário.</param>
-    /// <param name="contatoEmergenciaId">ID do contato a notificar.</param>
-    /// <param name="meioNotificacao">Meio de envio (Email ou WhatsApp).</param>
+    /// <param name="contatoEmergenciaId">ID do contato de emergência a notificar.</param>
+    /// <param name="meioNotificacao">Meio de envio (Email, WhatsApp).</param>
     /// <returns>Nova notificação de emergência no estado Pendente.</returns>
-    public static Notificacao CriarEmergencia(
+    public static Notificacao CriarEmergenciaContatos(
         Guid usuarioId,
         Guid contatoEmergenciaId,
         MeioNotificacao meioNotificacao)
     {
+        if (contatoEmergenciaId == Guid.Empty)
+            throw new ArgumentException("ContatoEmergenciaId não pode ser vazio.", nameof(contatoEmergenciaId));
+
         return new Notificacao
         {
             Id = Guid.NewGuid(),
             UsuarioId = usuarioId,
             ContatoEmergenciaId = contatoEmergenciaId,
-            TipoNotificacao = TipoNotificacao.Emergencia,
+            TipoNotificacao = TipoNotificacao.EmergenciaContatos,
             MeioNotificacao = meioNotificacao,
-            DataEnvio = DateTime.UtcNow,
+            DataCriacao = DateTime.UtcNow,
             Status = StatusNotificacao.Pendente,
+            DataProximoReenvio = null,  // Será calculado ao marcar como enviada
             MensagemErro = null
         };
     }
 
     /// <summary>
     /// Marca a notificação como enviada com sucesso.
+    /// Para EmergenciaContatos, agenda o próximo reenvio para 6 horas depois.
     /// </summary>
     public void MarcarComoEnviada()
     {
         Status = StatusNotificacao.Enviada;
         MensagemErro = null;
+
+        // Se é emergência, agenda próximo reenvio
+        if (TipoNotificacao == TipoNotificacao.EmergenciaContatos)
+        {
+            DataProximoReenvio = DateTime.UtcNow.AddHours(6);
+        }
     }
 
     /// <summary>
@@ -135,32 +154,56 @@ public sealed class Notificacao
     public void Cancelar()
     {
         Status = StatusNotificacao.Cancelada;
+        DataProximoReenvio = null;
     }
 
     /// <summary>
-    /// Verifica se a notificação pode ser reenviada (está em erro ou pendente).
+    /// Verifica se a notificação de EMERGÊNCIA deve ser reenviada.
+    /// Retorna true se:
+    /// - É uma EmergenciaContatos
+    /// - Status é Enviada
+    /// - Passou o horário agendado (DataProximoReenvio)
+    /// - Não ultrapassou 48 horas desde a criação
     /// </summary>
-    /// <returns>True se a notificação está em estado "reenvável".</returns>
-    public bool PodeSerReenviada()
+    /// <returns>True se deve ser reenviada.</returns>
+    public bool DeveSerReenviada()
     {
-        return Status == StatusNotificacao.Erro || Status == StatusNotificacao.Pendente;
+        // Só aplica a emergências
+        if (TipoNotificacao != TipoNotificacao.EmergenciaContatos)
+            return false;
+
+        // Deve estar enviada
+        if (Status != StatusNotificacao.Enviada)
+            return false;
+
+        // Deve ter DataProximoReenvio agendada
+        if (!DataProximoReenvio.HasValue)
+            return false;
+
+        // Deve ter passado o horário agendado
+        if (DateTime.UtcNow < DataProximoReenvio.Value)
+            return false;
+
+        // Não deve ter ultrapassado 48 horas desde a criação
+        var horasDesdeOrigem = (DateTime.UtcNow - DataCriacao).TotalHours;
+        return horasDesdeOrigem <= 48;
     }
 
     /// <summary>
-    /// Calcula quantas horas se passaram desde o envio da notificação.
+    /// Calcula quantas horas se passaram desde a criação da notificação.
     /// </summary>
     /// <returns>Número de horas decorridas.</returns>
-    public double HorasDesdeEnvio()
+    public double HorasDesciasCriacao()
     {
-        return (DateTime.UtcNow - DataEnvio).TotalHours;
+        return (DateTime.UtcNow - DataCriacao).TotalHours;
     }
 
     /// <summary>
-    /// Verifica se a notificação é antiga (enviada há mais de 24h) e pode ser descartada do histórico.
+    /// Verifica se a notificação de emergência já atingiu o limite de 48 horas.
     /// </summary>
-    /// <returns>True se a notificação tem mais de 24 horas.</returns>
-    public bool EhAntiga()
+    /// <returns>True se passou mais de 48 horas desde a criação.</returns>
+    public bool Ultrapassa48Horas()
     {
-        return HorasDesdeEnvio() > 24;
+        return HorasDesciasCriacao() > 48;
     }
 }

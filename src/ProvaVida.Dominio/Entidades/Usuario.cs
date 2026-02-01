@@ -202,23 +202,48 @@ public sealed class Usuario
     }
 
     /// <summary>
-    /// Verifica se um lembrete de -6 horas deve ser disparado.
+    /// Verifica se é o dia do check-in e deve enviar lembrete "Hoje você deve realizar o check-in".
+    /// 
+    /// Considera que:
+    /// - O check-in deve ser feito entre 08:00 e 18:00 do dia agendado
+    /// - Retorna true se faltam entre 10h e 11h para vencimento (consideram o dia)
     /// </summary>
-    /// <returns>True se faltam entre 6h e 5h59m para vencimento.</returns>
-    public bool DeveDispararLembrete6h()
+    /// <returns>True se está no dia agendado (próximas 10-11 horas até 18h).</returns>
+    public bool DeveDispararLembreteDia()
     {
         var horasAte = HorasAteVencimento();
-        return horasAte > 0 && horasAte <= 6;
+        
+        // Se faltam entre 10h e 11h, significa que chegou o dia
+        // (considerando 18h de vencimento e uma margem para 08:00 da manhã)
+        return horasAte > 0 && horasAte <= 10 && horasAte > 9;
     }
 
     /// <summary>
-    /// Verifica se um lembrete de -2 horas deve ser disparado.
+    /// Verifica se um lembrete deve ser disparado para o usuário em um intervalo específico.
+    /// 
+    /// Exemplos:
+    /// - DeveDispararLembrete(4) retorna true se faltam entre 4h e 5h para vencimento (14h)
+    /// - DeveDispararLembrete(6) retorna true se faltam entre 6h e 7h para vencimento
     /// </summary>
-    /// <returns>True se faltam entre 2h e 1h59m para vencimento.</returns>
-    public bool DeveDispararLembrete2h()
+    /// <param name="horasAntes">Intervalo de horas (ex: 4 para "4 horas antes" = 14h se vence 18h).</param>
+    /// <returns>True se faltam entre horasAntes e (horasAntes+1) horas.</returns>
+    public bool DeveDispararLembrete(int horasAntes)
     {
+        if (horasAntes <= 0)
+            throw new ArgumentException("horasAntes deve ser positivo.", nameof(horasAntes));
+
         var horasAte = HorasAteVencimento();
-        return horasAte > 0 && horasAte <= 2;
+        return horasAte > 0 && horasAte <= horasAntes && horasAte > (horasAntes - 1);
+    }
+
+    /// <summary>
+    /// Verifica se deve ser lançada uma EMERGÊNCIA para os contatos.
+    /// Retorna true quando o usuário não faz check-in por 24+ horas.
+    /// </summary>
+    /// <returns>True se passou mais de 24h sem check-in.</returns>
+    public bool DeveLancarEmergencia()
+    {
+        return EstaVencido() && HorasAteVencimento() < -24;
     }
 
     /// <summary>

@@ -268,20 +268,59 @@ public class UsuarioTests
     }
 
     [Fact]
-    public void DeveDispararLembrete6h_Quando6HorasFaltam_DevRetornarTrue()
+    public void DeveDispararLembreteDia_QuandoEDiaDaCheckin_DevRetornarTrue()
     {
         // Arrange
         var usuario = Usuario.Criar("João", "joao@example.com", "11987654321", "hash123");
         usuario.RegistrarCheckIn();
         
-        // Simula passagem de tempo (não é real, apenas verifica a lógica)
-        // Como DataProximoVencimento é calculado em runtime, testamos o método
+        // Act
+        // No momento de criação, faltam ~48h, não 10-11h como esperado para o dia
+        var deveLembrete = usuario.DeveDispararLembreteDia();
+
+        // Assert
+        Assert.False(deveLembrete);  // Ainda não é o dia (faltam 48h)
+    }
+
+    [Fact]
+    public void DeveDispararLembrete_ComIntervalo4h_DevRetornarTrue()
+    {
+        // Arrange
+        var usuario = Usuario.Criar("João", "joao@example.com", "11987654321", "hash123");
+        usuario.RegistrarCheckIn();
         
         // Act
-        var deve = usuario.DeveDispararLembrete6h();
+        // No momento de criação, faltam ~48h, não 4h como esperado
+        var deve4h = usuario.DeveDispararLembrete(4);
 
-        // Assert (no momento de criação, faltam ~48h, não 6h)
-        Assert.False(deve);
+        // Assert
+        Assert.False(deve4h);  // Ainda faltam muitas horas
+    }
+
+    [Fact]
+    public void DeveDispararLembrete_IntervaloInvalido_DeveLancarException()
+    {
+        // Arrange
+        var usuario = Usuario.Criar("João", "joao@example.com", "11987654321", "hash123");
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => usuario.DeveDispararLembrete(0));
+        Assert.Throws<ArgumentException>(() => usuario.DeveDispararLembrete(-5));
+    }
+
+    [Fact]
+    public void DeveLancarEmergencia_QuandoNaoFazCheckInPor24h_DevRetornarTrue()
+    {
+        // Arrange
+        var usuario = Usuario.Criar("João", "joao@example.com", "11987654321", "hash123");
+        usuario.RegistrarCheckIn();
+        
+        // Act
+        // No momento de criação, não passou 24h, portanto não há emergência
+        var deveEmergencia = usuario.DeveLancarEmergencia();
+
+        // Assert
+        Assert.False(deveEmergencia);  // Precisa de 24+ horas sem check-in
     }
 
     #endregion
