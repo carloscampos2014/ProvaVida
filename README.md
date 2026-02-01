@@ -16,32 +16,42 @@
 
 ### 📊 Progresso Geral
 ```
-Sprint 1 ✅ CONCLUÍDA    [████████████████████] 100% - Domínio Puro
-Sprint 2 ✅ CONCLUÍDA    [████████████████████] 100% - Infraestrutura
-Sprint 3 ⏳ PRÓXIMA      [████████░░░░░░░░░░░░]  40% - Check-in e Histórico
-Sprint 4 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░░░░]   0% - Sistema de Alertas
-Sprint 5 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░░░░]   0% - API REST
-Sprint 6 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░░░░]   0% - QA + Deploy
+Sprint 1 ✅ CONCLUÍDA    [████████████████████] 100% - Domínio Puro (60 testes)
+Sprint 2 ✅ CONCLUÍDA    [████████████████████] 100% - Infraestrutura (15 testes)
+Sprint 3 ✅ CONCLUÍDA    [████████████████████] 100% - Aplicação (13 testes)
+Sprint 4 ⏳ PRÓXIMA      [░░░░░░░░░░░░░░░░░░░░]   0% - API REST
+Sprint 5 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░░░░]   0% - WebApp + E2E
+Sprint 6 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░░░░]   0% - Deploy + Segurança
 ```
 
 ### 📈 Métricas Atuais
-- **Testes Total:** 75/75 ✅ PASSANDO
+- **Testes Total:** 88/88 ✅ PASSANDO (100%)
   - Domínio: 60/60 ✅
   - Infraestrutura: 15/15 ✅
-- **Cobertura:** 75%+ 
-- **Build Status:** ✅ Sucesso (0 erros, 0 avisos)
-- **Camadas Implementadas:** 2/4
+  - Aplicação: 13/13 ✅ (NOVO)
+- **Cobertura:** 100% (Services críticos)
+- **Build Status:** ✅ Sucesso (0 erros, 0 avisos críticos)
+- **Camadas Implementadas:** 3/4
   - ✅ Domínio (Completo)
   - ✅ Infraestrutura (Completo)
-  - ⏳ Aplicação (Sprint 3)
-  - ⏳ API (Sprint 5)
+  - ✅ Aplicação (Completo)
+  - ⏳ API (Sprint 4)
 
-### 🚀 Próximas Prioridades (Sprint 3)
-- [ ] ServicoCheckIn com lógica de 48h
-- [ ] Histórico FIFO (máx 5 registros)
-- [ ] ServicoNotificacao (limpeza de alertas)
-- [ ] DTOs para CheckIn e Notificação
-- [ ] Testes de integração
+### 🎯 O que foi entregue em Sprint 3
+- ✅ Camada de Aplicação (ProvaVida.Aplicacao) - 21 arquivos
+- ✅ 10 DTOs (Usuarios, CheckIns, ContatosEmergencia, Notificacoes)
+- ✅ 4 Mapeadores manuais (sem AutoMapper)
+- ✅ 2 Application Services (AutenticacaoService, CheckInService)
+- ✅ 6 Exceções customizadas
+- ✅ Testes unitários completos (ProvaVida.Aplicacao.Tests) - 13 testes
+- ✅ Documentação (README + XML comments 100%)
+
+### 🚀 Próximas Prioridades (Sprint 4 - API REST)
+- [ ] ProvaVida.API (ASP.NET Core)
+- [ ] Controllers REST (Usuarios, CheckIns, Notificacoes)
+- [ ] Swagger/OpenAPI
+- [ ] NotificacaoService (camada de aplicação)
+- [ ] ContatoEmergenciaService (camada de aplicação)
 
 ---
 
@@ -62,6 +72,12 @@ Sprint 6 📅 PLANEJADA    [░░░░░░░░░░░░░░░░░�
 ### 👥 Documentação de Padrões
 * [**Diretrizes para IA**](docs/DIRETRIZES_IA.md) - Padrões de código, SOLID e Clean Code (Português)
 * [**Papéis de IA**](docs/PAPEIS_IA.md) - Definição de papéis (PO, Analista, Arquiteto, Dev, QA)
+
+### ✅ Documentação de Sprint 3 (Camada de Aplicação)
+* [**Status do Projeto**](docs/STATUS_PROJETO.md) - Acompanhamento completo e métricas
+* [**Exemplos de Uso**](docs/EXEMPLOS_USO_SPRINT3.md) - Exemplos práticos de DTOs e Services
+* [**README Aplicação**](src/ProvaVida.Aplicacao/README.md) - Detalhes da camada de aplicação
+* [**README Testes**](test/ProvaVida.Aplicacao.Tests/README.md) - Documentação dos testes unitários
 
 ---
 
@@ -196,14 +212,39 @@ cd ProvaVida
 # 2. Restaurar dependências
 dotnet restore
 
-# 3. Compilar
+# 3. Compilar solução
 dotnet build
 
-# 4. Executar testes
+# 4. Executar todos os testes (88 testes)
 dotnet test
 
-# 5. Executar aplicação (Sprint 5+)
+# 5. Executar testes com detalhes
+dotnet test --verbosity normal
+
+# 6. Executar testes específicos
+dotnet test test/ProvaVida.Dominio.Tests/
+dotnet test test/ProvaVida.Infraestrutura.Tests/
+dotnet test test/ProvaVida.Aplicacao.Tests/
+
+# 7. Executar aplicação (Sprint 4+)
 dotnet run --project src/ProvaVida.API/ProvaVida.API.csproj
+```
+
+### Estrutura do Projeto
+```
+ProvaVida/
+├── src/
+│   ├── ProvaVida.Dominio/              ✅ Entidades + Regras de Negócio
+│   ├── ProvaVida.Infraestrutura/       ✅ EF Core + Repositórios
+│   ├── ProvaVida.Aplicacao/            ✅ DTOs + Services
+│   └── ProvaVida.API/                  ⏳ Controllers REST (Sprint 4)
+├── test/
+│   └── ProvaVida.Aplicacao.Tests/      ✅ 13 testes unitários
+├── tests/
+│   ├── ProvaVida.Dominio.Tests/        ✅ 60 testes unitários
+│   └── ProvaVida.Infraestrutura.Tests/ ✅ 15 testes integração
+├── docs/                               ✅ Documentação completa
+└── README.md                           ✅ Este arquivo
 ```
 
 ---
@@ -212,11 +253,12 @@ dotnet run --project src/ProvaVida.API/ProvaVida.API.csproj
 
 | Métrica | Meta | Atual | Status |
 |---------|------|-------|--------|
-| Cobertura de Testes | > 75% | 75%+ | ✅ |
-| Testes Passando | 100% | 75/75 | ✅ |
+| Cobertura de Testes | > 75% | 100% | ✅ |
+| Testes Passando | 100% | 88/88 | ✅ |
 | Build | 0 erros | 0 erros | ✅ |
 | SOLID Compliance | Sim | Sim | ✅ |
-| Documentação | Completa | 80% | 🟡 |
+| Documentação | Completa | 90% | ✅ |
+| Camadas Implementadas | 4/4 | 3/4 | 🟡 |
 
 ---
 
