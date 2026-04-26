@@ -1,6 +1,7 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.2.0
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11716.220 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
@@ -16,11 +17,32 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvaVida.Infraestrutura.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvaVida.Aplicacao", "src\ProvaVida.Aplicacao\ProvaVida.Aplicacao.csproj", "{0689B731-0234-4BE0-A397-479A7EC0B6BF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{676D47E2-A6E6-444A-B8B7-5CAA21FCEF92}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvaVida.Aplicacao.Tests", "test\ProvaVida.Aplicacao.Tests\ProvaVida.Aplicacao.Tests.csproj", "{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvaVida.API", "src\ProvaVida.API\ProvaVida.API.csproj", "{94DB8205-9015-4401-88BB-D211DF1777C2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{AF874646-A3BB-4E65-9BEE-1A0DF137635F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\ARQUITETURA.md = docs\ARQUITETURA.md
+		docs\ARQUITETURA_ALERTAS.md = docs\ARQUITETURA_ALERTAS.md
+		docs\BACKLOG_AGILE.md = docs\BACKLOG_AGILE.md
+		docs\DIAGRAMA_ARQUITETURA_BD.md = docs\DIAGRAMA_ARQUITETURA_BD.md
+		docs\DIRETRIZES_IA.md = docs\DIRETRIZES_IA.md
+		docs\ESPECIFICACOES.md = docs\ESPECIFICACOES.md
+		docs\EXEMPLOS_USO_SPRINT3.md = docs\EXEMPLOS_USO_SPRINT3.md
+		docs\MODELAGEM.md = docs\MODELAGEM.md
+		docs\PAPEIS_IA.md = docs\PAPEIS_IA.md
+		docs\RESPOSTA_MULTIPLOS_BANCOS.md = docs\RESPOSTA_MULTIPLOS_BANCOS.md
+		docs\STATUS_PROJETO.md = docs\STATUS_PROJETO.md
+		docs\SUPORTE_MULTIPLOS_BANCOS.md = docs\SUPORTE_MULTIPLOS_BANCOS.md
+		docs\TESTES_API.md = docs\TESTES_API.md
+		docs\USER_STORIES.md = docs\USER_STORIES.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{15B0795F-5669-4CD6-B0EF-66DF2F030E05}"
+	ProjectSection(SolutionItems) = preProject
+		.github\copilot-instructions.md = .github\copilot-instructions.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvaVida.Aplicacao.Tests", "tests\ProvaVida.Aplicacao.Tests\ProvaVida.Aplicacao.Tests.csproj", "{7332CEBA-E1C8-3C35-7122-BC241A079308}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,14 +70,14 @@ Global
 		{0689B731-0234-4BE0-A397-479A7EC0B6BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0689B731-0234-4BE0-A397-479A7EC0B6BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0689B731-0234-4BE0-A397-479A7EC0B6BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{94DB8205-9015-4401-88BB-D211DF1777C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{94DB8205-9015-4401-88BB-D211DF1777C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94DB8205-9015-4401-88BB-D211DF1777C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94DB8205-9015-4401-88BB-D211DF1777C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7332CEBA-E1C8-3C35-7122-BC241A079308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7332CEBA-E1C8-3C35-7122-BC241A079308}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7332CEBA-E1C8-3C35-7122-BC241A079308}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7332CEBA-E1C8-3C35-7122-BC241A079308}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,8 +88,8 @@ Global
 		{452D14FB-46E0-45B3-8320-B115922AAAB8} = {5A534B3B-B494-4431-A007-0217279453AC}
 		{F5C4F3CA-1572-4246-B098-21C76C91E1CE} = {5A534B3B-B494-4431-A007-0217279453AC}
 		{0689B731-0234-4BE0-A397-479A7EC0B6BF} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{940B96BA-D2C4-4E6B-8F2C-8DAB57CB62A2} = {676D47E2-A6E6-444A-B8B7-5CAA21FCEF92}
 		{94DB8205-9015-4401-88BB-D211DF1777C2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{7332CEBA-E1C8-3C35-7122-BC241A079308} = {5A534B3B-B494-4431-A007-0217279453AC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33DBE39E-CB92-489B-97D1-B05F16D11B28}
