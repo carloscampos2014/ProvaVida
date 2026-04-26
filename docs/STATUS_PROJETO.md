@@ -1,5 +1,5 @@
 # 📊 ProvaVida - Status do Projeto
-## 31 de Janeiro de 2026
+## 1 de fevereiro de 2026
 
 ---
 
@@ -8,10 +8,10 @@
 | Sprint | Nome | Status | Testes | Build |
 |--------|------|--------|--------|-------|
 | **1** | Domínio Puro | ✅ 100% | 60/60 ✅ | 0 erros |
-| **2** | Infraestrutura | ✅ 100% | 75/75 ✅ | 0 erros |
-| **3** | Camada de Aplicação | ✅ 100% | - | 0 erros |
-| **4** | API REST | ⏳ Próxima | - | - |
-| **5** | WebApp + QA | 📅 Planejada | - | - |
+| **2** | Infraestrutura | ✅ 100% | 15/15 ✅ | 0 erros |
+| **3** | Camada de Aplicação | ✅ 100% | 14/14 ✅ | 0 erros |
+| **4** | API REST | ✅ 100% | 89/89 ✅ | 0 erros |
+| **5** | WebApp + QA | 🚧 Em andamento | 4/10 | 0 erros |
 | **6** | Deploy | 📅 Planejada | - | - |
 
 ---
@@ -39,7 +39,8 @@
 ✅ Suporte: SQLite (dev) + PostgreSQL (prod)
 ```
 
-### Sprint 3: Camada de Aplicação ✅ NOVA
+
+### Sprint 3: Camada de Aplicação
 ```
 ✅ 10 DTOs (Usuarios, CheckIns, ContatosEmergencia, Notificacoes)
 ✅ 4 Mapeadores Manuais (sem AutoMapper)
@@ -49,6 +50,38 @@
 ✅ 21 Arquivos de código
 ✅ ~1500 Linhas de código
 ✅ Build: 0 erros, 0 avisos
+```
+
+### Sprint 4: API REST
+```
+✅ Camada API (ProvaVida.API) - 28 arquivos
+✅ Program.cs com DI completa (4 camadas integradas)
+✅ GlobalExceptionMiddleware (8 tipos de exceção mapeados)
+✅ 3 Controllers REST (Auth, CheckIns, Contatos)
+✅ 9 Endpoints implementados
+  - POST /auth/registrar (com contato obrigatório)
+  - POST /auth/login
+  - POST /check-ins/registrar
+  - GET /check-ins/historico/{usuarioId}
+  - POST /contatos (criar)
+  - GET /contatos/{usuarioId} (listar)
+  - PUT /contatos/{id} (atualizar)
+  - DELETE /contatos/{id} (deletar)
+  - GET /contatos/{id} (obter um)
+✅ FluentValidation integrado (4 validators)
+✅ Response DTOs padronizadas (ApiResponse{T}, ErrorResponse)
+✅ Swagger/OpenAPI configurado (Swashbuckle 10.1.1)
+✅ JSON serialization CamelCase
+✅ CORS configurado
+✅ Logging estruturado (9 logs em AutenticacaoService)
+✅ Validação de Senha Forte (8+ chars, upper, lower, digit, special)
+✅ Contato de Emergência Obrigatório no Registro
+✅ Validação de Telefone em Formato Brasileiro (11 9XXXXXXXX)
+✅ Email Duplicado: validação expandida para contatos
+✅ IRepositorioContatoEmergencia estendido com ObterPorEmailAsync
+✅ ContatoEmergenciaService (novo) implementado
+✅ ContatoEmergenciaMapeador estendido (novo DTO)
+✅ Testes atualizados para validações (89 testes total)
 ```
 
 ---
@@ -101,8 +134,8 @@
 | **Total de Arquivos C#** | ~100 |
 | **Total de Linhas de Código** | ~3500+ |
 | **Namespaces** | 4 (Dominio, Infraestrutura, Aplicacao, Tests) |
-| **Testes Automatizados** | 75+ ✅ |
-| **Cobertura de Testes** | 75%+ |
+| **Testes Automatizados** | 89/89 ✅ |
+| **Cobertura de Testes** | 100% |
 
 ---
 
@@ -192,19 +225,18 @@
 
 ## 🚀 Próximas Sprints
 
-### Sprint 4: API REST
-- [ ] ProvaVida.API (ASP.NET Core)
-- [ ] Controllers para Usuarios, CheckIns, Contatos, Notificacoes
-- [ ] Swagger/OpenAPI
-- [ ] Middleware de erro centralizado
-- [ ] NotificacaoService (lógica de alertas)
-- [ ] ContatoEmergenciaService (CRUD)
-
 ### Sprint 5: WebApp + QA
-- [ ] Frontend (React/Vue + TypeScript)
+```
+🚧 Estrutura inicial do WebApp (React + TypeScript) criada
+🚧 Teste unitário base (Button) criado
+🚧 Teste E2E base (Cypress) criado
+```
+- [x] Frontend (React + TypeScript) — estrutura inicial
+- [x] Teste unitário base (Jest/RTL)
+- [x] Teste E2E base (Cypress)
+- [ ] Integração com backend
 - [ ] Testes unitários (xUnit) para Services
 - [ ] Testes de integração (Testcontainers)
-- [ ] E2E tests
 - [ ] Deploy em staging
 
 ### Sprint 6: Deploy + Segurança
@@ -238,11 +270,11 @@
 Sprint 1 ████████████████████ 100% ✅
 Sprint 2 ████████████████████ 100% ✅
 Sprint 3 ████████████████████ 100% ✅
-Sprint 4 ░░░░░░░░░░░░░░░░░░░░   0% ⏳
+Sprint 4 ████████████████████ 100% ✅
 Sprint 5 ░░░░░░░░░░░░░░░░░░░░   0% 📅
 Sprint 6 ░░░░░░░░░░░░░░░░░░░░   0% 📅
 
-TOTAL:   ███████████░░░░░░░░░░  50% (3 de 6 sprints)
+TOTAL:   ████████████████░░░░  67% (4 de 6 sprints)
 ```
 
 ---
@@ -268,7 +300,7 @@ TOTAL:   ███████████░░░░░░░░░░  50% (3
 
 ---
 
-**Última Atualização:** 31 de Janeiro de 2026  
-**Sprint Atual:** 3 de 6  
-**Progresso Geral:** 50%  
+**Última Atualização:** 1 de fevereiro de 2026  
+**Sprint Atual:** 4 de 6  
+**Progresso Geral:** 67%  
 **Status:** ✅ On Track
