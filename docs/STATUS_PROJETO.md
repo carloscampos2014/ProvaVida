@@ -1,5 +1,5 @@
 # 📊 ProvaVida - Status do Projeto
-## 1 de fevereiro de 2026
+## 30 de abril de 2026
 
 ---
 
@@ -11,7 +11,7 @@
 | **2** | Infraestrutura | ✅ 100% | 15/15 ✅ | 0 erros |
 | **3** | Camada de Aplicação | ✅ 100% | 14/14 ✅ | 0 erros |
 | **4** | API REST | ✅ 100% | 89/89 ✅ | 0 erros |
-| **5** | WebApp + QA | 🚧 Em andamento | 4/10 | 0 erros |
+| **5** | WebApp + QA | 🚧 Em andamento | 3/10 | 0 erros |
 | **6** | Deploy | 📅 Planejada | - | - |
 
 ---
@@ -228,16 +228,15 @@
 ### Sprint 5: WebApp + QA
 ```
 🚧 Estrutura inicial do WebApp (React + TypeScript) criada
-🚧 Teste unitário base (Button) criado
-🚧 Teste E2E base (Cypress) criado
+🚧 Dependências instaladas e configuradas (Jest, Babel, jsdom)
+🚧 Teste unitário base (Button) criado e passando ✅
+🚧 Teste de componente (LoginForm) criado e passando ✅
+🚧 Teste de serviço (authService) criado e passando ✅
+🚧 Integração com backend - Pendente
+🚧 Testes unitários (xUnit) para Services - Pendente
+🚧 Testes de integração (Testcontainers) - Pendente
+🚧 Deploy em staging - Pendente
 ```
-- [x] Frontend (React + TypeScript) — estrutura inicial
-- [x] Teste unitário base (Jest/RTL)
-- [x] Teste E2E base (Cypress)
-- [ ] Integração com backend
-- [ ] Testes unitários (xUnit) para Services
-- [ ] Testes de integração (Testcontainers)
-- [ ] Deploy em staging
 
 ### Sprint 6: Deploy + Segurança
 - [ ] JWT Authentication
@@ -271,10 +270,10 @@ Sprint 1 ████████████████████ 100% ✅
 Sprint 2 ████████████████████ 100% ✅
 Sprint 3 ████████████████████ 100% ✅
 Sprint 4 ████████████████████ 100% ✅
-Sprint 5 ░░░░░░░░░░░░░░░░░░░░   0% 📅
+Sprint 5 ███░░░░░░░░░░░░░░░░░  30% 🚧
 Sprint 6 ░░░░░░░░░░░░░░░░░░░░   0% 📅
 
-TOTAL:   ████████████████░░░░  67% (4 de 6 sprints)
+TOTAL:   ████████████████░░░░  75% (4.3 de 6 sprints)
 ```
 
 ---
@@ -300,7 +299,7 @@ TOTAL:   ████████████████░░░░  67% (4 de
 
 ---
 
-**Última Atualização:** 1 de fevereiro de 2026  
-**Sprint Atual:** 4 de 6  
-**Progresso Geral:** 67%  
-**Status:** ✅ On Track
+**Última Atualização:** 30 de abril de 2026  
+**Sprint Atual:** 5 de 6  
+**Progresso Geral:** 75%  
+**Status:** 🚧 Em Andamento

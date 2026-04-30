@@ -12,6 +12,7 @@ namespace ProvaVida.Infraestrutura.Tests;
 /// Priorize SQLite para integração contínua (CI). Este teste é opcional/local.
 /// </summary>
 [Trait("Categoria", "Opcional-Postgres")]
+[Collection("Testcontainers")]
 public class RepositorioUsuarioTestcontainersTests : IClassFixture<TestcontainersPostgresFixture>
 {
     private readonly TestcontainersPostgresFixture _fixture;
