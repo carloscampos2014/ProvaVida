@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Microsoft.EntityFrameworkCore;
 using ProvaVida.Infraestrutura.Contexto;
@@ -8,28 +7,34 @@ using Xunit;
 
 namespace ProvaVida.Infraestrutura.Tests;
 
+/// <summary>
+/// Fixture para testes de integração com PostgreSQL via Testcontainers.
+/// Priorize SQLite para CI/CD. Este é opcional e para ambiente local.
+/// </summary>
 public class TestcontainersPostgresFixture : IAsyncLifetime
 {
-    public PostgreSqlContainer Container { get; private set; } = default!;
-    public string ConnectionString => Container.GetConnectionString();
+    private IContainer? _container;
+
+    public string? ConnectionString { get; private set; }
 
     public async Task InitializeAsync()
     {
-        Container = new TestcontainersBuilder<PostgreSqlContainer>()
-            .WithDatabase(new PostgreSqlTestcontainerConfiguration
-            {
-                Database = "postgres",
-                Username = "postgres",
-                Password = "postgres"
-            })
+        _container = new ContainerBuilder()
             .WithImage("postgres:16-alpine")
-            .WithCleanUp(true)
+            .WithEnvironment("POSTGRES_PASSWORD", "postgres")
+            .WithEnvironment("POSTGRES_USER", "postgres")
+            .WithEnvironment("POSTGRES_DB", "provavida_test")
+            .WithPortBinding(5432, 5432)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
             .Build();
-        await Container.StartAsync();
+
+        await _container.StartAsync();
+        ConnectionString = "Host=localhost;Port=5432;Database=provavida_test;Username=postgres;Password=postgres";
     }
 
     public async Task DisposeAsync()
     {
-        await Container.DisposeAsync();
+        if (_container != null)
+            await _container.DisposeAsync();
     }
 }

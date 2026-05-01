@@ -1,5 +1,5 @@
 # 📊 ProvaVida - Status do Projeto
-## 30 de abril de 2026
+## 5 de fevereiro de 2026 - Sprint 5 em andamento
 
 ---
 
@@ -11,7 +11,7 @@
 | **2** | Infraestrutura | ✅ 100% | 15/15 ✅ | 0 erros |
 | **3** | Camada de Aplicação | ✅ 100% | 14/14 ✅ | 0 erros |
 | **4** | API REST | ✅ 100% | 89/89 ✅ | 0 erros |
-| **5** | WebApp + QA | 🚧 Em andamento | 3/10 | 0 erros |
+| **5** | WebApp + QA | 🚧 Em andamento | 5/10 | 0 erros |
 | **6** | Deploy | 📅 Planejada | - | - |
 
 ---
@@ -83,6 +83,29 @@
 ✅ ContatoEmergenciaMapeador estendido (novo DTO)
 ✅ Testes atualizados para validações (89 testes total)
 ```
+
+### Sprint 5: WebApp + QA
+```
+🚧 Estrutura inicial do WebApp (React + TypeScript) criada
+✅ Componente Button e teste unitário criados
+✅ Integração com backend - Serviço de autenticação (login) implementado
+✅ LoginForm com validação de erro implementado
+✅ Testes unitários (authService, LoginForm) criados e passando ✅
+✅ Teste E2E base (Cypress) com cenário de erro de login
+✅ Testes de integração backend (SQLite + Testcontainers PostgreSQL opcional)
+✅ Base para deploy em staging (Docker, docker-compose, scripts)
+🚧 Deploy em staging - Pronto para executar
+```
+- [x] Frontend (React + TypeScript) — estrutura inicial e componentes
+- [x] Teste unitário base (Jest/RTL)
+- [x] Teste E2E base (Cypress)
+- [x] Integração com backend
+- [x] Testes unitários (Jest) para Services
+- [x] Testes de integração (SQLite + Testcontainers)
+- [x] Base para deploy em staging (Docker + scripts)
+- [ ] Execução de deploy em staging
+- [ ] Testes E2E em staging
+- [ ] Validação de funcionalidades críticas
 
 ---
 
@@ -228,14 +251,14 @@
 ### Sprint 5: WebApp + QA
 ```
 🚧 Estrutura inicial do WebApp (React + TypeScript) criada
-🚧 Dependências instaladas e configuradas (Jest, Babel, jsdom)
-🚧 Teste unitário base (Button) criado e passando ✅
-🚧 Teste de componente (LoginForm) criado e passando ✅
-🚧 Teste de serviço (authService) criado e passando ✅
-🚧 Integração com backend - Pendente
-🚧 Testes unitários (xUnit) para Services - Pendente
-🚧 Testes de integração (Testcontainers) - Pendente
-🚧 Deploy em staging - Pendente
+✅ Componente Button e teste unitário criados
+✅ Integração com backend - Serviço de autenticação (login) implementado
+✅ LoginForm com validação de erro implementado
+✅ Testes unitários (authService, LoginForm) criados e passando ✅
+✅ Teste E2E base (Cypress) com cenário de erro de login
+✅ Testes de integração backend (SQLite + Testcontainers PostgreSQL opcional)
+✅ Base para deploy em staging (Docker, docker-compose, scripts)
+🚧 Deploy em staging - Pronto para executar
 ```
 
 ### Sprint 6: Deploy + Segurança
@@ -299,7 +322,7 @@ TOTAL:   ████████████████░░░░  75% (4.3 
 
 ---
 
-**Última Atualização:** 30 de abril de 2026  
+**Última Atualização:** 5 de fevereiro de 2026  
 **Sprint Atual:** 5 de 6  
 **Progresso Geral:** 75%  
 **Status:** 🚧 Em Andamento

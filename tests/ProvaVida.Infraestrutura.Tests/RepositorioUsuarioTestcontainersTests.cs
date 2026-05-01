@@ -12,7 +12,6 @@ namespace ProvaVida.Infraestrutura.Tests;
 /// Priorize SQLite para integração contínua (CI). Este teste é opcional/local.
 /// </summary>
 [Trait("Categoria", "Opcional-Postgres")]
-[Collection("Testcontainers")]
 public class RepositorioUsuarioTestcontainersTests : IClassFixture<TestcontainersPostgresFixture>
 {
     private readonly TestcontainersPostgresFixture _fixture;
@@ -24,6 +23,9 @@ public class RepositorioUsuarioTestcontainersTests : IClassFixture<Testcontainer
 
     private ProvaVidaDbContext CriarContexto()
     {
+        if (string.IsNullOrEmpty(_fixture.ConnectionString))
+            throw new InvalidOperationException("ConnectionString não foi inicializada");
+
         var opcoes = new DbContextOptionsBuilder<ProvaVidaDbContext>()
             .UseNpgsql(_fixture.ConnectionString)
             .Options;
