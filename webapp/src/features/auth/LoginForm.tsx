@@ -70,9 +70,28 @@ const styles = {
     color: '#6b7280',
     fontSize: '0.875rem',
   },
+  linkRow: {
+    textAlign: 'center' as const,
+    marginTop: '1rem',
+    fontSize: '0.9rem',
+    color: '#6b7280',
+  },
+  link: {
+    background: 'none',
+    border: 'none',
+    color: '#4f46e5',
+    fontWeight: 600,
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    fontSize: '0.9rem',
+  },
 };
 
-export const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  onSwitchToCadastro?: () => void;
+}
+
+export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToCadastro }) => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -144,6 +163,15 @@ export const LoginForm: React.FC = () => {
         <div style={styles.footer}>
           <p>🔒 Seus dados estão protegidos</p>
         </div>
+
+        {onSwitchToCadastro && (
+          <div style={styles.linkRow}>
+            Não tem conta?{" "}
+            <button type="button" onClick={onSwitchToCadastro} style={styles.link}>
+              Cadastre-se
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

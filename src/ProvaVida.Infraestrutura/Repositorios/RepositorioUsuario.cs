@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProvaVida.Dominio.Entidades;
+using ProvaVida.Dominio.ObjetosValor;
 using ProvaVida.Dominio.Repositorios;
 using ProvaVida.Infraestrutura.Contexto;
 
@@ -27,10 +28,12 @@ public class RepositorioUsuario : RepositorioBase<Usuario>, IRepositorioUsuario
         if (string.IsNullOrWhiteSpace(email))
             return null;
 
+        var emailNormalizado = new Email(email);
+
         return await DbSet
             .Include(u => u.HistoricoCheckIns)
             .Include(u => u.Contatos)
-            .FirstOrDefaultAsync(u => u.Email.Valor == email, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Email == emailNormalizado, cancellationToken);
     }
 
     /// <summary>

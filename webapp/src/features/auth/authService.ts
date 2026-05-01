@@ -26,7 +26,7 @@ export interface CadastroUsuarioDto {
 }
 
 export async function loginUsuario(dados: UsuarioLoginDto): Promise<UsuarioResumoDto> {
-  const resposta = await api.post("/auth/login", dados);
+  const resposta = await api.post("/api/v1/auth/login", dados);
   return resposta.data.dados;
 }
 
@@ -38,7 +38,6 @@ export async function cadastrarUsuario(
     ...usuario,
     contatoEmergencia,
   };
-  // Rota correta: /api/v1/auth/registrar
-  const resposta = await api.post("/auth/registrar", dados);
+  const resposta = await api.post("/api/v1/auth/registrar", dados);
   return resposta.data.dados;
 }

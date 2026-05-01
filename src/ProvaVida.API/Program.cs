@@ -7,6 +7,7 @@ using ProvaVida.API.Validadores;
 using ProvaVida.Aplicacao.Configuracao;
 using ProvaVida.Infraestrutura;
 using ProvaVida.Infraestrutura.Configuracao;
+using ProvaVida.Infraestrutura.Contexto;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -92,6 +93,13 @@ public class Program
     /// </summary>
     private static void ConfigurarPipeline(WebApplication app)
     {
+        // Garante criação do schema local no ambiente de desenvolvimento.
+        using (var scope = app.Services.CreateScope())
+        {
+            var contexto = scope.ServiceProvider.GetRequiredService<ProvaVidaDbContext>();
+            contexto.Database.EnsureCreated();
+        }
+
         // 🌍 Ambiente de desenvolvimento
         if (app.Environment.IsDevelopment())
         {

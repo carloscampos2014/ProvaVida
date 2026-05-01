@@ -12,6 +12,6 @@ describe("authService", () => {
     expect(usuario).toHaveProperty("id");
     expect(usuario).toHaveProperty("nome");
     expect(usuario).toHaveProperty("email");
-    expect(api.post).toHaveBeenCalledWith("/auth/login", { email: "teste@exemplo.com", senha: "12345678" });
+    expect(api.post).toHaveBeenCalledWith("/api/v1/auth/login", { email: "teste@exemplo.com", senha: "12345678" });
   });
 });

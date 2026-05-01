@@ -111,7 +111,11 @@ interface ContatoEmergencia {
   whatsapp: string;
 }
 
-export const CadastroForm: React.FC = () => {
+interface CadastroFormProps {
+  onSwitchToLogin?: () => void;
+}
+
+export const CadastroForm: React.FC<CadastroFormProps> = ({ onSwitchToLogin }) => {
   const [etapa, setEtapa] = useState<'dados' | 'contato'>('dados');
   
   // Dados do usuário
@@ -139,8 +143,16 @@ export const CadastroForm: React.FC = () => {
       setErro("Email inválido");
       return false;
     }
-    if (senha.length < 6) {
-      setErro("Senha deve ter pelo menos 6 caracteres");
+    if (telefone.replace(/\D/g, "").length !== 11 || telefone.replace(/\D/g, "")[2] !== "9") {
+      setErro("Telefone deve ser celular brasileiro válido (11 dígitos). Ex: 11987654321");
+      return false;
+    }
+    if (senha.length < 8) {
+      setErro("Senha deve ter pelo menos 8 caracteres");
+      return false;
+    }
+    if (!/[A-Z]/.test(senha) || !/[a-z]/.test(senha) || !/\d/.test(senha) || !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(senha)) {
+      setErro("Senha precisa ter maiúscula, minúscula, número e caractere especial.");
       return false;
     }
     if (senha !== confirmarSenha) {
@@ -161,6 +173,11 @@ export const CadastroForm: React.FC = () => {
     }
     if (!contatoWhatsapp.trim()) {
       setErro("WhatsApp do contato é obrigatório");
+      return false;
+    }
+    const whatsappNumeros = contatoWhatsapp.replace(/\D/g, "");
+    if (whatsappNumeros.length !== 11 || whatsappNumeros[2] !== "9") {
+      setErro("WhatsApp do contato deve ser celular brasileiro válido (11 dígitos).");
       return false;
     }
     return true;
@@ -185,17 +202,21 @@ export const CadastroForm: React.FC = () => {
       const contato: ContatoEmergencia = {
         nome: contatoNome,
         email: contatoEmail,
-        whatsapp: contatoWhatsapp,
+        whatsapp: contatoWhatsapp.replace(/\D/g, ""),
       };
       
-      await cadastrarUsuario({ nome, email, telefone, senha }, contato);
+      await cadastrarUsuario({ nome, email, telefone: telefone.replace(/\D/g, ""), senha }, contato);
       setSucesso("Cadastro realizado com sucesso!");
       setTimeout(() => {
-        // Reset e volta para login (aqui você pode navegar)
-        window.location.reload();
+        if (onSwitchToLogin) {
+          onSwitchToLogin();
+        } else {
+          window.location.reload();
+        }
       }, 2000);
     } catch (err) {
-      setErro("Erro ao cadastrar. Tente novamente.");
+      const mensagem = err instanceof Error ? err.message : "Erro ao cadastrar. Tente novamente.";
+      setErro(mensagem);
     } finally {
       setCarregando(false);
     }
@@ -361,7 +382,20 @@ export const CadastroForm: React.FC = () => {
           </button>
 
           <div style={styles.footer}>
-            Já tem conta? <span style={styles.link}>Entrar</span>
+            Já tem conta?{" "}
+            <span
+              style={styles.link}
+              onClick={onSwitchToLogin}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  onSwitchToLogin?.();
+                }
+              }}
+            >
+              Entrar
+            </span>
           </div>
         </form>
       </div>

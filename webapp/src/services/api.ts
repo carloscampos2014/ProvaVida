@@ -10,9 +10,14 @@ const viteEnv = (() => {
   }
 })();
 
+const processEnv =
+  typeof process !== "undefined" && process.env
+    ? (process.env as Record<string, string | undefined>)
+    : undefined;
+
 const baseURL =
   viteEnv?.VITE_API_URL ??
-  process.env.VITE_API_URL ??
+  processEnv?.VITE_API_URL ??
   "http://localhost:58271";
 
 const api = axios.create({

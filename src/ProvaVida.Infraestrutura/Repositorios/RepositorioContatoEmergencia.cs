@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProvaVida.Dominio.Entidades;
+using ProvaVida.Dominio.ObjetosValor;
 using ProvaVida.Dominio.Repositorios;
 using ProvaVida.Infraestrutura.Contexto;
 
@@ -40,8 +41,10 @@ public class RepositorioContatoEmergencia : RepositorioBase<ContatoEmergencia>, 
         if (string.IsNullOrWhiteSpace(email))
             return null;
 
+        var emailNormalizado = new Email(email);
+
         return await DbSet
-            .FirstOrDefaultAsync(c => c.Email.Valor == email, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Email == emailNormalizado, cancellationToken);
     }
 
     /// <summary>
@@ -52,8 +55,13 @@ public class RepositorioContatoEmergencia : RepositorioBase<ContatoEmergencia>, 
         if (string.IsNullOrWhiteSpace(email))
             return null;
 
+        var emailNormalizado = new Email(email);
+
         return await DbSet
-            .FirstOrDefaultAsync(c => c.UsuarioId == usuarioId && c.Email.Valor == email, cancellationToken);
+            .FirstOrDefaultAsync(
+                c => c.UsuarioId == usuarioId &&
+                     c.Email == emailNormalizado,
+                cancellationToken);
     }
 
     /// <summary>
