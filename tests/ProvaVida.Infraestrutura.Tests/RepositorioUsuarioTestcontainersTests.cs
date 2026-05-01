@@ -35,6 +35,11 @@ public class RepositorioUsuarioTestcontainersTests : IClassFixture<Testcontainer
     [Fact]
     public async Task AdicionarAsync_DeveSalvarUsuarioNoPostgresComSucesso()
     {
+        if (!_fixture.IsDockerAvailable)
+        {
+            return;
+        }
+
         using var contexto = CriarContexto();
         await contexto.Database.EnsureCreatedAsync();
         var repositorio = new RepositorioUsuario(contexto);

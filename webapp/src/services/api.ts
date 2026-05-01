@@ -1,6 +1,19 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:58271";
+const viteEnv = (() => {
+  try {
+    return new Function(
+      "return (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : undefined;"
+    )() as Record<string, string> | undefined;
+  } catch {
+    return undefined;
+  }
+})();
+
+const baseURL =
+  viteEnv?.VITE_API_URL ??
+  process.env.VITE_API_URL ??
+  "http://localhost:58271";
 
 const api = axios.create({
   baseURL,

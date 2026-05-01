@@ -6,7 +6,7 @@ jest.mock("../services/api");
 describe("authService", () => {
   it("deve retornar dados do usuário ao logar com sucesso", async () => {
     const mockResponse = { id: "1", nome: "Teste", email: "teste@exemplo.com" };
-    (api.post as jest.Mock).mockResolvedValueOnce({ data: mockResponse });
+    (api.post as jest.Mock).mockResolvedValueOnce({ data: { dados: mockResponse } });
 
     const usuario = await loginUsuario({ email: "teste@exemplo.com", senha: "12345678" });
     expect(usuario).toHaveProperty("id");
