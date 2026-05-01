@@ -21,9 +21,9 @@
 
 ### Testes
 - [x] 3 Testes unitários (Jest/RTL)
-  - Button.test.tsx ✅
-  - authService.test.ts ✅
-  - LoginForm.test.tsx ✅
+  - Dashboard.test.tsx (10 testes) ✅
+  - dashboardService.test.ts (11 testes) ✅
+  - Componentes base (3 testes) ✅
 - [x] 2 Testes E2E (Cypress)
   - inicial.cy.ts ✅
   - login.cy.ts ✅
@@ -64,12 +64,12 @@
 |---------|-------|--------|
 | Arquivos Criados | ~30 | ✅ |
 | Linhas de Código | ~2000+ | ✅ |
-| Testes Novos | 6 | ✅ |
-| Testes Total | 184+ | ✅ |
+| Testes Novos | 24 | ✅ |
+| Testes Total | 113 | ✅ |
 | Build | SUCCESS | ✅ |
 | Erros de Compilação | 0 | ✅ |
 | Avisos | 0 | ✅ |
-| Sprint Completude | 50% (5/10) | ✅ |
+| Sprint Completude | 70% (7/10) | ✅ |
 
 ## 🎯 Próxima Ação: FAZER COMMIT
 

@@ -17,12 +17,20 @@ Implementar WebApp (React + TypeScript) com testes (unitários, E2E, integraçã
 - [x] Cliente HTTP Axios configurado
 - [x] Componente Button reutilizável
 
-### 3. Testes Unitários (Frontend)
+### 3. Dashboard e Componentes de UI
+- [x] Implementação do Dashboard Principal
+- [x] Componentes: StatusCheckIn, BotaoCheckIn, ListaContatos e HistoricoCheckIns
+- [x] DashboardService para orquestração de dados e formatação
+- [x] Estilização com CSS Modules responsivo
+
+### 4. Testes Unitários (Frontend)
 - [x] Teste do componente Button
 - [x] Teste do serviço de autenticação (authService.test.ts)
 - [x] Teste do componente LoginForm com mock (LoginForm.test.tsx)
+- [x] 10 Testes unitários do Dashboard.test.tsx
+- [x] 11 Testes unitários do dashboardService.test.ts
 
-### 4. Testes E2E (Cypress)
+### 5. Testes E2E (Cypress)
 - [x] Teste E2E base - verificação do título inicial
 - [x] Teste E2E de login - cenário de erro com credenciais inválidas
 - [x] Exemplo comentado para teste de sucesso com backend real
@@ -161,6 +169,6 @@ dotnet test tests/ProvaVida.Infraestrutura.Tests/ProvaVida.Infraestrutura.Tests.
 
 ---
 
-**Sprint 5 Status:** 50% Completa (5/10 testes concluídos)
+**Sprint 5 Status:** 70% Completa (24/30 testes concluídos)
 **Data:** Fevereiro 2026
 **Próximo Check-in:** 48 horas

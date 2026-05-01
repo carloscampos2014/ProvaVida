@@ -483,4 +483,4 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 *.db
-webapp/dist/*
+webapp/dist

@@ -11,10 +11,16 @@ export interface UsuarioResumoDto {
   email: string;
 }
 
-export interface ContatoEmergenciaDto {
+export interface UsuarioResumoDtoApiResponse {
+  dados: UsuarioResumoDto;
+  mensagem?: string;
+  timestamp: string;
+}
+
+export interface ContatoEmergenciaNovoDto {
   nome: string;
   email: string;
-  whatsapp: string;
+  whatsApp: string;
 }
 
 export interface CadastroUsuarioDto {
@@ -22,22 +28,22 @@ export interface CadastroUsuarioDto {
   email: string;
   telefone?: string;
   senha: string;
-  contatoEmergencia: ContatoEmergenciaDto;
+  contatoEmergencia: ContatoEmergenciaNovoDto;
 }
 
-export async function loginUsuario(dados: UsuarioLoginDto): Promise<UsuarioResumoDto> {
-  const resposta = await api.post("/api/v1/auth/login", dados);
-  return resposta.data.dados;
+export async function loginUsuario(dados: UsuarioLoginDto): Promise<UsuarioResumoDtoApiResponse> {
+  const resposta = await api.post("/api/v1/Auth/login", dados);
+  return resposta.data;
 }
 
 export async function cadastrarUsuario(
   usuario: Omit<CadastroUsuarioDto, "contatoEmergencia">,
-  contatoEmergencia: ContatoEmergenciaDto
-): Promise<UsuarioResumoDto> {
+  contatoEmergencia: ContatoEmergenciaNovoDto
+): Promise<UsuarioResumoDtoApiResponse> {
   const dados: CadastroUsuarioDto = {
     ...usuario,
     contatoEmergencia,
   };
-  const resposta = await api.post("/api/v1/auth/registrar", dados);
-  return resposta.data.dados;
+  const resposta = await api.post("/api/v1/Auth/registrar", dados);
+  return resposta.data;
 }

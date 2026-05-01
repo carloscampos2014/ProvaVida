@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { loginUsuario } from "./authService";
+import { loginUsuario } from "./authService"; // Assuming authService is updated
 import { Button } from "../../components/Button";
 
 const styles = {
@@ -89,9 +89,10 @@ const styles = {
 
 interface LoginFormProps {
   onSwitchToCadastro?: () => void;
+  onLoginSuccess?: (token: string) => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToCadastro }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToCadastro, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -102,8 +103,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToCadastro }) => {
     setCarregando(true);
     setErro("");
     try {
-      const usuario = await loginUsuario({ email, senha });
-      alert(`Bem-vindo, ${usuario.nome}!`);
+      const response: UsuarioResumoDtoApiResponse = await loginUsuario({ email, senha });
+      const userId = response.dados.id; // Get user ID from the response
+      localStorage.setItem("userId", userId); // Store userId for future API calls
+      // Assuming the actual authentication token is handled by the API client (e.g., Axios interceptor)
+      onLoginSuccess?.(userId); // Pass userId as the "token" for now, or adjust onLoginSuccess to expect userId
     } catch (err) {
       setErro("Login inválido. Verifique suas credenciais.");
     } finally {

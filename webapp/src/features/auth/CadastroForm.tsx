@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { cadastrarUsuario } from "./authService";
+import { cadastrarUsuario } from "./authService"; // Assuming authService is updated
 
 const styles = {
   container: {
@@ -101,7 +101,7 @@ const styles = {
   link: {
     color: '#4f46e5',
     cursor: 'pointer',
-    textDecoration: 'underline',
+    textDecoration: 'underline' as const,
   },
 };
 
@@ -113,9 +113,10 @@ interface ContatoEmergencia {
 
 interface CadastroFormProps {
   onSwitchToLogin?: () => void;
+  onCadastroSuccess?: () => void;
 }
 
-export const CadastroForm: React.FC<CadastroFormProps> = ({ onSwitchToLogin }) => {
+export const CadastroForm: React.FC<CadastroFormProps> = ({ onSwitchToLogin, onCadastroSuccess }) => { // Changed to use ContatoEmergenciaNovoDto
   const [etapa, setEtapa] = useState<'dados' | 'contato'>('dados');
   
   // Dados do usuário
@@ -199,16 +200,19 @@ export const CadastroForm: React.FC<CadastroFormProps> = ({ onSwitchToLogin }) =
     
     setCarregando(true);
     try {
-      const contato: ContatoEmergencia = {
+      const contato: ContatoEmergenciaNovoDto = { // Use ContatoEmergenciaNovoDto
         nome: contatoNome,
         email: contatoEmail,
-        whatsapp: contatoWhatsapp.replace(/\D/g, ""),
+        whatsApp: contatoWhatsapp.replace(/\D/g, ""), // Changed to whatsApp
       };
       
-      await cadastrarUsuario({ nome, email, telefone: telefone.replace(/\D/g, ""), senha }, contato);
-      setSucesso("Cadastro realizado com sucesso!");
+      const response: UsuarioResumoDtoApiResponse = await cadastrarUsuario({ nome, email, telefone: telefone.replace(/\D/g, ""), senha }, contato);
+      localStorage.setItem("userId", response.dados.id); // Store userId after successful registration
+      setSucesso(response.mensagem || "Cadastro realizado com sucesso!");
       setTimeout(() => {
-        if (onSwitchToLogin) {
+        if (onCadastroSuccess) {
+          onCadastroSuccess();
+        } else if (onSwitchToLogin) {
           onSwitchToLogin();
         } else {
           window.location.reload();

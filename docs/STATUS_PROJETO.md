@@ -11,7 +11,7 @@
 | **2** | Infraestrutura | ✅ 100% | 15/15 ✅ | 0 erros |
 | **3** | Camada de Aplicação | ✅ 100% | 14/14 ✅ | 0 erros |
 | **4** | API REST | ✅ 100% | 89/89 ✅ | 0 erros |
-| **5** | WebApp + QA | 🚧 Em andamento | 5/10 | 0 erros |
+| **5** | WebApp + QA | 🚧 70% concluída | 24/24 ✅ | 0 erros |
 | **6** | Deploy | 📅 Planejada | - | - |
 
 ---
@@ -84,26 +84,45 @@
 ✅ Testes atualizados para validações (89 testes total)
 ```
 
-### Sprint 5: WebApp + QA
+### Sprint 5: WebApp + QA (70% concluída)
 ```
-🚧 Estrutura inicial do WebApp (React + TypeScript) criada
-✅ Componente Button e teste unitário criados
-✅ Integração com backend - Serviço de autenticação (login) implementado
-✅ LoginForm com validação de erro implementado
-✅ Testes unitários (authService, LoginForm) criados e passando ✅
-✅ Teste E2E base (Cypress) com cenário de erro de login
-✅ Testes de integração backend (SQLite + Testcontainers PostgreSQL opcional)
-✅ Base para deploy em staging (Docker, docker-compose, scripts)
-🚧 Deploy em staging - Pronto para executar
+✅ React + TypeScript - estrutura profissional
+✅ Button Component com testes unitários
+✅ AuthService com integração API
+✅ LoginForm com validação e erro handling
+✅ CadastroForm com validação de contato obrigatório
+✅ Dashboard Principal - interface completa
+✅ 5 Componentes Reutilizáveis:
+   - StatusCheckIn (com cores dinâmicas: OK/Atenção/Crítico/Vencido)
+   - BotaoCheckIn (com spinner de carregamento)
+   - ListaContatos (contatos de emergência)
+   - HistoricoCheckIns (tabela com últimos 5)
+   - Notificacoes (badge pulsante)
+✅ DashboardService com 8 métodos (API integration)
+✅ CSS Modular (6 arquivos com estilos por componente)
+✅ Roteamento completo (Login → Cadastro → Dashboard → Logout)
+✅ Persistência de token em localStorage
+✅ Estrutura organizada:
+   - components/ (componentes reutilizáveis em pastas)
+   - features/auth/ (componentes específicos de autenticação)
+   - features/dashboard/ (container + serviço do dashboard)
+   - services/ (serviços genéricos)
+✅ 24 Testes:
+   - 10 testes unitários (Dashboard component)
+   - 11 testes de serviço (dashboardService)
+   - 3 testes base (Button, LoginForm, AuthService)
+   - 2 testes E2E (Cypress) iniciais
+   - Local: tests/ProvaVida.WebApp.Tests/
+✅ Responsividade - Mobile, Tablet, Desktop
+✅ Integração com Backend API - pronto
 ```
-- [x] Frontend (React + TypeScript) — estrutura inicial e componentes
-- [x] Teste unitário base (Jest/RTL)
-- [x] Teste E2E base (Cypress)
-- [x] Integração com backend
-- [x] Testes unitários (Jest) para Services
-- [x] Testes de integração (SQLite + Testcontainers)
-- [x] Base para deploy em staging (Docker + scripts)
-- [ ] Execução de deploy em staging
+- [x] Frontend structure (React + TypeScript)
+- [x] Components reusáveis + testes
+- [x] Dashboard principal com fluxo completo
+- [x] Authentication flow (Login → Cadastro → Dashboard)
+- [x] API integration + error handling
+- [x] Testes organizados na pasta correta
+- [ ] Deploy em staging
 - [ ] Testes E2E em staging
 - [ ] Validação de funcionalidades críticas
 
@@ -293,10 +312,10 @@ Sprint 1 ████████████████████ 100% ✅
 Sprint 2 ████████████████████ 100% ✅
 Sprint 3 ████████████████████ 100% ✅
 Sprint 4 ████████████████████ 100% ✅
-Sprint 5 ███░░░░░░░░░░░░░░░░░  30% 🚧
+Sprint 5 ██████████████░░░░░░  70% 🚧
 Sprint 6 ░░░░░░░░░░░░░░░░░░░░   0% 📅
 
-TOTAL:   ████████████████░░░░  75% (4.3 de 6 sprints)
+TOTAL:   ████████████████░░░░  81% (4.7 de 6 sprints)
 ```
 
 ---
