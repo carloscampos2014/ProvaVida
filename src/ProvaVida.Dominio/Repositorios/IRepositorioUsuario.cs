@@ -32,9 +32,10 @@ public interface IRepositorioUsuario
     /// <summary>
     /// Atualiza um usuário existente no repositório.
     /// </summary>
+    /// <param name="id">ID da entidade.</param>
     /// <param name="usuario">O usuário com os dados atualizados.</param>
     /// <param name="cancellationToken">Token de cancelamento para operações assíncronas.</param>
-    Task AtualizarAsync(Entidades.Usuario usuario, CancellationToken cancellationToken = default);
+    Task AtualizarAsync(Guid id, Entidades.Usuario usuario, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Remove um usuário do repositório.

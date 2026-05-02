@@ -58,9 +58,10 @@ public interface IRepositorioNotificacao
     /// <summary>
     /// Atualiza o status de uma notificação (ex: Pendente → Enviada).
     /// </summary>
+    /// <param name="id">ID da entidade.</param>
     /// <param name="notificacao">A notificação com status atualizado.</param>
     /// <param name="cancellationToken">Token de cancelamento para operações assíncronas.</param>
-    Task AtualizarAsync(Entidades.Notificacao notificacao, CancellationToken cancellationToken = default);
+    Task AtualizarAsync(Guid id, Entidades.Notificacao notificacao, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Remove uma notificação do repositório.

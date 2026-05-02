@@ -63,18 +63,27 @@ public abstract class RepositorioBase<T> where T : class
     /// <summary>
     /// Atualiza uma entidade existente.
     /// </summary>
+    /// <param name="id">ID da entidade.</param>
     /// <param name="entidade">Entidade com dados atualizados.</param>
     /// <param name="cancellationToken">Token de cancelamento.</param>
     /// <returns>Task assíncrona.</returns>
-    public virtual async Task AtualizarAsync(T entidade, CancellationToken cancellationToken = default)
+    public virtual async Task AtualizarAsync(Guid id, T entidade, CancellationToken cancellationToken = default)
     {
+        if (id == Guid.Empty)
+            throw new ArgumentException("ID inválido", nameof(id));
+
         if (entidade == null)
             throw new ArgumentNullException(nameof(entidade));
 
-        DbSet.Update(entidade);
+        var existente = await ObterPorIdAsync(id, cancellationToken);
+
+        if (existente == null)
+            throw new InvalidOperationException("Registro não encontrado");
+
+        Contexto.Entry(existente).CurrentValues.SetValues(entidade);
+
         await Contexto.SaveChangesAsync(cancellationToken);
     }
-
     /// <summary>
     /// Remove uma entidade do banco de dados.
     /// </summary>
@@ -90,7 +99,7 @@ public abstract class RepositorioBase<T> where T : class
         if (entidade == null)
             return false;
 
-        DbSet.Remove(entidade);
+        Contexto.Entry(entidade).State = EntityState.Deleted;
         await Contexto.SaveChangesAsync(cancellationToken);
         return true;
     }

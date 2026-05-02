@@ -41,9 +41,10 @@ public interface IRepositorioContatoEmergencia
     /// <summary>
     /// Atualiza um contato de emergência existente no repositório.
     /// </summary>
+    /// <param name="id">ID da entidade.</param>
     /// <param name="contato">O contato com os dados atualizados.</param>
     /// <param name="cancellationToken">Token de cancelamento para operações assíncronas.</param>
-    Task AtualizarAsync(Entidades.ContatoEmergencia contato, CancellationToken cancellationToken = default);
+    Task AtualizarAsync(Guid id, Entidades.ContatoEmergencia contato, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Remove um contato de emergência do repositório.

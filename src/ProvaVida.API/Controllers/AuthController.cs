@@ -148,14 +148,31 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém o perfil do usuário autenticado (futura - com JWT).
+    /// Obtém o perfil do usuário autenticado pelo ID.
     /// </summary>
+    /// <param name="id">ID do usuário.</param>
+    /// <param name="cancellationToken">Token de cancelamento.</param>
+    /// <returns>Perfil resumido do usuário.</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ApiResponse<UsuarioResumoDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public IActionResult GetPerfil(Guid id)
+    public async Task<IActionResult> GetPerfil(Guid id, CancellationToken cancellationToken = default)
     {
-        // Futura implementação (Sprint 4+) - com autenticação JWT
-        return Ok(new { mensagem = "Implementação futura" });
+        _logger.LogInformation("🔎 Requisição de perfil para usuário: {UsuarioId}", id);
+        try
+        {
+            var usuarioResumo = await _autenticacao.ObterPerfilPorIdAsync(id, cancellationToken);
+            return Ok(new ApiResponse<UsuarioResumoDto>
+            {
+                Dados = usuarioResumo,
+                Mensagem = "✅ Perfil obtido com sucesso!",
+                Timestamp = DateTime.UtcNow
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao obter perfil do usuário: {UsuarioId}", id);
+            throw;
+        }
     }
 }

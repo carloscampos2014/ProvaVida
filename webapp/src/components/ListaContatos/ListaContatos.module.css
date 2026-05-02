@@ -16,8 +16,8 @@
 }
 
 .item:hover {
-  border-color: #667eea;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  border-color: #00d4ff;
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.15);
 }
 
 .item.inativo {

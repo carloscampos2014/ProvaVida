@@ -37,7 +37,7 @@ const ListaContatos: React.FC<ListaContatosProps> = ({ contatos }) => {
               </p>
               <p className={styles.detalhe}>
                 <span className={styles.icone}>💬</span>
-                {contato.whatsapp}
+                {contato.whatsApp}
               </p>
             </div>
           </div>

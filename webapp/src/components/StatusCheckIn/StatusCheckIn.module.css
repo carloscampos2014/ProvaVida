@@ -44,14 +44,14 @@
   flex-direction: column;
   align-items: center;
   padding: 1.5rem;
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(0, 212, 255, 0.1);
   border-radius: 8px;
 }
 
 .valor {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: #00d4ff;
   letter-spacing: -1px;
 }
 

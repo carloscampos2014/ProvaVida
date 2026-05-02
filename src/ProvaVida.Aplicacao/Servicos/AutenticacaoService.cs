@@ -185,4 +185,19 @@ public class AutenticacaoService : IAutenticacaoService
         var usuario = await _repositorioUsuario.ObterPorEmailAsync(email, cancellationToken);
         return usuario != null;
     }
+
+    /// <summary>
+    /// Obtém o perfil/resumo de um usuário pelo ID.
+    /// </summary>
+    public async Task<UsuarioResumoDto> ObterPerfilPorIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("🔎 Buscando perfil do usuário: {UsuarioId}", id);
+        var usuario = await _repositorioUsuario.ObterPorIdAsync(id, cancellationToken);
+        if (usuario == null)
+        {
+            _logger.LogWarning("⚠️ Usuário não encontrado: {UsuarioId}", id);
+            throw new UsuarioNaoEncontradoException($"Usuário com id '{id}' não encontrado.");
+        }
+        return usuario.ParaResumoDto();
+    }
 }

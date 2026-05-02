@@ -99,10 +99,10 @@ public class RepositorioUsuario : RepositorioBase<Usuario>, IRepositorioUsuario
     /// <summary>
     /// Atualiza um usuário existente.
     /// </summary>
-    public override async Task AtualizarAsync(Usuario usuario, CancellationToken cancellationToken = default)
+    public override async Task AtualizarAsync(Guid id, Usuario usuario, CancellationToken cancellationToken = default)
     {
         if (usuario == null) throw new ArgumentNullException(nameof(usuario));
-        await base.AtualizarAsync(usuario, cancellationToken);
+        await base.AtualizarAsync(id, usuario, cancellationToken);
     }
 
     /// <summary>

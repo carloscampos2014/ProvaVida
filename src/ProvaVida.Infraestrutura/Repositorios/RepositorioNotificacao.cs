@@ -122,10 +122,10 @@ public class RepositorioNotificacao : RepositorioBase<Notificacao>, IRepositorio
     /// <summary>
     /// Atualiza uma notificação existente.
     /// </summary>
-    public override async Task AtualizarAsync(Notificacao notificacao, CancellationToken cancellationToken = default)
+    public override async Task AtualizarAsync(Guid id, Notificacao notificacao, CancellationToken cancellationToken = default)
     {
         if (notificacao == null) throw new ArgumentNullException(nameof(notificacao));
-        await base.AtualizarAsync(notificacao, cancellationToken);
+        await base.AtualizarAsync(id, notificacao, cancellationToken);
     }
 
     /// <summary>

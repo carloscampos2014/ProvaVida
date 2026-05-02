@@ -84,10 +84,10 @@ public class RepositorioContatoEmergencia : RepositorioBase<ContatoEmergencia>, 
     /// <summary>
     /// Atualiza um contato existente.
     /// </summary>
-    public override async Task AtualizarAsync(ContatoEmergencia contato, CancellationToken cancellationToken = default)
+    public override async Task AtualizarAsync(Guid id, ContatoEmergencia contato, CancellationToken cancellationToken = default)
     {
         if (contato == null) throw new ArgumentNullException(nameof(contato));
-        await base.AtualizarAsync(contato, cancellationToken);
+        await base.AtualizarAsync(id, contato, cancellationToken);
     }
 
     /// <summary>

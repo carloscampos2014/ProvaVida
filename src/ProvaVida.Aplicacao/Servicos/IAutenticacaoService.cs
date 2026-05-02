@@ -39,4 +39,12 @@ public interface IAutenticacaoService
     /// <param name="cancellationToken">Token de cancelamento.</param>
     /// <returns>True se email existe, false caso contrário.</returns>
     Task<bool> EmailJaExisteAsync(string email, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtém o perfil/resumo de um usuário pelo ID.
+    /// </summary>
+    /// <param name="id">ID do usuário.</param>
+    /// <param name="cancellationToken">Token de cancelamento.</param>
+    /// <returns>DTO com resumo do usuário, ou lança exceção se não encontrado.</returns>
+    Task<UsuarioResumoDto> ObterPerfilPorIdAsync(Guid id, CancellationToken cancellationToken = default);
 }

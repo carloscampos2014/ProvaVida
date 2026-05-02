@@ -83,7 +83,7 @@ public class CheckInService : ICheckInService
         usuario.RegistrarCheckIn();
 
         // 5️⃣ Persistir atualização do usuário
-        await _repositorioUsuario.AtualizarAsync(usuario, cancellationToken);
+        await _repositorioUsuario.AtualizarAsync(usuario.Id, usuario, cancellationToken);
 
         // 6️⃣ Limpar notificações pendentes
         await LimparNotificacoesPendentesAsync(usuario.Id, cancellationToken);
