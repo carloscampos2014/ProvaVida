@@ -4,23 +4,32 @@ Versão 1.0 — Agosto de 2026
 
 ## 1. Visão Geral da Arquitetura
 
-Arquitetura baseada em aplicativo móvel (cliente) com banco de dados local próprio + backend hospedado em VM própria na Oracle Cloud Infrastructure (OCI), com Nginx como reverse proxy/TLS termination, API REST em .NET e banco de dados PostgreSQL (ambiente já provisionado). O app mobile mantém uma base local (offline-first) que sincroniza com o backend; o agendamento da verificação diária roda dentro do próprio processo .NET, e as notificações são integradas via serviços externos de e-mail e WhatsApp.
+Arquitetura baseada em aplicativo móvel (cliente) com banco de dados local próprio + backend hospedado em VM própria na Oracle Cloud Infrastructure (OCI), com Cloudflare como CDN/proxy DNS e terminação TLS externa, Nginx como reverse proxy interno, API REST em .NET e banco de dados PostgreSQL (ambiente já provisionado). O app mobile mantém uma base local (offline-first) que sincroniza com o backend; o agendamento da verificação diária roda dentro do próprio processo .NET, e as notificações são integradas via serviços externos de e-mail e WhatsApp.
+
+**Domínio da API:** `provida-api.enzojb.com.br` (subdomínio gerenciado no Cloudflare)
 
 ### 1.1 Ambiente já disponível (ponto de partida)
 
 - VM na Oracle Cloud Infrastructure (OCI)
-- Nginx instalado (reverse proxy / TLS)
+- Nginx instalado (reverse proxy interno)
 - .NET runtime instalado
 - PostgreSQL instalado
+- Domínio `enzojb.com.br` gerenciado no Cloudflare
 
 ### 1.2 Diagrama de Componentes (representação textual)
 
 ```
 [App Mobile (Android/iOS)]
    ├─ [Banco de dados local (SQLite)]  ← check-ins e dados de sessão gravados primeiro localmente
-   └─ [Camada de sincronização]  →  [Nginx (reverse proxy / TLS)]  →  [API REST .NET]  →  [PostgreSQL]
+   └─ [Camada de sincronização]
+         ↓ HTTPS
+   [Cloudflare — provida-api.enzojb.com.br]  ← terminação TLS, WAF, DDoS protection
+         ↓ HTTPS (Cloudflare Origin Certificate)
+   [Nginx (reverse proxy interno — VM OCI)]
+         ↓ HTTP (127.0.0.1:5000)
+   [API REST .NET (Kestrel)]  →  [PostgreSQL]
 
-[API .NET]  →  [Job Agendado in-process (Hangfire / Quartz.NET)]  →  [Serviço de Notificação]  →  [E-mail (SMTP)] e [WhatsApp Business API]
+[API .NET]  →  [Job Agendado in-process (Hangfire)]  →  [Serviço de Notificação]  →  [E-mail (SMTP)] e [WhatsApp Business API]
 
 [API .NET]  →  [Serviço de Autenticação (JWT)]
 
@@ -34,20 +43,27 @@ Arquitetura baseada em aplicativo móvel (cliente) com banco de dados local pró
 | App Mobile | React Native (ou Flutter) | Um único código-base para Android e iOS, acesso nativo a GPS e push notifications |
 | Banco Local (Mobile) | SQLite (via `expo-sqlite`/`react-native-sqlite-storage` ou `sqflite` no Flutter) | Armazena check-ins e dados de sessão localmente, permitindo uso offline-first |
 | Backend / API | .NET (ASP.NET Core Web API) | Já instalado na VM Oracle Cloud |
-| Servidor Web / Proxy | Nginx | Já instalado na VM; reverse proxy para a API .NET (Kestrel) + terminação TLS (Let's Encrypt/Certbot) |
+| DNS / CDN / Proxy | Cloudflare | Gerencia o domínio `enzojb.com.br`; subdomínio `provida-api.enzojb.com.br` com proxy ativo (modo Full Strict); WAF, DDoS protection e rate limiting incluídos |
+| TLS (externo) | Cloudflare — certificado automático | TLS terminado no Cloudflare; certificado gerenciado pelo próprio Cloudflare |
+| TLS (Cloudflare → VM) | Cloudflare Origin Certificate | Certificado gratuito emitido no painel Cloudflare, válido 15 anos, instalado no Nginx da VM; garante criptografia ponta a ponta mesmo entre Cloudflare e a VM |
+| Servidor Web / Proxy | Nginx | Já instalado na VM; reverse proxy para a API .NET (Kestrel `127.0.0.1:5000`) + terminação TLS com Cloudflare Origin Certificate |
 | Banco de Dados | PostgreSQL | Já instalado na VM |
-| Agendador | Hangfire ou Quartz.NET (in-process, dentro da própria API .NET) | Evita depender de serviço de nuvem externo; roda a rotina diária de verificação de inatividade |
+| Agendador | Hangfire (in-process, dentro da própria API .NET) | Evita depender de serviço de nuvem externo; roda a rotina diária de verificação de inatividade; painel web embutido para monitoramento dos jobs |
 | E-mail | SMTP (ex.: SendGrid, Amazon SES ou outro provedor SMTP) | Envio de e-mails transacionais e de alerta |
 | WhatsApp | WhatsApp Business API (Meta) / Twilio | Envio de mensagens ao contato de emergência |
 | Autenticação | JWT + BCrypt/Argon2 (via ASP.NET Identity ou implementação própria) | Sessões stateless e senhas protegidas |
 | Infraestrutura | VM única na Oracle Cloud (OCI) | Hospedagem atual; ver considerações de escalabilidade abaixo |
 | Observabilidade | Serilog + arquivo/console, com opção futura de integração a Grafana/Loki ou OCI Logging | Monitoramento de falhas em envios e disponibilidade |
 
-### 2.1 Considerações específicas do ambiente .NET + Nginx + PostgreSQL
+### 2.1 Considerações específicas do ambiente Cloudflare + Nginx + .NET + PostgreSQL
 
-- A API ASP.NET Core roda via Kestrel em uma porta interna (ex.: `127.0.0.1:5000`), e o Nginx atua como reverse proxy externo, cuidando de TLS/HTTPS, compressão e cabeçalhos (`X-Forwarded-For`, `X-Forwarded-Proto`).
-- Recomenda-se rodar a API como serviço `systemd` (com restart automático) para garantir resiliência a falhas do processo.
-- O agendamento diário pode ser feito com **Hangfire** (traz painel de monitoramento web dos jobs, útil para acompanhar o disparo de emergências) ou **Quartz.NET** (mais leve, sem painel embutido). Hangfire é recomendado pela visibilidade operacional.
+- **Cloudflare:** atua como DNS, CDN, WAF e terminação TLS pública. O subdomínio `provida-api.enzojb.com.br` deve ter o proxy do Cloudflare ativado (ícone laranja). Usar modo SSL **Full (Strict)** nas configurações do Cloudflare para garantir criptografia até a VM.
+- **Cloudflare Origin Certificate:** certificado gratuito emitido no painel Cloudflare (Validity: 15 anos), instalado no Nginx da VM. Não é reconhecido por browsers diretamente — funciona exclusivamente quando o tráfego passa pelo Cloudflare.
+- **Firewall da OCI:** restringir regras para aceitar conexões nas portas 80/443 **somente dos IPs da Cloudflare** ([lista oficial](https://www.cloudflare.com/ips/)). Isso garante que a VM não seja acessível diretamente, forçando todo tráfego a passar pelo Cloudflare.
+- **Nginx:** reverse proxy do Kestrel (`proxy_pass http://127.0.0.1:5000`), configurado para repassar cabeçalhos reais do cliente (`X-Forwarded-For`, `X-Forwarded-Proto`, `CF-Connecting-IP`). TLS configurado com o Cloudflare Origin Certificate.
+- **Kestrel:** API ASP.NET Core roda em porta interna (`127.0.0.1:5000`), acessível apenas localmente — nunca exposta diretamente.
+- Recomenda-se rodar a API como serviço `systemd` (com `Restart=always`) para garantir resiliência a falhas do processo.
+- **Hangfire** recomendado para o job diário de verificação — painel web embutido útil para monitorar disparos de emergência.
 - Usar `appsettings.json` + variáveis de ambiente (ou `dotnet user-secrets` em dev) para strings de conexão do PostgreSQL e credenciais de e-mail/WhatsApp — nunca hardcoded.
 - Migrations de banco via **Entity Framework Core** (`dotnet ef database update`) garantem versionamento do schema do PostgreSQL já instalado.
 
@@ -111,7 +127,9 @@ Job agendado (Hangfire/Quartz.NET, in-process na API .NET) executa diariamente (
 ## 7. Deploy e Operação na VM (Oracle Cloud)
 
 - **Publicação da API:** `dotnet publish` gerando build de release; execução via `systemd` (unit file dedicado) apontando para o binário publicado, com `Restart=always` e `Environment=ASPNETCORE_ENVIRONMENT=Production`.
-- **Nginx:** configurado como reverse proxy do Kestrel (`proxy_pass http://127.0.0.1:5000`), com certificado TLS (Let's Encrypt via Certbot) e redirecionamento HTTP → HTTPS.
+- **Cloudflare:** subdomínio `provida-api.enzojb.com.br` com proxy ativo; SSL/TLS mode **Full (Strict)**; Cloudflare Origin Certificate instalado no Nginx.
+- **Nginx:** configurado como reverse proxy do Kestrel (`proxy_pass http://127.0.0.1:5000`), com Cloudflare Origin Certificate para TLS, repassando cabeçalhos `X-Forwarded-For`, `X-Forwarded-Proto` e `CF-Connecting-IP`.
+- **Firewall OCI:** regras de ingress nas portas 80/443 restritas aos blocos de IP da Cloudflare — bloquear acesso direto à VM.
 - **PostgreSQL:** usar usuário/roles dedicados para a aplicação (não o superusuário), string de conexão via variável de ambiente/secret, e `pg_hba.conf` restringindo acesso a localhost.
 - **CI/CD (sugestão):** pipeline simples (ex.: GitHub Actions) que builda o projeto .NET, roda os testes e faz deploy via SSH/rsync + restart do serviço `systemd` na VM.
 - **Logs:** Serilog gravando em arquivo rotacionado na VM; `journalctl` para logs do serviço `systemd`; revisar periodicamente logs de falha de envio de e-mail/WhatsApp.
