@@ -1,0 +1,57 @@
+using ProvaVida.Application.Common;
+using ProvaVida.Application.Interfaces;
+using ProvaVida.Domain.Entities;
+
+namespace ProvaVida.Application.UseCases.Login;
+
+public class LoginUseCase
+{
+    private readonly IUsuarioRepository _usuarioRepository;
+    private readonly ISessaoLoginRepository _sessaoRepository;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IJwtService _jwtService;
+    private readonly IUnitOfWork _uow;
+
+    public LoginUseCase(
+        IUsuarioRepository usuarioRepository,
+        ISessaoLoginRepository sessaoRepository,
+        IPasswordHasher passwordHasher,
+        IJwtService jwtService,
+        IUnitOfWork uow)
+    {
+        _usuarioRepository = usuarioRepository;
+        _sessaoRepository = sessaoRepository;
+        _passwordHasher = passwordHasher;
+        _jwtService = jwtService;
+        _uow = uow;
+    }
+
+    public async Task<LoginOutput> ExecutarAsync(LoginInput input, CancellationToken ct = default)
+    {
+        var usuario = await _usuarioRepository.ObterPorEmailAsync(input.Email, ct);
+
+        if (usuario is null || !usuario.Ativo)
+            throw AppException.NaoAutorizado("Credenciais inválidas.");
+
+        var senhaValida = _passwordHasher.Verificar(input.Senha, usuario.SenhaHash);
+        if (!senhaValida)
+            throw AppException.NaoAutorizado("Credenciais inválidas.");
+
+        var token = _jwtService.GerarToken(usuario, out var expiraEm);
+        var sessao = SessaoLogin.Criar(usuario.Id, token, expiraEm);
+
+        await _uow.BeginAsync(cancellationToken: ct);
+        try
+        {
+            await _sessaoRepository.AdicionarAsync(sessao, ct);
+            await _uow.CommitAsync(ct);
+        }
+        catch
+        {
+            await _uow.RollbackAsync(ct);
+            throw;
+        }
+
+        return new LoginOutput(token, expiraEm);
+    }
+}

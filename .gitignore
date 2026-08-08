@@ -1,0 +1,40 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+*.bak
+
+## Publicação
+publish/
+out/
+
+## EF Core migrations temporárias
+*.efbundle
+
+## Segredos — manter apenas o appsettings base sem secrets
+appsettings.*.json
+!appsettings.json
+*.pfx
+*.p12
+secrets.json
+
+## Logs
+logs/
+*.log
+
+## Cobertura de testes
+coverage/
+*.coverage
+TestResults/
+
+## IDE
+.idea/
+.vscode/
+*.DotSettings.user
+
+## OS
+.DS_Store
+Thumbs.db
