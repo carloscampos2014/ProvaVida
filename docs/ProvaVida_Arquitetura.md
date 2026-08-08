@@ -10,11 +10,11 @@ Arquitetura baseada em aplicativo móvel (cliente) com banco de dados local pró
 
 ### 1.1 Ambiente já disponível (ponto de partida)
 
-- VM na Oracle Cloud Infrastructure (OCI)
-- Nginx instalado (reverse proxy interno)
+- VM na Oracle Cloud Infrastructure (OCI) — já em uso por outro projeto
+- Nginx instalado e configurado (Cloudflare Origin Certificate já instalado, firewall OCI já configurado)
 - .NET runtime instalado
 - PostgreSQL instalado
-- Domínio `enzojb.com.br` gerenciado no Cloudflare
+- Domínio `enzojb.com.br` gerenciado no Cloudflare (proxy e SSL Full Strict já ativos para o projeto existente)
 
 ### 1.2 Diagrama de Componentes (representação textual)
 
@@ -126,10 +126,12 @@ Job agendado (Hangfire/Quartz.NET, in-process na API .NET) executa diariamente (
 
 ## 7. Deploy e Operação na VM (Oracle Cloud)
 
-- **Publicação da API:** `dotnet publish` gerando build de release; execução via `systemd` (unit file dedicado) apontando para o binário publicado, com `Restart=always` e `Environment=ASPNETCORE_ENVIRONMENT=Production`.
-- **Cloudflare:** subdomínio `provida-api.enzojb.com.br` com proxy ativo; SSL/TLS mode **Full (Strict)**; Cloudflare Origin Certificate instalado no Nginx.
-- **Nginx:** configurado como reverse proxy do Kestrel (`proxy_pass http://127.0.0.1:5000`), com Cloudflare Origin Certificate para TLS, repassando cabeçalhos `X-Forwarded-For`, `X-Forwarded-Proto` e `CF-Connecting-IP`.
-- **Firewall OCI:** regras de ingress nas portas 80/443 restritas aos blocos de IP da Cloudflare — bloquear acesso direto à VM.
-- **PostgreSQL:** usar usuário/roles dedicados para a aplicação (não o superusuário), string de conexão via variável de ambiente/secret, e `pg_hba.conf` restringindo acesso a localhost.
-- **CI/CD (sugestão):** pipeline simples (ex.: GitHub Actions) que builda o projeto .NET, roda os testes e faz deploy via SSH/rsync + restart do serviço `systemd` na VM.
-- **Logs:** Serilog gravando em arquivo rotacionado na VM; `journalctl` para logs do serviço `systemd`; revisar periodicamente logs de falha de envio de e-mail/WhatsApp.
+A VM já está em uso por outro projeto, com Nginx, Cloudflare Origin Certificate e firewall OCI configurados. Para o ProvaVida, as adições necessárias são mínimas:
+
+- **Novo server block no Nginx:** adicionar configuração para `provida-api.enzojb.com.br` com `proxy_pass http://127.0.0.1:5001` (porta diferente do projeto existente), reusando o Cloudflare Origin Certificate já instalado.
+- **Cloudflare:** adicionar registro A `provida-api` apontando para o IP da VM, com proxy ativo. Nenhuma alteração nas configurações de SSL/TLS ou firewall é necessária.
+- **Novo unit file systemd:** serviço dedicado para o ProvaVida com `Restart=always`, `Environment=ASPNETCORE_ENVIRONMENT=Production` e a porta interna configurada (`ASPNETCORE_URLS=http://127.0.0.1:5001`).
+- **Publicação da API:** `dotnet publish` gerando build de release; deploy via SSH/rsync + restart do serviço `systemd`.
+- **PostgreSQL:** criar banco de dados e usuário/role dedicados para o ProvaVida (não compartilhar com o projeto existente). String de conexão via variável de ambiente.
+- **CI/CD (sugestão):** GitHub Actions buildando o projeto, rodando testes e fazendo deploy via SSH + restart do serviço `systemd`.
+- **Logs:** Serilog gravando em arquivo rotacionado próprio; `journalctl -u provida-api` para logs do serviço.
