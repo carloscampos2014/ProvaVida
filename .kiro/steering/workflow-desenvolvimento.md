@@ -60,23 +60,16 @@ O agente DEVE pausar e aguardar o usuário dizer explicitamente: "aprovado", "po
 
 ### Etapa 5 — Mover issue(s) para "In Progress" no GitHub Project
 
-Antes de iniciar a implementação, mover as issues relacionadas à fase/feature para o status **In Progress** no GitHub Project `carloscampos2014/ProvaVida`.
-
-> **Nota:** Se o GitHub Project ainda não foi criado, criá-lo antes de continuar:
-> ```powershell
-> gh project create --owner carloscampos2014 --title "ProvaVida"
-> ```
-> Após criar, atualizar os IDs abaixo com os valores retornados pelo comando
-> `gh project list --owner carloscampos2014 --format json`.
+Antes de iniciar a implementação, mover as issues relacionadas à fase/feature para o status **In Progress** no GitHub Project `carloscampos2014/ProvaVida` (Project #4):
 
 ```powershell
-# IDs do projeto — atualizar após criar o project
-$projectId    = "<PROJECT_ID>"
-$fieldId      = "<FIELD_ID_STATUS>"
-$inProgressId = "<OPTION_ID_IN_PROGRESS>"
+# IDs do projeto
+$projectId    = "PVT_kwHOAHxQCM4Bfyrt"
+$fieldId      = "PVTSSF_lAHOAHxQCM4BfyrtzhaDCAA"
+$inProgressId = "47fc9ee4"
 
 # Buscar o item da issue e mover
-$item = (gh project item-list <PROJECT_NUMBER> --owner carloscampos2014 --format json | ConvertFrom-Json).items |
+$item = (gh project item-list 4 --owner carloscampos2014 --format json | ConvertFrom-Json).items |
         Where-Object { $_.title -like "*<titulo-da-issue>*" }
 gh project item-edit --project-id $projectId --id $item.id --field-id $fieldId --single-select-option-id $inProgressId
 ```
