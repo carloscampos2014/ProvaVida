@@ -1,0 +1,8 @@
+{
+  "ConnectionStrings": {
+    "Default": "Host=localhost;Port=5432;Database=provavida_dev;Username=postgres;Password=SUA_SENHA"
+  },
+  "Jwt": {
+    "SecretKey": "chave-secreta-minimo-32-caracteres-trocar!"
+  }
+}
