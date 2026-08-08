@@ -2,78 +2,68 @@
 inclusion: auto
 ---
 
-# Padrões específicos — LicenciamentoSoftware
+# Padrões específicos — ProvaVida
 
 ## Stack obrigatória
 
-- **Backend:** .NET 10, C#, ASP.NET Core, PostgreSQL, Dapper (sem EF Core), DbUp (migrations)
-- **Frontend web:** Blazor WebAssembly + BFF (ASP.NET Core + YARP)
-- **Desktop/Mobile:** .NET MAUI (Windows, Android)
-- **Testes:** xUnit, FluentAssertions, Testcontainers, NSubstitute, NetArchTest
+- **Backend:** .NET (ASP.NET Core Web API), C#, PostgreSQL, Entity Framework Core, Hangfire (job agendado)
+- **App Mobile:** React Native (ou Flutter) com SQLite local (offline-first)
+- **Autenticação:** JWT + BCrypt/Argon2
+- **E-mail:** SMTP (SendGrid, Amazon SES ou provedor compatível)
+- **WhatsApp:** WhatsApp Business API (Meta) ou Twilio
+- **Testes backend:** xUnit, FluentAssertions, Testcontainers
 - **Validação:** FluentValidation
-- **Autenticação gestão:** JWT + 2FA TOTP (Google Authenticator / Authy)
-- **Autenticação API de validação:** HMAC com timestamp (anti-replay) + token por licença com expiração automática
+- **Infraestrutura:** VM Oracle Cloud (OCI) — Nginx + .NET (Kestrel) + PostgreSQL já provisionados
 
-## Estrutura de projetos
+## Estrutura do backend (ASP.NET Core)
 
 ```
 src/
-  LicenciamentoSoftware.Domain/
-  LicenciamentoSoftware.Application/
-  LicenciamentoSoftware.Infrastructure/
-  LicenciamentoSoftware.Api/
-  LicenciamentoSoftware.Client/       ← cliente HTTP compartilhado (Web + MAUI)
-  LicenciamentoSoftware.Web/          ← Blazor WASM
-  LicenciamentoSoftware.Web.Server/   ← BFF (proxy YARP + cookie HttpOnly)
-  LicenciamentoSoftware.Maui/         ← MAUI Desktop (Windows) + Mobile (Android)
+  ProvaVida.Api/              ← Controllers, Program.cs, configuração de DI
+  ProvaVida.Application/      ← Casos de uso, serviços, interfaces
+  ProvaVida.Domain/           ← Entidades, regras de negócio, value objects
+  ProvaVida.Infrastructure/   ← EF Core, repositórios, jobs Hangfire, integrações (e-mail, WhatsApp)
 tests/
-  LicenciamentoSoftware.Domain.Tests/
-  LicenciamentoSoftware.Application.Tests/
-  LicenciamentoSoftware.IntegrationTests/
-  LicenciamentoSoftware.Maui.Tests/
+  ProvaVida.Application.Tests/
+  ProvaVida.IntegrationTests/
 ```
 
-## Regras de dependência (verificadas por teste de arquitetura)
+## Estrutura do app mobile
 
-- `Application` nunca referencia `Infrastructure` ou `Api`
-- `Domain` nunca referencia nenhum outro projeto da solução
-- Controllers nunca acessam `DbContext` diretamente
-
-## Isolamento por tenant
-
-- O `IdCliente` (tenant) vem **sempre** da identidade autenticada (`ICurrentUser`), nunca do body da requisição.
-- Nenhuma query retorna dados de tenant diferente do usuário autenticado.
-
-## Nomenclatura de casos de uso
-
-Cada agregado tem sua própria pasta em `Application/` com:
-- `[Acao][Agregado]Command.cs` ou `[Acao][Agregado]Query.cs`
-- `[Acao][Agregado]Validator.cs`
-- `[Acao][Agregado]Handler.cs`
-- `I[Agregado]Repository.cs`
-
-Exemplo:
 ```
-Application/Clientes/
-  CriarClienteCommand.cs
-  CriarClienteValidator.cs
-  CriarClienteHandler.cs
-  IClienteRepository.cs
+mobile/
+  src/
+    screens/          ← Telas (Login, Cadastro, CheckIn, Perfil)
+    components/       ← Componentes reutilizáveis
+    services/         ← Chamadas à API REST
+    storage/          ← SQLite local (check-ins offline, dados do usuário)
+    navigation/       ← Navegação (React Navigation ou equivalente)
+    hooks/            ← Custom hooks
+    utils/
 ```
+
+## Modelo de dados principal
+
+| Entidade | Principais atributos |
+|---|---|
+| Usuario | id, nome, email, whatsapp, senha_hash, status, contato_emergencia_nome, contato_emergencia_email, contato_emergencia_whatsapp, criado_em, atualizado_em |
+| CheckIn | id, usuario_id (FK), data_hora, latitude, longitude, device_id |
+| NotificacaoEmergencia | id, usuario_id (FK), data_disparo, canal (email/whatsapp), status_envio |
+| SessaoLogin | id, usuario_id (FK), token, criado_em, expira_em, ativo |
 
 ## Regras de negócio obrigatórias
 
-- Exclusão sempre lógica (`Ativo = false`), nunca física.
-- Toda operação de escrita gera registro no `LogOperacao`.
-- Concorrência em validação de licença deve ser atômica (transação serializável).
-- `ClienteFinal` e `Aplicacao` devem pertencer ao mesmo `Cliente` da licença.
-- O tipo da aplicação não pode mudar enquanto houver licenças ativas.
-- Limites de usuários, sessões e instalações devem ser inteiros positivos.
+- Exclusão de conta: remover ou anonimizar todos os dados do usuário (LGPD).
+- Check-in gravado localmente primeiro (offline-first); sincronizado com o backend quando houver conexão.
+- Job diário (Hangfire) verifica usuários com 2+ dias sem check-in e envia alerta ao contato de emergência.
+- Mesmo check-in não pode ser duplicado no backend (idempotência via `id_local` no payload).
+- Token de sessão armazenado em keychain/keystore seguro no dispositivo (nunca em texto plano).
+- Localização é coletada com consentimento explícito; check-in sem localização deve ser permitido (não bloquear).
 
-## Interfaces e distribuição
+## Regras gerais
 
-- **Web:** Blazor WASM + BFF publicado na Oracle Cloud VM (Nginx)
-- **Desktop:** MAUI Windows, distribuição via instalador
-- **Mobile:** MAUI Android, distribuição via Google Play
-- As três interfaces consomem a mesma API REST de gestão
-- Lógica de cliente HTTP e modelos compartilhados entre Web e MAUI via `LicenciamentoSoftware.Client`
+- Sem credenciais, segredos ou connection strings no código ou repositório.
+- Usar `appsettings.json` + variáveis de ambiente para configurações sensíveis.
+- Migrations via EF Core (`dotnet ef database update`).
+- API roda via Kestrel em porta interna (`127.0.0.1:5000`); Nginx cuida de TLS/HTTPS externamente.
+- Warnings tratados como erros no build da API.

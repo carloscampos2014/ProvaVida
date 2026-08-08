@@ -23,13 +23,13 @@ Confirmar que está no master atualizado antes de continuar.
 ## Etapa 2 — Coletar todas as issues abertas
 
 ```powershell
-gh issue list --repo carloscampos2014/LicenciamentoSoftware --state open --limit 100 --json number,title,labels,body
+gh issue list --repo carloscampos2014/ProvaVida --state open --limit 100 --json number,title,labels,body
 ```
 
 Coletar também os PRs abertos que possam indicar trabalho em andamento:
 
 ```powershell
-gh pr list --repo carloscampos2014/LicenciamentoSoftware --state open --json number,title,headRefName
+gh pr list --repo carloscampos2014/ProvaVida --state open --json number,title,headRefName
 ```
 
 ---
@@ -40,7 +40,7 @@ Para cada issue aberta, verificar se a implementação **já existe no código a
 
 - Busca por palavras-chave do título da issue nos arquivos relevantes
 - Verificação das migrations existentes (se a issue envolve banco de dados)
-- Verificação dos endpoints, handlers, páginas e testes
+- Verificação dos endpoints, serviços, telas e testes
 
 Critério de "já implementado":
 - O código correspondente existe E está no branch master
@@ -53,7 +53,7 @@ Critério de "já implementado":
 Para cada issue identificada como já implementada:
 
 ```powershell
-gh issue close <numero> --repo carloscampos2014/LicenciamentoSoftware --comment "Implementado. Verificado no código atual do master."
+gh issue close <numero> --repo carloscampos2014/ProvaVida --comment "Implementado. Verificado no código atual do master."
 ```
 
 ---
@@ -78,7 +78,7 @@ Após o levantamento, apresentar ao usuário uma lista organizada com:
 ```
 
 **Critérios de ordenação:**
-1. Issues com número de fase no título (Fase 12, Fase 13...) — ordenar pela fase
+1. Issues com número de fase no título (Fase 2, Fase 3...) — ordenar pela fase
 2. Dentro da mesma fase — ordenar pelo número da issue (menor primeiro)
 3. Issues sem fase — ordenar por label (bug primeiro, enhancement depois)
 4. PRs abertos — listar separadamente
@@ -100,4 +100,3 @@ Só então seguir o workflow de desenvolvimento normal (criar branch, briefing, 
 - Nunca assumir que uma issue está implementada apenas pelo título — verificar o código
 - Se houver PRs abertos, mencionar que há trabalho em andamento antes de propor novo trabalho
 - Issues de bug têm prioridade sobre features da mesma fase
-- Issues do Dependabot (atualizações de dependências) não precisam de análise de código — apenas listar se houver muitas acumuladas

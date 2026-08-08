@@ -16,37 +16,36 @@ Todo código produzido deve seguir obrigatoriamente os princípios abaixo. Eles 
 
 ## Clean Code
 
-- Nomes revelam intenção: variáveis, métodos e classes têm nomes que dispensam comentário.
-- Métodos fazem uma coisa só e são curtos.
+- Nomes revelam intenção: variáveis, métodos, funções e classes têm nomes que dispensam comentário.
+- Métodos/funções fazem uma coisa só e são curtos.
 - Sem números mágicos — usar constantes nomeadas.
 - Sem comentários que explicam "o quê" — o código deve ser autoexplicativo. Comentários explicam "por quê".
 - Sem código morto, sem TODOs esquecidos, sem código comentado.
-- Tratamento de erros explícito — nunca engolir exceções silenciosamente.
+- Tratamento de erros explícito — nunca engolir exceções/erros silenciosamente.
 
-## Clean Architecture
+## Separação de responsabilidades
 
-- Regra de dependência: camadas internas nunca dependem de camadas externas.
-  - `Domain` → sem dependências externas
-  - `Application` → depende apenas de `Domain`
-  - `Infrastructure` → depende de `Application` e `Domain`
-  - `Api` → depende de `Application` e `Infrastructure`
-- `Domain` e `Application` não conhecem PostgreSQL, Dapper, controllers, HTTP ou qualquer detalhe de infraestrutura.
-- Controllers são finos: recebem request, delegam para caso de uso, retornam resposta.
-- Casos de uso retornam resultados explícitos (`Result`, `NotFound`, `Conflict`, `ValidationError`) — sem tipos HTTP na camada de aplicação.
-- Sem repositório genérico (`GenericRepository`), sem serviço de gestão genérico (`ManagementService`).
+- Backend (.NET): controllers finos — recebem request, delegam para serviços/casos de uso, retornam resposta. Lógica de negócio fica fora dos controllers.
+- App mobile: componentes de UI não contêm lógica de negócio nem chamadas diretas à API — delegar para hooks/serviços.
+- Serviços de infraestrutura (e-mail, WhatsApp, SQLite) acessados via interfaces/abstrações, nunca diretamente pelo domínio.
 
-## TDD — Test-Driven Development
+## Testes
 
-- O ciclo é sempre: **Red → Green → Refactor**.
-- Nenhuma regra de negócio nova é implementada sem teste automatizado correspondente escrito antes.
-- Testes unitários cobrem domínio e handlers de aplicação.
-- Testes de integração usam banco real via Testcontainers.
-- Testes de API usam `WebApplicationFactory`.
-- Testes têm nomes descritivos no formato: `Metodo_Cenario_ResultadoEsperado`.
+- Testes unitários cobrem lógica de negócio e serviços de aplicação.
+- Testes de integração usam banco real via Testcontainers (backend).
+- Nomes descritivos no formato: `Metodo_Cenario_ResultadoEsperado`.
 - Sem testes que apenas verificam que "não lança exceção" — testar comportamento real.
+
+## Segurança
+
+- Sem credenciais, segredos ou connection strings no código ou repositório.
+- Validação de entrada em toda operação de escrita (FluentValidation no backend; validação nos formulários do app).
+- Senhas sempre com hash (bcrypt/argon2) — nunca em texto plano.
+- Comunicação cliente-servidor exclusivamente via HTTPS.
+- Token JWT armazenado de forma segura no dispositivo (keychain/keystore).
 
 ## Regras gerais
 
-- Sem credenciais, segredos ou connection strings no código ou repositório.
-- Validação de entrada em toda operação de escrita.
-- Warnings tratados como erros — o build não aceita warnings.
+- Warnings tratados como erros no build do backend — o build não aceita warnings.
+- Sem estado global mutável compartilhado entre requisições na API.
+- Código estruturado para facilitar evolução futura (ex.: separar banco de dados da VM, escalar horizontalmente) sem redesenho completo.

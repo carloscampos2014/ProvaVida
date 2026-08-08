@@ -60,16 +60,23 @@ O agente DEVE pausar e aguardar o usuário dizer explicitamente: "aprovado", "po
 
 ### Etapa 5 — Mover issue(s) para "In Progress" no GitHub Project
 
-Antes de iniciar a implementação, mover as issues relacionadas à fase/feature para o status **In Progress** no GitHub Project `carloscampos2014/LicenciamentoSoftware` (Project #3):
+Antes de iniciar a implementação, mover as issues relacionadas à fase/feature para o status **In Progress** no GitHub Project `carloscampos2014/ProvaVida`.
+
+> **Nota:** Se o GitHub Project ainda não foi criado, criá-lo antes de continuar:
+> ```powershell
+> gh project create --owner carloscampos2014 --title "ProvaVida"
+> ```
+> Após criar, atualizar os IDs abaixo com os valores retornados pelo comando
+> `gh project list --owner carloscampos2014 --format json`.
 
 ```powershell
-# IDs do projeto
-$projectId = "PVT_kwHOAHxQCM4BeoqO"
-$fieldId   = "PVTSSF_lAHOAHxQCM4BeoqOzhZBYG4"
-$inProgressId = "47fc9ee4"
+# IDs do projeto — atualizar após criar o project
+$projectId    = "<PROJECT_ID>"
+$fieldId      = "<FIELD_ID_STATUS>"
+$inProgressId = "<OPTION_ID_IN_PROGRESS>"
 
 # Buscar o item da issue e mover
-$item = (gh project item-list 3 --owner carloscampos2014 --format json | ConvertFrom-Json).items |
+$item = (gh project item-list <PROJECT_NUMBER> --owner carloscampos2014 --format json | ConvertFrom-Json).items |
         Where-Object { $_.title -like "*<titulo-da-issue>*" }
 gh project item-edit --project-id $projectId --id $item.id --field-id $fieldId --single-select-option-id $inProgressId
 ```
@@ -109,17 +116,28 @@ Incluir `#N` com o número da issue quando o commit fecha ou avança uma issue e
 
 ### Etapa 8 — Verificar build e testes
 
-Após cada commit (ou grupo de commits relacionados), verificar:
+Após cada commit (ou grupo de commits relacionados), verificar os projetos afetados:
 
+**Backend (.NET):**
 ```powershell
-# Build dos projetos afetados
-dotnet build src/LicenciamentoSoftware.<Projeto>/<Projeto>.csproj -c Debug --no-restore
+# Build
+dotnet build src/ProvaVida.Api/ProvaVida.Api.csproj -c Debug --no-restore
 
 # Testes unitários
-dotnet test tests/LicenciamentoSoftware.Application.Tests/ --logger "console;verbosity=minimal"
+dotnet test tests/ProvaVida.Application.Tests/ --logger "console;verbosity=minimal"
 ```
 
-- Build deve passar sem erros (`TreatWarningsAsErrors=true`)
+**App mobile (React Native):**
+```powershell
+# Verificar tipos/lint
+npx tsc --noEmit
+npx eslint mobile/src --ext .ts,.tsx
+
+# Testes unitários
+npx jest --passWithNoTests
+```
+
+- Build deve passar sem erros (backend com `TreatWarningsAsErrors=true`)
 - Todos os testes existentes devem continuar aprovados
 - Novos testes devem ser escritos para nova lógica de negócio (exceto se o usuário explicitamente dispensar)
 
@@ -129,9 +147,10 @@ dotnet test tests/LicenciamentoSoftware.Application.Tests/ --logger "console;ver
 
 Após verificação automatizada, analisar se há cenários que precisam de validação manual:
 
-- Funcionalidades de UI (Blazor WASM) — verificar no browser
+- Funcionalidades de UI no app mobile — verificar no simulador/emulador ou dispositivo real
 - Integrações com banco de dados — confirmar com o usuário se o banco está disponível
-- Fluxos de autenticação (login, 2FA, tokens HMAC) — dependem de estado real
+- Fluxo de check-in offline + sincronização — depende de estado real de conectividade
+- Envio de e-mail e WhatsApp — dependem de credenciais e serviços externos configurados
 
 Se testes manuais forem necessários, **informar o usuário** e aguardar confirmação antes de prosseguir para o push.
 
@@ -143,13 +162,12 @@ Antes do push, atualizar toda a documentação afetada pelas mudanças da fase/f
 
 **Sempre verificar:**
 - `README.md` — atualizar status da fase na tabela, testes aprovados, instruções de uso se necessário
-- `docs/DEVELOPMENT_PLAN.md` — marcar itens concluídos com ✅, adicionar resultado e demo da fase
-- `docs/ARCHITECTURE.md` — documentar novos componentes, camadas, decisões de design adicionadas
-- `docs/WEB_SPECIFICATION.md` — se houve mudanças no frontend Web, atualizar seções afetadas
+- `docs/ProvaVida_Cronograma.md` — marcar itens concluídos, adicionar resultado da fase
+- `docs/ProvaVida_Arquitetura.md` — documentar novos componentes, decisões de design adicionadas
+- `docs/ProvaVida_Documentacao_Tecnica.md` — atualizar endpoints, fluxos ou comportamentos alterados
 
 **Critérios:**
 - O `README.md` SEMPRE deve ser atualizado com o status correto da fase (✅ Concluída / 🔜 Próxima)
-- O `DEVELOPMENT_PLAN.md` deve refletir o estado real — itens implementados marcados, resultado e demo preenchidos
 - Não criar documentação desnecessária — atualizar apenas o que foi impactado
 - Commitar a documentação junto ou logo após o último commit de código da fase
 
@@ -168,31 +186,30 @@ Somente após build, testes e documentação atualizados:
 git push origin feature/<nome> --no-verify
 ```
 
-O hook de pre-push roda build + testes completos. Se falhar, corrigir antes de prosseguir.
-
 ---
 
 ### Etapa 12 — Criar Pull Request
 
-```
-gh pr create \
-  --base master \
-  --head feature/<nome> \
-  --title "feat(fase-X): Descrição concisa (máx 70 chars)" \
+```powershell
+gh pr create `
+  --repo carloscampos2014/ProvaVida `
+  --base master `
+  --head feature/<nome> `
+  --title "feat(fase-X): Descrição concisa (máx 70 chars)" `
   --body "..."
 ```
 
 **Body do PR deve conter:**
 - Resumo do que foi implementado
-- Lista de mudanças por área (backend, frontend, infra)
+- Lista de mudanças por área (backend, mobile, infra)
 - Resultado dos testes
 - `Closes #N` para cada issue que o PR fecha (fecha automaticamente no merge)
 
 **Exemplo de `Closes`:**
 ```
-Closes #41
-Closes #42
-Closes #43
+Closes #1
+Closes #2
+Closes #3
 ```
 
 ---
@@ -234,7 +251,7 @@ master atualizado
       ↓
   testes manuais? (se necessário)
       ↓
-  atualizar documentação (README + DEVELOPMENT_PLAN + ARCHITECTURE)
+  atualizar documentação (README + Cronograma + Arquitetura)
       ↓
   push  →  criar PR (com Closes #N)
       ↓
@@ -249,7 +266,7 @@ master atualizado
 
 As etapas 3 e 4 (briefing + aprovação) **não se aplicam** a:
 - Correções de build ou testes já em andamento
-- Ajustes simples em arquivos de configuração (`.gitignore`, `appsettings`)
-- Respostas a erros identificados durante a execução (ex: erro de tipo no Dapper)
+- Ajustes simples em arquivos de configuração (`.gitignore`, `appsettings.json`)
+- Respostas a erros identificados durante a execução
 
 Todas as outras etapas são obrigatórias sem exceção.
