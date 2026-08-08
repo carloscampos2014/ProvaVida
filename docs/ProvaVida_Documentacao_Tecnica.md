@@ -41,8 +41,9 @@ Oferecer uma ferramenta simples e confiável de monitoramento de bem-estar, volt
 | RF04 | Login | O sistema deve autenticar o usuário por e-mail e senha, iniciando uma sessão. |
 | RF05 | Logoff | O sistema deve permitir encerrar a sessão ativa do usuário. |
 | RF06 | Check-in | O sistema deve registrar check-in diário contendo: ID do usuário, data/hora, localização (lat/long) e identificação do aparelho. |
-| RF07 | Notificação de emergência | O sistema deve verificar diariamente os usuários sem check-in há 2 dias consecutivos e, ao final do segundo dia, enviar mensagem ao contato de emergência via e-mail e WhatsApp. |
-| RF08 | Lembrete de check-in | O sistema deve notificar o usuário (push) caso ainda não tenha feito o check-in do dia (recomendado, não citado no doc. base). |
+| RF07 | Notificação de emergência | O sistema deve verificar diariamente os usuários sem check-in há 2 dias consecutivos e, ao final do segundo dia, executar o fluxo de três camadas: (1) verificar heartbeat recente — se houver, suspender alerta; (2) enviar push de aviso ao próprio usuário com janela de graça de 6h; (3) só após a janela sem resposta, enviar alerta ao contato de emergência via e-mail e WhatsApp. |
+| RF08 | Heartbeat de sessão | O app deve enviar um sinal de presença ao backend ao ser aberto e ao recuperar conectividade, permitindo que o backend distinga inatividade real de falha de sincronização por falta de internet. |
+| RF09 | Lembrete de check-in | O sistema deve notificar o usuário (push) caso ainda não tenha feito o check-in do dia. |
 
 ### 2.2 Requisitos Não Funcionais
 
@@ -79,8 +80,17 @@ Oferecer uma ferramenta simples e confiável de monitoramento de bem-estar, volt
 
 ### UC04 — Verificação de Inatividade e Disparo de Emergência
 
-**Ator:** Sistema (job automático)
-**Fluxo:** rotina diária identifica usuários sem check-in nas últimas 48h → ao completar o 2º dia sem check-in, sistema envia mensagem ao contato de emergência (e-mail + WhatsApp) → sistema registra o disparo para evitar reenvio duplicado no mesmo ciclo.
+**Ator:** Sistema (job automático — Hangfire)
+**Fluxo:**
+1. Rotina diária (23h50) identifica usuários sem check-in sincronizado nas últimas 48h
+2. Para cada usuário: verifica se houve heartbeat nas últimas 24h
+   - Com heartbeat: usuário está ativo com o app (provável falta de internet para sincronizar) — suspende alerta e registra ocorrência
+   - Sem heartbeat: avança para o passo 3
+3. Envia push notification ao próprio usuário ("Não detectamos seu check-in. Está tudo bem?") e registra com status `aguardando_resposta` e `janela_expira_em` = agora + 6h
+4. Aguarda a janela de graça:
+   - Usuário abre o app (heartbeat ou sync recebido): cancela alerta, atualiza status para `cancelado`
+   - Janela expira sem resposta: envia e-mail + WhatsApp ao contato de emergência, atualiza status para `disparado`
+5. Não reenvia alerta no mesmo ciclo (verifica registro existente antes de disparar)
 
 ### UC05 — Alterar / Remover Dados da Conta
 

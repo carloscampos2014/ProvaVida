@@ -75,8 +75,9 @@ Arquitetura baseada em aplicativo móvel .NET MAUI (Android) com banco de dados 
 | Entidade | Principais atributos |
 |---|---|
 | Usuario | id, nome, email, whatsapp, senha_hash, status, contato_emergencia_nome, contato_emergencia_email, contato_emergencia_whatsapp, criado_em, atualizado_em |
-| CheckIn | id, usuario_id (FK), data_hora, latitude, longitude, device_id |
-| NotificacaoEmergencia | id, usuario_id (FK), data_disparo, canal (email/whatsapp), status_envio |
+| CheckIn | id, usuario_id (FK), data_hora, latitude, longitude, device_id, id_local |
+| Heartbeat | id, usuario_id (FK), data_hora |
+| NotificacaoEmergencia | id, usuario_id (FK), data_disparo, canal (email/whatsapp/push), status (heartbeat_ativo/aguardando_resposta/cancelado/disparado), janela_expira_em |
 | SessaoLogin | id, usuario_id (FK), token, criado_em, expira_em, ativo |
 
 > Os dados do contato de emergência ficam desnormalizados na própria tabela `Usuario` (colunas prefixadas `contato_emergencia_*`), já que é sempre um único contato por usuário — evita join extra no fluxo mais crítico do sistema (leitura para disparo de notificação). Se no futuro for necessário suportar múltiplos contatos de emergência por usuário, essa decisão precisa ser revisitada e migrada para uma tabela relacionada.
@@ -89,18 +90,66 @@ O app mantém uma base local (SQLite) para funcionar de forma offline-first, pri
 |---|---|---|
 | UsuarioLocal | id, nome, email, whatsapp, contato_emergencia_nome, contato_emergencia_email, contato_emergencia_whatsapp, token_sessao | Cópia dos dados do usuário logado, para exibir perfil e permitir uso do app sem depender de chamada de rede a cada tela |
 | CheckInLocal | id_local, usuario_id, data_hora, latitude, longitude, device_id, sincronizado (bool), tentativas_sincronizacao | Registro do check-in feito no dispositivo; gravado localmente primeiro e depois enviado ao backend |
+| HeartbeatLocal | id_local, usuario_id, data_hora, sincronizado (bool) | Registro de abertura do app; enviado ao backend assim que houver conexão |
 
 ### Estratégia de sincronização
 
 1. **Check-in:** ao tocar em "Check-in", o app grava imediatamente em `CheckInLocal` com `sincronizado = false` e mostra confirmação ao usuário na hora — a experiência não depende da rede.
-2. **Envio ao backend:** em paralelo (ou assim que houver conectividade), o app tenta enviar o registro para a API `.NET`. Em caso de sucesso, marca `sincronizado = true`; em caso de falha, mantém `false` e tenta novamente (retry em background, ex.: ao abrir o app ou via job periódico local).
-3. **Fonte da verdade:** o backend (PostgreSQL) é sempre a fonte da verdade para a rotina de verificação de inatividade — o app local serve para UX responsiva e tolerância a falhas de rede, não substitui o registro no servidor.
-4. **Dados de conta:** nome, e-mail, WhatsApp e contato de emergência são cadastrados/editados via API (exigem conexão) e depois espelhados no `UsuarioLocal` para exibição rápida offline.
-5. **Conflitos:** como o check-in é um evento de "criação" (não edição), não há necessidade de resolução de conflitos complexa — apenas garantir que o mesmo check-in não seja duplicado no backend (idempotência via `id_local` enviado no payload).
+2. **Heartbeat:** ao abrir o app (e ao recuperar conexão via `Connectivity.ConnectivityChanged`), grava em `HeartbeatLocal` e tenta enviar ao backend imediatamente. Se falhar, mantém `sincronizado = false` e envia assim que houver conectividade.
+3. **Envio ao backend:** em paralelo (ou assim que houver conectividade), o app tenta enviar check-ins e heartbeats pendentes. Em caso de sucesso, marca `sincronizado = true`; em caso de falha, mantém `false` e tenta novamente (retry em background ao abrir o app ou via `Connectivity.ConnectivityChanged`).
+4. **Fonte da verdade:** o backend (PostgreSQL) é sempre a fonte da verdade para a rotina de verificação de inatividade — o app local serve para UX responsiva e tolerância a falhas de rede, não substitui o registro no servidor.
+5. **Dados de conta:** nome, e-mail, WhatsApp e contato de emergência são cadastrados/editados via API (exigem conexão) e depois espelhados no `UsuarioLocal` para exibição rápida offline.
+6. **Conflitos:** como check-in e heartbeat são eventos de "criação" (não edição), não há necessidade de resolução de conflitos complexa — apenas garantir que o mesmo registro não seja duplicado no backend (idempotência via `id_local` enviado no payload).
 
 ## 4. Rotina de Verificação de Inatividade
 
-Job agendado (Hangfire/Quartz.NET, in-process na API .NET) executa diariamente (ex.: 23h50) e consulta usuários cujo último check-in tenha ocorrido há 48h ou mais. Para cada usuário identificado, o sistema verifica se já existe notificação de emergência disparada no ciclo atual; caso não exista, envia mensagem por e-mail e WhatsApp ao contato de emergência e registra o disparo em `NotificacaoEmergencia`, evitando duplicidade em execuções subsequentes.
+Job agendado (Hangfire, in-process na API .NET) executa diariamente (ex.: 23h50) seguindo o fluxo de três camadas de proteção contra falsos positivos:
+
+### 4.1 Fluxo de decisão
+
+```
+Job diário (23h50) detecta usuário sem check-in sincronizado há 48h+
+        ↓
+Camada 1 — Heartbeat: houve heartbeat de sessão nas últimas 24h?
+  → SIM: usuário está ativo com o app aberto (provavelmente sem internet para sincronizar)
+         registrar situação e aguardar próxima execução do job (sem alerta)
+  → NÃO: continuar para camada 2
+        ↓
+Camada 2 — Push de aviso ao próprio usuário:
+  "Não detectamos seu check-in. Está tudo bem? Abra o app para confirmar."
+  Registrar disparo do push em NotificacaoEmergencia (status = "aguardando_resposta")
+        ↓
+Aguardar janela de graça (ex.: 6 horas)
+  → Usuário abriu o app (heartbeat ou sync recebido dentro da janela): cancelar alerta
+  → Sem resposta após a janela de graça: continuar para camada 3
+        ↓
+Camada 3 — Alerta ao contato de emergência:
+  Enviar e-mail + WhatsApp ao contato de emergência
+  Atualizar NotificacaoEmergencia (status = "disparado")
+  Não reenviar no mesmo ciclo (verificar registro existente antes de disparar)
+```
+
+### 4.2 Heartbeat de sessão
+
+- O app envia um heartbeat ao backend sempre que for aberto (foreground) e sempre que recuperar conectividade (`Connectivity.ConnectivityChanged` no MAUI)
+- O heartbeat é um endpoint leve (`POST /heartbeat`) que registra apenas `usuario_id` e `data_hora`
+- O backend usa o heartbeat como sinal de que o usuário está vivo e com o app funcionando, independente de check-in sincronizado
+
+### 4.3 Sincronização agressiva (Opção 4)
+
+- Ao abrir o app: tenta sincronizar todos os check-ins com `sincronizado = false`
+- Ao recuperar conexão: `Connectivity.ConnectivityChanged` dispara sincronização imediata
+- Periodicamente em background (se suportado pelo SO): retry dos check-ins pendentes
+- Payload de check-in inclui `id_local` para garantir idempotência — o mesmo check-in nunca é duplicado no backend
+
+### 4.4 Tabela de estados de NotificacaoEmergencia
+
+| Status | Descrição |
+|---|---|
+| `heartbeat_ativo` | Inatividade detectada, mas heartbeat recente encontrado — alerta suspenso |
+| `aguardando_resposta` | Push enviado ao usuário, dentro da janela de graça |
+| `cancelado` | Usuário respondeu (abriu app/sincronizou) dentro da janela de graça |
+| `disparado` | Alerta enviado ao contato de emergência |
 
 > Observação: por rodar in-process na própria API, é importante que o serviço `systemd` da aplicação tenha `Restart=always`, para que o job não deixe de disparar em caso de falha momentânea do processo.
 
