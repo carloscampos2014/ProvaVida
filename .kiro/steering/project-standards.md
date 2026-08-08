@@ -7,13 +7,13 @@ inclusion: auto
 ## Stack obrigatória
 
 - **Backend:** .NET (ASP.NET Core Web API), C#, PostgreSQL, Entity Framework Core, Hangfire (job agendado)
-- **App Mobile:** React Native (ou Flutter) com SQLite local (offline-first)
+- **App Mobile:** .NET MAUI (Android), C#, SQLite local (offline-first), distribuição via APK direto
 - **Autenticação:** JWT + BCrypt/Argon2
 - **E-mail:** SMTP (SendGrid, Amazon SES ou provedor compatível)
 - **WhatsApp:** WhatsApp Business API (Meta) ou Twilio
 - **Testes backend:** xUnit, FluentAssertions, Testcontainers
 - **Validação:** FluentValidation
-- **Infraestrutura:** VM Oracle Cloud (OCI) — Nginx + .NET (Kestrel) + PostgreSQL já provisionados
+- **Infraestrutura:** VM Oracle Cloud (OCI) — Nginx + .NET (Kestrel) + PostgreSQL já provisionados (compartilhada com outro projeto)
 
 ## Estrutura do backend (ASP.NET Core)
 
@@ -28,18 +28,16 @@ tests/
   ProvaVida.IntegrationTests/
 ```
 
-## Estrutura do app mobile
+## Estrutura do app mobile (.NET MAUI)
 
 ```
-mobile/
-  src/
-    screens/          ← Telas (Login, Cadastro, CheckIn, Perfil)
-    components/       ← Componentes reutilizáveis
-    services/         ← Chamadas à API REST
-    storage/          ← SQLite local (check-ins offline, dados do usuário)
-    navigation/       ← Navegação (React Navigation ou equivalente)
-    hooks/            ← Custom hooks
-    utils/
+mobile/ProvaVida.Maui/
+  Pages/              ← Telas (LoginPage, CadastroPage, CheckInPage, PerfilPage)
+  ViewModels/         ← ViewModels (MVVM)
+  Models/             ← Modelos locais e DTOs
+  Services/           ← Chamadas à API REST (HttpClient)
+  Storage/            ← SQLite local (check-ins offline, dados do usuário)
+  Resources/          ← Imagens, fontes, estilos
 ```
 
 ## Modelo de dados principal

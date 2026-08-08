@@ -5,10 +5,10 @@
       "name": "Alerta de teste ausente",
       "trigger": "PostFileCreate",
       "description": "Alerta quando um arquivo de implementação é criado sem um arquivo de teste correspondente",
-      "matcher": "src\\\\.*\\.(cs|ts|tsx)$",
+      "matcher": "src\\\\.*\\.cs$",
       "action": {
         "type": "agent",
-        "prompt": "Um novo arquivo de implementação foi criado em src/. Verifique se existe um arquivo de teste correspondente em tests/ (para arquivos .cs do backend) ou em mobile/__tests__/ ou próximo ao arquivo com sufixo .test.ts/.spec.ts (para arquivos .ts/.tsx do app mobile).\n\nSe não existir, avise o usuário de forma objetiva: informe o nome do arquivo criado e sugira o caminho esperado do teste. Não crie o arquivo de teste automaticamente — apenas alerte.\n\nNão alertar para: interfaces, DTOs, enums, arquivos de configuração, arquivos de navegação (Navigator, Routes), arquivos de constantes, arquivos de tipos (types.ts, interfaces.ts)."
+        "prompt": "Um novo arquivo de implementação C# foi criado em src/. Verifique se existe um arquivo de teste correspondente em tests/ (para arquivos do backend) ou em mobile/ProvaVida.Maui.Tests/ (para arquivos do app MAUI).\n\nSe não existir, avise o usuário de forma objetiva: informe o nome do arquivo criado e sugira o caminho esperado do teste. Não crie o arquivo de teste automaticamente — apenas alerte.\n\nNão alertar para: interfaces, DTOs, enums, arquivos de configuração, arquivos de recursos (Resources/), arquivos de estilos, AppShell.xaml.cs, MauiProgram.cs."
       }
     }
   ]

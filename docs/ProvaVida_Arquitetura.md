@@ -4,7 +4,9 @@ Versão 1.0 — Agosto de 2026
 
 ## 1. Visão Geral da Arquitetura
 
-Arquitetura baseada em aplicativo móvel (cliente) com banco de dados local próprio + backend hospedado em VM própria na Oracle Cloud Infrastructure (OCI), com Cloudflare como CDN/proxy DNS e terminação TLS externa, Nginx como reverse proxy interno, API REST em .NET e banco de dados PostgreSQL (ambiente já provisionado). O app mobile mantém uma base local (offline-first) que sincroniza com o backend; o agendamento da verificação diária roda dentro do próprio processo .NET, e as notificações são integradas via serviços externos de e-mail e WhatsApp.
+Arquitetura baseada em aplicativo móvel .NET MAUI (Android) com banco de dados local próprio + backend hospedado em VM própria na Oracle Cloud Infrastructure (OCI), com Cloudflare como CDN/proxy DNS e terminação TLS externa, Nginx como reverse proxy interno, API REST em .NET e banco de dados PostgreSQL (ambiente já provisionado). O app mobile mantém uma base local (offline-first) que sincroniza com o backend; o agendamento da verificação diária roda dentro do próprio processo .NET, e as notificações são integradas via serviços externos de e-mail e WhatsApp.
+
+**Decisão de plataforma mobile:** .NET MAUI (Android), distribuição via APK direto (sem publicação em loja por ora). Stack unificada em C# com o backend.
 
 **Domínio da API:** `provida-api.enzojb.com.br` (subdomínio gerenciado no Cloudflare)
 
@@ -19,40 +21,41 @@ Arquitetura baseada em aplicativo móvel (cliente) com banco de dados local pró
 ### 1.2 Diagrama de Componentes (representação textual)
 
 ```
-[App Mobile (Android/iOS)]
-   ├─ [Banco de dados local (SQLite)]  ← check-ins e dados de sessão gravados primeiro localmente
-   └─ [Camada de sincronização]
+[App Mobile (.NET MAUI — Android)]
+   ├─ [Banco de dados local (SQLite — Microsoft.Data.Sqlite)]  ← check-ins e dados de sessão gravados primeiro localmente
+   └─ [Camada de sincronização (HttpClient)]
          ↓ HTTPS
    [Cloudflare — provida-api.enzojb.com.br]  ← terminação TLS, WAF, DDoS protection
          ↓ HTTPS (Cloudflare Origin Certificate)
    [Nginx (reverse proxy interno — VM OCI)]
-         ↓ HTTP (127.0.0.1:5000)
+         ↓ HTTP (127.0.0.1:5001)
    [API REST .NET (Kestrel)]  →  [PostgreSQL]
 
 [API .NET]  →  [Job Agendado in-process (Hangfire)]  →  [Serviço de Notificação]  →  [E-mail (SMTP)] e [WhatsApp Business API]
 
 [API .NET]  →  [Serviço de Autenticação (JWT)]
 
-[App Mobile]  →  [Serviço de Geolocalização nativo do dispositivo]
+[App MAUI]  →  [Geolocalização (Microsoft.Maui.Devices.Sensors)]
 ```
 
 ## 2. Stack Tecnológica
 
 | Camada | Tecnologia | Observação |
 |---|---|---|
-| App Mobile | React Native (ou Flutter) | Um único código-base para Android e iOS, acesso nativo a GPS e push notifications |
-| Banco Local (Mobile) | SQLite (via `expo-sqlite`/`react-native-sqlite-storage` ou `sqflite` no Flutter) | Armazena check-ins e dados de sessão localmente, permitindo uso offline-first |
+| App Mobile | .NET MAUI (Android) | Stack unificada em C# com o backend; distribuição via APK direto (sem conta de desenvolvedor Google por ora) |
+| Banco Local (Mobile) | SQLite via `sqlite-net-pcl` ou `Microsoft.Data.Sqlite` | Armazena check-ins e dados de sessão localmente, permitindo uso offline-first |
+| Geolocalização | `Microsoft.Maui.Devices.Sensors` (API nativa MAUI) | Captura latitude/longitude no momento do check-in |
 | Backend / API | .NET (ASP.NET Core Web API) | Já instalado na VM Oracle Cloud |
 | DNS / CDN / Proxy | Cloudflare | Gerencia o domínio `enzojb.com.br`; subdomínio `provida-api.enzojb.com.br` com proxy ativo (modo Full Strict); WAF, DDoS protection e rate limiting incluídos |
 | TLS (externo) | Cloudflare — certificado automático | TLS terminado no Cloudflare; certificado gerenciado pelo próprio Cloudflare |
 | TLS (Cloudflare → VM) | Cloudflare Origin Certificate | Certificado gratuito emitido no painel Cloudflare, válido 15 anos, instalado no Nginx da VM; garante criptografia ponta a ponta mesmo entre Cloudflare e a VM |
-| Servidor Web / Proxy | Nginx | Já instalado na VM; reverse proxy para a API .NET (Kestrel `127.0.0.1:5000`) + terminação TLS com Cloudflare Origin Certificate |
+| Servidor Web / Proxy | Nginx | Já instalado na VM; reverse proxy para a API .NET (Kestrel `127.0.0.1:5001`) + terminação TLS com Cloudflare Origin Certificate |
 | Banco de Dados | PostgreSQL | Já instalado na VM |
 | Agendador | Hangfire (in-process, dentro da própria API .NET) | Evita depender de serviço de nuvem externo; roda a rotina diária de verificação de inatividade; painel web embutido para monitoramento dos jobs |
 | E-mail | SMTP (ex.: SendGrid, Amazon SES ou outro provedor SMTP) | Envio de e-mails transacionais e de alerta |
 | WhatsApp | WhatsApp Business API (Meta) / Twilio | Envio de mensagens ao contato de emergência |
-| Autenticação | JWT + BCrypt/Argon2 (via ASP.NET Identity ou implementação própria) | Sessões stateless e senhas protegidas |
-| Infraestrutura | VM única na Oracle Cloud (OCI) | Hospedagem atual; ver considerações de escalabilidade abaixo |
+| Autenticação | JWT + BCrypt/Argon2 | Sessões stateless e senhas protegidas |
+| Infraestrutura | VM única na Oracle Cloud (OCI) | Hospedagem compartilhada com outro projeto; ver considerações de escalabilidade abaixo |
 | Observabilidade | Serilog + arquivo/console, com opção futura de integração a Grafana/Loki ou OCI Logging | Monitoramento de falhas em envios e disponibilidade |
 
 ### 2.1 Considerações específicas do ambiente Cloudflare + Nginx + .NET + PostgreSQL

@@ -26,7 +26,7 @@ Todo código produzido deve seguir obrigatoriamente os princípios abaixo. Eles 
 ## Separação de responsabilidades
 
 - Backend (.NET): controllers finos — recebem request, delegam para serviços/casos de uso, retornam resposta. Lógica de negócio fica fora dos controllers.
-- App mobile: componentes de UI não contêm lógica de negócio nem chamadas diretas à API — delegar para hooks/serviços.
+- App mobile (MAUI): Pages/Views não contêm lógica de negócio — delegar para ViewModels (padrão MVVM). ViewModels não chamam SQLite ou HTTP diretamente — delegar para Services.
 - Serviços de infraestrutura (e-mail, WhatsApp, SQLite) acessados via interfaces/abstrações, nunca diretamente pelo domínio.
 
 ## Testes
