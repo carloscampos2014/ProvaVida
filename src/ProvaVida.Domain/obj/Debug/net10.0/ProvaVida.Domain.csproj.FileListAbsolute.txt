@@ -1,0 +1,12 @@
+C:\Dev\ProvaVida\src\ProvaVida.Domain\bin\Debug\net10.0\ProvaVida.Domain.deps.json
+C:\Dev\ProvaVida\src\ProvaVida.Domain\bin\Debug\net10.0\ProvaVida.Domain.dll
+C:\Dev\ProvaVida\src\ProvaVida.Domain\bin\Debug\net10.0\ProvaVida.Domain.pdb
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ProvaVida.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ProvaVida.Domain.AssemblyInfoInputs.cache
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ProvaVida.Domain.AssemblyInfo.cs
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ProvaVida.Domain.csproj.CoreCompileInputs.cache
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ProvaVida.Domain.sourcelink.json
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ProvaVida.Domain.dll
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\refint\ProvaVida.Domain.dll
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ProvaVida.Domain.pdb
+C:\Dev\ProvaVida\src\ProvaVida.Domain\obj\Debug\net10.0\ref\ProvaVida.Domain.dll
