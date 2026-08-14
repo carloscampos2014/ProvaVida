@@ -18,6 +18,9 @@ concurrency:
   group: build-apk
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build APK Release (Android)
