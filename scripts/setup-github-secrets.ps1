@@ -97,19 +97,13 @@ if (-not $ApenasAndroid) {
     Write-Host "     Consulte o valor em: https://github.com/$repo/settings/secrets/actions" -ForegroundColor Gray
 
     Write-Host "[7/11] Email SMTP..." -ForegroundColor Yellow
-    $emailHost = Read-Host "SMTP Host (ex: smtp.sendgrid.net)"
-    gh secret set EMAIL_HOST --body $emailHost --repo $repo
-    $emailPort = Read-Host "SMTP Port (padrao 587)"
-    if ([string]::IsNullOrWhiteSpace($emailPort)) { $emailPort = "587" }
-    gh secret set EMAIL_PORT --body $emailPort --repo $repo
+    Write-Host "     (Host, porta e remetente ficam no appsettings.json do repositorio)" -ForegroundColor Gray
     $emailUser = Read-Host "SMTP Usuario (ex: apikey para SendGrid)"
     gh secret set EMAIL_USUARIO --body $emailUser --repo $repo
     $emailPass = Read-Host "SMTP Senha/API Key" -AsSecureString
     $emailPassPl = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
         [Runtime.InteropServices.Marshal]::SecureStringToBSTR($emailPass))
     gh secret set EMAIL_SENHA --body $emailPassPl --repo $repo
-    $emailFrom = Read-Host "E-mail remetente (ex: noreply@enzojb.com.br)"
-    gh secret set EMAIL_REMETENTE --body $emailFrom --repo $repo
 
     Write-Host "[8/11] WhatsApp Business API..." -ForegroundColor Yellow
     $waToken = Read-Host "WhatsApp Token (Bearer)"
