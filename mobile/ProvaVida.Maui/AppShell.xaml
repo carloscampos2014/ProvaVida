@@ -11,6 +11,9 @@
     <ShellContent Route="cadastro"
                   ContentTemplate="{DataTemplate pages:CadastroPage}"/>
 
+    <ShellContent Route="checkin"
+                  ContentTemplate="{DataTemplate pages:CheckInPage}"/>
+
     <ShellContent Route="perfil"
                   ContentTemplate="{DataTemplate pages:PerfilPage}"/>
 

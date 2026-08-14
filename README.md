@@ -10,7 +10,7 @@ App mobile de check-in diário de bem-estar. O usuário registra sua presença u
 | 2. Backend – Autenticação e Conta | ✅ Concluída | API REST com cadastro, login, logoff, alteração e exclusão de conta; Dapper + DbUp + PostgreSQL; 25 testes unitários aprovados |
 | 3. App Mobile – Autenticação e Conta | ✅ Concluída | App .NET MAUI Android com Login, Cadastro e Perfil integrados à API; paleta roxa; MVVM; SecureStorage para JWT |
 | 4. Backend – Check-in | ✅ Concluída | Entidades CheckIn e Heartbeat; migration V002; endpoints POST /checkin (idempotência via id_local), POST /heartbeat, GET /checkin/historico; 37 testes aprovados |
-| 5. App Mobile – Check-in | 🔜 Próxima | — |
+| 5. App Mobile – Check-in | ✅ Concluída | Check-in offline-first (SQLite), sync agressivo, heartbeat automático, captura de localização, push de lembrete diário (20h) |
 | 6. Backend – Job e Notificações | ⏳ Pendente | — |
 | 7. Testes End-to-End | ⏳ Pendente | — |
 | 8. Homologação (QA) | ⏳ Pendente | — |

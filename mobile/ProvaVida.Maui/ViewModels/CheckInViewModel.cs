@@ -1,0 +1,164 @@
+using System.Windows.Input;
+using ProvaVida.Maui.Models;
+using ProvaVida.Maui.Services;
+using ProvaVida.Maui.Storage;
+
+namespace ProvaVida.Maui.ViewModels;
+
+public class CheckInViewModel : BaseViewModel
+{
+    private readonly LocalDatabase _db;
+    private readonly ICheckInService _checkInService;
+    private readonly LocationService _locationService;
+    private readonly SyncService _syncService;
+    private readonly IUsuarioStorage _usuarioStorage;
+
+    private bool _fezCheckInHoje;
+    private int _sequenciaDias;
+    private List<bool> _semana = new(7);
+    private string _nomeUsuario = string.Empty;
+
+    public bool FezCheckInHoje { get => _fezCheckInHoje; set => SetProperty(ref _fezCheckInHoje, value); }
+    public int SequenciaDias { get => _sequenciaDias; set => SetProperty(ref _sequenciaDias, value); }
+    public List<bool> Semana { get => _semana; set => SetProperty(ref _semana, value); }
+    public string NomeUsuario { get => _nomeUsuario; set => SetProperty(ref _nomeUsuario, value); }
+
+    public ICommand CheckInCommand { get; }
+
+    public CheckInViewModel(
+        LocalDatabase db,
+        ICheckInService checkInService,
+        LocationService locationService,
+        SyncService syncService,
+        IUsuarioStorage usuarioStorage)
+    {
+        _db = db;
+        _checkInService = checkInService;
+        _locationService = locationService;
+        _syncService = syncService;
+        _usuarioStorage = usuarioStorage;
+
+        CheckInCommand = new Command(async () => await FazerCheckInAsync(), () => !IsLoading && !FezCheckInHoje);
+    }
+
+    public async Task InicializarAsync()
+    {
+        var usuario = _usuarioStorage.Obter();
+        if (usuario is not null)
+            NomeUsuario = usuario.Nome.Split(' ')[0]; // primeiro nome
+
+        await CarregarEstadoAsync();
+
+        // Sync em background — não bloqueia a UI
+        _ = Task.Run(() => _syncService.SincronizarAsync());
+    }
+
+    private async Task CarregarEstadoAsync()
+    {
+        var usuario = _usuarioStorage.Obter();
+        if (usuario is null) return;
+
+        FezCheckInHoje = await _db.FezCheckInHojeAsync(usuario.Email);
+
+        var checkInsSemana = await _db.ObterCheckInsDaSemanaAsync(usuario.Email);
+
+        // Monta array de 7 dias (Dom..Sab ou Seg..Dom dependendo da semana)
+        var hoje = DateTime.UtcNow.Date;
+        var semana = new List<bool>();
+        for (int i = 6; i >= 0; i--)
+        {
+            var dia = hoje.AddDays(-i);
+            semana.Add(checkInsSemana.Any(c => c.DataHora.Date == dia));
+        }
+        Semana = semana;
+
+        // Sequência de dias consecutivos
+        int seq = 0;
+        for (int i = 0; i < semana.Count; i++)
+        {
+            if (semana[semana.Count - 1 - i]) seq++;
+            else break;
+        }
+        SequenciaDias = seq;
+
+        ((Command)CheckInCommand).ChangeCanExecute();
+    }
+
+    private async Task FazerCheckInAsync()
+    {
+        LimparErro();
+        IsLoading = true;
+
+        try
+        {
+            var usuario = _usuarioStorage.Obter();
+            if (usuario is null) return;
+
+            // 1. Captura localização (melhor esforço)
+            var loc = await _locationService.ObterLocalizacaoAsync();
+
+            // 2. Device ID
+            var deviceId = DeviceInfo.Current.Name ?? "unknown";
+
+            // 3. Grava localmente PRIMEIRO — offline-first
+            var idLocal = Guid.NewGuid().ToString();
+            var checkIn = new CheckInLocal
+            {
+                IdLocal = idLocal,
+                UsuarioId = usuario.Email,
+                DataHora = DateTime.UtcNow,
+                Latitude = loc.Latitude,
+                Longitude = loc.Longitude,
+                DeviceId = deviceId,
+                Sincronizado = false
+            };
+
+            await _db.SalvarCheckInAsync(checkIn);
+
+            // Atualiza UI imediatamente — não espera sync
+            FezCheckInHoje = true;
+            await CarregarEstadoAsync();
+
+            // 4. Tenta sincronizar com a API em background
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var request = new RegistrarCheckInRequest(
+                        Guid.Parse(idLocal),
+                        checkIn.DataHora,
+                        checkIn.Latitude,
+                        checkIn.Longitude,
+                        checkIn.DeviceId);
+
+                    await _checkInService.RegistrarAsync(request);
+                    await _db.MarcarCheckInSincronizadoAsync(idLocal);
+                }
+                catch
+                {
+                    await _db.IncrementarTentativaCheckInAsync(idLocal);
+                }
+            });
+
+            // 5. Cancela o lembrete push do dia
+            CancelarLembrete();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Erro ao registrar check-in: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private static void CancelarLembrete()
+    {
+        try
+        {
+            LocalNotificationService.CancelarLembrete();
+        }
+        catch { /* ignora se notificações não estiverem disponíveis */ }
+    }
+}

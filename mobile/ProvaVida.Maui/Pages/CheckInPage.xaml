@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProvaVida.Maui.Pages.CheckInPage"
+             Title="ProvaVida"
+             BackgroundColor="{StaticResource Surface}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Top bar -->
+            <Border BackgroundColor="White" StrokeThickness="0" Padding="20,16,20,16">
+                <Label Text="{Binding NomeUsuario, StringFormat='Olá, {0} 👋'}"
+                       FontSize="16" TextColor="{StaticResource TextSecondary}"/>
+            </Border>
+
+            <VerticalStackLayout Padding="20,12,20,24" Spacing="20">
+
+                <!-- Card sequência -->
+                <Border BackgroundColor="White" StrokeShape="RoundRectangle 20"
+                        StrokeThickness="0" Padding="20">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="16" Opacity="0.06"/>
+                    </Border.Shadow>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Sequência" FontSize="12"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                            <Label Text="{Binding SequenciaDias, StringFormat='{0} dias consecutivos'}"
+                                   FontSize="22" FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"/>
+                            <Label Text="com check-in ✓" FontSize="13"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1"
+                                BackgroundColor="{StaticResource PrimaryLight}"
+                                StrokeShape="RoundRectangle 28"
+                                StrokeThickness="0"
+                                WidthRequest="56" HeightRequest="56">
+                            <Label Text="🔥" FontSize="22"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Botão principal Check-in -->
+                <VerticalStackLayout HorizontalOptions="Center" Spacing="16">
+                    <Border BackgroundColor="{StaticResource PrimaryLight}"
+                            StrokeShape="RoundRectangle 126"
+                            StrokeThickness="0"
+                            WidthRequest="252" HeightRequest="252"
+                            HorizontalOptions="Center">
+                        <Border BackgroundColor="{StaticResource Primary}"
+                                StrokeShape="RoundRectangle 110"
+                                StrokeThickness="0"
+                                WidthRequest="220" HeightRequest="220"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center">
+                            <Border.Shadow>
+                                <Shadow Brush="{StaticResource Primary}"
+                                        Offset="0,16" Radius="40" Opacity="0.40"/>
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CheckInCommand}"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="4">
+                                <Label Text="✓" FontSize="52" FontAttributes="Bold"
+                                       TextColor="White" HorizontalOptions="Center"/>
+                                <Label Text="Check-in" FontSize="18" FontAttributes="Bold"
+                                       TextColor="White" HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Border>
+                    <Label x:Name="HintLabel" FontSize="13"
+                           TextColor="{StaticResource TextSecondary}"
+                           HorizontalOptions="Center"
+                           Text="Toque para registrar sua presença hoje"/>
+                </VerticalStackLayout>
+
+                <!-- Erro -->
+                <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="13"
+                       IsVisible="{Binding HasError}" HorizontalOptions="Center"/>
+
+                <!-- Loading -->
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                   Color="{StaticResource Primary}" HorizontalOptions="Center"/>
+
+                <!-- Card histórico da semana -->
+                <Border BackgroundColor="White" StrokeShape="RoundRectangle 20"
+                        StrokeThickness="0" Padding="20">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="16" Opacity="0.06"/>
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Esta semana" FontSize="14" FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"/>
+                        <HorizontalStackLayout x:Name="SemanaLayout" Spacing="8"
+                                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
