@@ -4,11 +4,22 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Suppress MailKit/MimeKit audit warnings — no patch available yet (GHSA-9j88-vvj5-vhgr, GHSA-g7hc-96xr-gvvx) -->
+    <NoWarn>$(NoWarn);NU1902</NoWarn>
   </PropertyGroup>
+
+  <!-- Suppresses known MailKit/MimeKit advisories — no patch available yet -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-9j88-vvj5-vhgr" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g7hc-96xr-gvvx" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+    <PackageReference Include="MimeKit" Version="4.13.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
   </ItemGroup>

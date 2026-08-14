@@ -11,14 +11,14 @@ App mobile de check-in diário de bem-estar. O usuário registra sua presença u
 | 3. App Mobile – Autenticação e Conta | ✅ Concluída | App .NET MAUI Android com Login, Cadastro e Perfil integrados à API; paleta roxa; MVVM; SecureStorage para JWT |
 | 4. Backend – Check-in | ✅ Concluída | Entidades CheckIn e Heartbeat; migration V002; endpoints POST /checkin (idempotência via id_local), POST /heartbeat, GET /checkin/historico; 37 testes aprovados |
 | 5. App Mobile – Check-in | ✅ Concluída | Check-in offline-first (SQLite), sync agressivo, heartbeat automático, captura de localização, push de lembrete diário (20h) |
-| 6. Backend – Job e Notificações | ⏳ Pendente | — |
-| 7. Testes End-to-End | ⏳ Pendente | — |
+| 6. Backend – Job e Notificações | ✅ Concluída | Job Hangfire (23h50 + horário); fluxo 3 camadas anti-falso-positivo; e-mail SMTP via MailKit; WhatsApp Business API (Meta); 48 testes aprovados |
+| 7. Testes End-to-End | 🔜 Próxima | — |
 | 8. Homologação (QA) | ⏳ Pendente | — |
 | 9. Publicação e Lançamento | ⏳ Pendente | — |
 
 ## Stack
 
-- **Backend:** .NET 9 (ASP.NET Core Web API), Dapper, DbUp, PostgreSQL, BCrypt, JWT
+- **Backend:** .NET 10 (ASP.NET Core Web API), Dapper, DbUp, Hangfire, MailKit, PostgreSQL, BCrypt, JWT
 - **App Mobile:** .NET MAUI Android (a implementar)
 - **Infraestrutura:** VM Oracle Cloud (OCI) — Nginx + Cloudflare (`provida-api.enzojb.com.br`)
 

@@ -17,7 +17,6 @@ public sealed class CheckInRepository : ICheckInRepository
 
     public async Task<bool> AdicionarSeNaoExistirAsync(CheckIn checkIn, CancellationToken ct = default)
     {
-        // ON CONFLICT DO NOTHING garante idempotência — mesmo check-in enviado duas vezes é ignorado
         const string sql = """
             INSERT INTO checkins (id, usuario_id, id_local, data_hora, latitude, longitude, device_id)
             VALUES (@Id, @UsuarioId, @IdLocal, @DataHora, @Latitude, @Longitude, @DeviceId)
@@ -65,6 +64,29 @@ public sealed class CheckInRepository : ICheckInRepository
         return rows.Select(Mapear).ToList();
     }
 
+    public async Task<IEnumerable<Guid>> ListarUsuariosInativosDesdeAsync(
+        DateTime dataCorte, CancellationToken ct = default)
+    {
+        // Retorna usuario_id de todos usuários ativos cujo ÚLTIMO check-in foi antes de dataCorte
+        // ou que nunca fizeram check-in
+        const string sql = """
+            SELECT u.id
+            FROM usuarios u
+            WHERE u.ativo = TRUE
+              AND (
+                    -- Nunca fez check-in
+                    NOT EXISTS (SELECT 1 FROM checkins c WHERE c.usuario_id = u.id)
+                    OR
+                    -- Último check-in antes da data de corte
+                    (SELECT MAX(c.data_hora) FROM checkins c WHERE c.usuario_id = u.id) < @DataCorte
+              )
+            """;
+
+        using var conn = _factory.CreateConnection();
+        return await conn.QueryAsync<Guid>(
+            new CommandDefinition(sql, new { DataCorte = dataCorte }, cancellationToken: ct));
+    }
+
 #pragma warning disable CA1812
     private sealed class CheckInRow
     {
@@ -82,7 +104,6 @@ public sealed class CheckInRepository : ICheckInRepository
     {
         var c = (CheckIn)System.Runtime.CompilerServices
             .RuntimeHelpers.GetUninitializedObject(typeof(CheckIn));
-
         Set(c, nameof(CheckIn.Id), row.Id);
         Set(c, nameof(CheckIn.UsuarioId), row.UsuarioId);
         Set(c, nameof(CheckIn.IdLocal), row.IdLocal);
@@ -90,16 +111,13 @@ public sealed class CheckInRepository : ICheckInRepository
         Set(c, nameof(CheckIn.Latitude), row.Latitude);
         Set(c, nameof(CheckIn.Longitude), row.Longitude);
         Set(c, nameof(CheckIn.DeviceId), row.DeviceId);
-
         return c;
     }
 
-    private static void Set(object obj, string prop, object? valor)
-    {
+    private static void Set(object obj, string prop, object? valor) =>
         typeof(CheckIn)
             .GetProperty(prop,
                 System.Reflection.BindingFlags.Public |
                 System.Reflection.BindingFlags.Instance)
             ?.SetValue(obj, valor);
-    }
 }

@@ -1,5 +1,7 @@
 using System.Text;
 using FluentValidation;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ProvaVida.Application.Interfaces;
@@ -11,6 +13,9 @@ using ProvaVida.Application.UseCases.Logoff;
 using ProvaVida.Application.UseCases.ObterHistoricoCheckIn;
 using ProvaVida.Application.UseCases.RegistrarCheckIn;
 using ProvaVida.Application.UseCases.RegistrarHeartbeat;
+using ProvaVida.Application.UseCases.VerificarInatividade;
+using ProvaVida.Infrastructure.Jobs;
+using ProvaVida.Infrastructure.Notifications;
 using ProvaVida.Infrastructure.Persistence;
 using ProvaVida.Infrastructure.Persistence.Repositories;
 using ProvaVida.Infrastructure.Security;
@@ -22,20 +27,31 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDatabase(
         this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<DbConnectionFactory>(sp =>
-        {
-            var cs = sp.GetRequiredService<IConfiguration>()
-                .GetConnectionString("Default")
-                ?? throw new InvalidOperationException("ConnectionStrings:Default não configurada.");
-            return new DbConnectionFactory(cs);
-        });
+        var cs = configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("ConnectionStrings:Default não configurada.");
 
-        services.AddSingleton<DatabaseMigrator>(sp =>
+        services.AddSingleton(_ => new DbConnectionFactory(cs));
+        services.AddSingleton(_ => new DatabaseMigrator(cs));
+
+        return services;
+    }
+
+    public static IServiceCollection AddHangfireServices(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var cs = configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("ConnectionStrings:Default não configurada.");
+
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UsePostgreSqlStorage(opts => opts.UseNpgsqlConnection(cs)));
+
+        services.AddHangfireServer(opts =>
         {
-            var cs = sp.GetRequiredService<IConfiguration>()
-                .GetConnectionString("Default")
-                ?? throw new InvalidOperationException("ConnectionStrings:Default não configurada.");
-            return new DatabaseMigrator(cs);
+            opts.WorkerCount = 2;
+            opts.Queues = ["default"];
         });
 
         return services;
@@ -46,7 +62,7 @@ public static class ServiceCollectionExtensions
     {
         var secretKey = configuration["Jwt:SecretKey"]
             ?? throw new InvalidOperationException("Jwt:SecretKey não configurada.");
-        var issuer = configuration["Jwt:Issuer"] ?? "ProvaVida";
+        var issuer   = configuration["Jwt:Issuer"]   ?? "ProvaVida";
         var audience = configuration["Jwt:Audience"] ?? "ProvaVida";
 
         services
@@ -55,15 +71,14 @@ public static class ServiceCollectionExtensions
             {
                 opts.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
+                    ValidateIssuer           = true,
+                    ValidateAudience         = true,
+                    ValidateLifetime         = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(secretKey)),
-                    ClockSkew = TimeSpan.Zero
+                    ValidIssuer              = issuer,
+                    ValidAudience            = audience,
+                    IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    ClockSkew                = TimeSpan.Zero
                 };
             });
 
@@ -73,24 +88,29 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services)
     {
-        // UnitOfWork — Scoped
+        // UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Repositórios — Scoped
+        // Repositórios
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<ISessaoLoginRepository, SessaoLoginRepository>();
         services.AddScoped<ICheckInRepository, CheckInRepository>();
         services.AddScoped<IHeartbeatRepository, HeartbeatRepository>();
+        services.AddScoped<INotificacaoEmergenciaRepository, NotificacaoEmergenciaRepository>();
 
         // Segurança
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddSingleton<IJwtService, JwtService>();
 
+        // Notificações
+        services.AddHttpClient<IWhatsAppService, WhatsAppService>();
+        services.AddScoped<IEmailService, EmailService>();
+
         // Validadores
         services.AddScoped<IValidator<CadastrarUsuarioInput>, CadastrarUsuarioValidator>();
         services.AddScoped<IValidator<AlterarContaInput>, AlterarContaValidator>();
 
-        // Casos de uso — Scoped
+        // Casos de uso
         services.AddScoped<CadastrarUsuarioUseCase>();
         services.AddScoped<LoginUseCase>();
         services.AddScoped<LogoffUseCase>();
@@ -99,6 +119,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<RegistrarCheckInUseCase>();
         services.AddScoped<RegistrarHeartbeatUseCase>();
         services.AddScoped<ObterHistoricoCheckInUseCase>();
+        services.AddScoped<VerificarInatividadeUseCase>();
+
+        // Jobs
+        services.AddScoped<VerificacaoInatividadeJob>();
+        services.AddScoped<DispararAlertaJob>();
 
         return services;
     }
