@@ -32,7 +32,7 @@
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
-		<ApplicationTitle>ProvaVida</ApplicationTitle>
+		<ApplicationTitle>Enzojb Prova de Vida</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.enzojb.provavida</ApplicationId>
