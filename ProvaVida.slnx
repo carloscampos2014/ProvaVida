@@ -10,5 +10,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ProvaVida.Application.Tests/ProvaVida.Application.Tests.csproj" />
+    <Project Path="tests/ProvaVida.IntegrationTests/ProvaVida.IntegrationTests.csproj" />
   </Folder>
 </Solution>
