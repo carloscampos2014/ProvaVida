@@ -10,7 +10,7 @@ public static class MauiProgram
 {
     // URL base da API — usar 10.0.2.2 para emulador Android apontar para localhost do Windows
 #if DEBUG
-    private const string ApiBaseUrl = "http://10.0.2.2:5182/";
+    private const string ApiBaseUrl = "http://localhost:5182/";
 #else
     private const string ApiBaseUrl = "https://provida-api.enzojb.com.br/";
 #endif
@@ -50,6 +50,8 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<CadastroPage>();
         builder.Services.AddTransient<PerfilPage>();
+        builder.Services.AddSingleton<AppShell>();
+        builder.Services.AddSingleton<App>();
 
 #if DEBUG
         builder.Logging.AddDebug();
