@@ -1,0 +1,10 @@
+<api type="debug" assembly-name="ProvaVida.Maui" mvid="5856f6a9fcae40b5b3f4cc78b53acf18">
+  <java-to-managed>
+    <entry java-name="crc645978d831201e8b5a/MainActivity" managed-name="ProvaVida.Maui.MainActivity, ProvaVida.Maui" managed-type-token-id="33554440" />
+    <entry java-name="crc645978d831201e8b5a/MainApplication" managed-name="ProvaVida.Maui.MainApplication, ProvaVida.Maui" managed-type-token-id="33554441" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc645978d831201e8b5a/MainActivity" managed-name="ProvaVida.Maui.MainActivity, ProvaVida.Maui" managed-type-token-id="33554440" />
+    <entry java-name="crc645978d831201e8b5a/MainApplication" managed-name="ProvaVida.Maui.MainApplication, ProvaVida.Maui" managed-type-token-id="33554441" />
+  </managed-to-java>
+</api>
