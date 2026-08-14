@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/mobile/">
+    <Project Path="mobile/ProvaVida.Maui/ProvaVida.Maui.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/ProvaVida.Api/ProvaVida.Api.csproj" />
     <Project Path="src/ProvaVida.Application/ProvaVida.Application.csproj" />

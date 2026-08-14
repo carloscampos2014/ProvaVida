@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProvaVida.Maui.Pages.CadastroPage"
+             Title="Criar conta"
+             BackgroundColor="{StaticResource White}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Header -->
+            <Border BackgroundColor="{StaticResource Primary}" StrokeThickness="0"
+                    Padding="20,48,20,20">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Button Grid.Column="0" Text="←" Command="{Binding VoltarCommand}"
+                            BackgroundColor="Transparent" TextColor="White" FontSize="20"
+                            IsVisible="{Binding MostrarPasso2}" Padding="0"/>
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Label Text="{Binding Passo, StringFormat='Passo {0} de 2'}"
+                               FontSize="13" TextColor="White" Opacity="0.8"/>
+                        <Label Text="Criar conta" FontSize="18" FontAttributes="Bold" TextColor="White"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Passo 1 — Dados pessoais -->
+            <VerticalStackLayout Padding="32,28,32,24" Spacing="20"
+                                 IsVisible="{Binding MostrarPasso1}">
+                <Label Text="Seus dados" FontSize="22" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"/>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Nome completo" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding Nome}" Placeholder="João da Silva" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="E-mail" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding Email}" Placeholder="joao@email.com" Keyboard="Email" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="WhatsApp" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding WhatsApp}" Placeholder="(11) 99999-9999" Keyboard="Telephone" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Senha" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding Senha}" Placeholder="Mínimo 8 caracteres" IsPassword="True" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="13"
+                       IsVisible="{Binding HasError}" HorizontalOptions="Center"/>
+
+                <Button Text="Próximo →" Command="{Binding ProximoCommand}"
+                        BackgroundColor="{StaticResource Primary}" TextColor="White"
+                        CornerRadius="14" HeightRequest="52" FontSize="16" FontAttributes="Bold"/>
+
+                <Label HorizontalOptions="Center" FontSize="14">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Já tem conta? " TextColor="{StaticResource TextSecondary}"/>
+                            <Span Text="Entrar" TextColor="{StaticResource Primary}" FontAttributes="Bold"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding IrParaLoginCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
+
+            <!-- Passo 2 — Contato de emergência -->
+            <VerticalStackLayout Padding="32,28,32,24" Spacing="20"
+                                 IsVisible="{Binding MostrarPasso2}">
+                <Label Text="Contato de emergência" FontSize="22" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"/>
+                <Label Text="Quem avisamos se você não fizer check-in?" FontSize="14"
+                       TextColor="{StaticResource TextSecondary}"/>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Nome do contato" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding ContatoNome}" Placeholder="Maria da Silva" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="E-mail do contato" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding ContatoEmail}" Placeholder="maria@email.com" Keyboard="Email" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="WhatsApp do contato" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding ContatoWhatsApp}" Placeholder="(11) 98888-8888" Keyboard="Telephone" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="13"
+                       IsVisible="{Binding HasError}" HorizontalOptions="Center"/>
+
+                <Button Text="Criar conta" Command="{Binding CadastrarCommand}"
+                        BackgroundColor="{StaticResource Primary}" TextColor="White"
+                        CornerRadius="14" HeightRequest="52" FontSize="16" FontAttributes="Bold"/>
+
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                   Color="{StaticResource Primary}" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

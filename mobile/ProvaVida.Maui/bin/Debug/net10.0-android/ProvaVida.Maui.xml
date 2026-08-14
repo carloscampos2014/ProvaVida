@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ProvaVida.Maui</name>
+    </assembly>
+    <members>
+        <member name="T:ProvaVida.Maui.Models.UsuarioLocal">
+            <summary>
+            Dados do usuário logado armazenados localmente via Preferences.
+            Usados para exibição rápida sem chamada de rede.
+            </summary>
+        </member>
+        <member name="T:ProvaVida.Maui.Storage.TokenStorage">
+            <summary>
+            Armazena o token JWT usando SecureStorage (keychain no iOS, keystore no Android).
+            Nunca em texto plano.
+            </summary>
+        </member>
+        <member name="T:ProvaVida.Maui.Storage.UsuarioStorage">
+            <summary>
+            Persiste dados básicos do usuário logado via Preferences (não sensível).
+            </summary>
+        </member>
+        <member name="T:ProvaVida.Maui.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+    </members>
+</doc>

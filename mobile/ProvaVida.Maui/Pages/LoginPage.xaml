@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProvaVida.Maui.Pages.LoginPage"
+             Title="Login"
+             BackgroundColor="{StaticResource White}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Header roxo -->
+            <Border BackgroundColor="{StaticResource Primary}"
+                    StrokeThickness="0" HeightRequest="240">
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
+                    <Border BackgroundColor="White"
+                            StrokeShape="RoundRectangle 44"
+                            StrokeThickness="0"
+                            Padding="12"
+                            WidthRequest="88" HeightRequest="88"
+                            HorizontalOptions="Center">
+                        <Label Text="♥" FontSize="36" TextColor="{StaticResource Primary}"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <Label Text="ProvaVida" FontSize="22" FontAttributes="Bold"
+                           TextColor="White" HorizontalOptions="Center"/>
+                    <Label Text="Seu check-in diário de bem-estar" FontSize="14"
+                           TextColor="White" Opacity="0.85" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Formulário -->
+            <VerticalStackLayout Padding="32,32,32,24" Spacing="20">
+
+                <!-- E-mail -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="E-mail" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5"
+                            Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding Email}" Placeholder="seu@email.com"
+                               Keyboard="Email" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Senha -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Senha" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
+                    <Border Stroke="{StaticResource Border}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1.5"
+                            Padding="16,0" HeightRequest="52">
+                        <Entry Text="{Binding Senha}" Placeholder="••••••••"
+                               IsPassword="True" VerticalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Erro -->
+                <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="13"
+                       IsVisible="{Binding HasError}" HorizontalOptions="Center"/>
+
+                <!-- Botão Entrar -->
+                <Button Text="Entrar" Command="{Binding EntrarCommand}"
+                        BackgroundColor="{StaticResource Primary}" TextColor="White"
+                        CornerRadius="14" HeightRequest="52" FontSize="16" FontAttributes="Bold"/>
+
+                <!-- Divisor -->
+                <Grid ColumnDefinitions="*,Auto,*" VerticalOptions="Center">
+                    <BoxView Grid.Column="0" HeightRequest="1" BackgroundColor="{StaticResource Border}" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" Text="ou" FontSize="13" TextColor="{StaticResource TextHint}" Margin="12,0"/>
+                    <BoxView Grid.Column="2" HeightRequest="1" BackgroundColor="{StaticResource Border}" VerticalOptions="Center"/>
+                </Grid>
+
+                <!-- Botão Criar Conta -->
+                <Button Text="Criar conta" Command="{Binding IrParaCadastroCommand}"
+                        BackgroundColor="White" TextColor="{StaticResource Primary}"
+                        BorderColor="{StaticResource Primary}" BorderWidth="1.5"
+                        CornerRadius="14" HeightRequest="52" FontSize="16" FontAttributes="Bold"/>
+
+                <!-- Loading -->
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                   Color="{StaticResource Primary}" HorizontalOptions="Center"/>
+
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
