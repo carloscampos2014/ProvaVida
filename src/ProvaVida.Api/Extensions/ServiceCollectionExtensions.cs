@@ -8,6 +8,9 @@ using ProvaVida.Application.UseCases.CadastrarUsuario;
 using ProvaVida.Application.UseCases.ExcluirConta;
 using ProvaVida.Application.UseCases.Login;
 using ProvaVida.Application.UseCases.Logoff;
+using ProvaVida.Application.UseCases.ObterHistoricoCheckIn;
+using ProvaVida.Application.UseCases.RegistrarCheckIn;
+using ProvaVida.Application.UseCases.RegistrarHeartbeat;
 using ProvaVida.Infrastructure.Persistence;
 using ProvaVida.Infrastructure.Persistence.Repositories;
 using ProvaVida.Infrastructure.Security;
@@ -19,7 +22,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDatabase(
         this IServiceCollection services, IConfiguration configuration)
     {
-        // DbConnectionFactory e DatabaseMigrator como Singleton — lazy via IConfiguration
         services.AddSingleton<DbConnectionFactory>(sp =>
         {
             var cs = sp.GetRequiredService<IConfiguration>()
@@ -71,12 +73,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services)
     {
-        // UnitOfWork — Scoped (uma transação por request)
+        // UnitOfWork — Scoped
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Repositórios — Scoped
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<ISessaoLoginRepository, SessaoLoginRepository>();
+        services.AddScoped<ICheckInRepository, CheckInRepository>();
+        services.AddScoped<IHeartbeatRepository, HeartbeatRepository>();
 
         // Segurança
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
@@ -92,6 +96,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LogoffUseCase>();
         services.AddScoped<AlterarContaUseCase>();
         services.AddScoped<ExcluirContaUseCase>();
+        services.AddScoped<RegistrarCheckInUseCase>();
+        services.AddScoped<RegistrarHeartbeatUseCase>();
+        services.AddScoped<ObterHistoricoCheckInUseCase>();
 
         return services;
     }
