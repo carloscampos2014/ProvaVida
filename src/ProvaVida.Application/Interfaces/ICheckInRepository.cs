@@ -12,4 +12,10 @@ public interface ICheckInRepository
 
     Task<IEnumerable<CheckIn>> ListarPorUsuarioAsync(
         Guid usuarioId, DateTime dataInicio, DateTime dataFim, CancellationToken ct = default);
+
+    /// <summary>
+    /// Retorna IDs dos usuários cujo último check-in foi antes de dataCorte.
+    /// Usado pelo job de verificação de inatividade.
+    /// </summary>
+    Task<IEnumerable<Guid>> ListarUsuariosInativosDesdeAsync(DateTime dataCorte, CancellationToken ct = default);
 }
