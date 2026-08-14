@@ -1,0 +1,23 @@
+[Unit]
+Description=ProvaVida API
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=www-data
+WorkingDirectory=/opt/provavida/api
+ExecStart=/usr/bin/dotnet /opt/provavida/api/ProvaVida.Api.dll
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=provavida-api
+EnvironmentFile=/etc/provavida/env
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

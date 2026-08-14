@@ -1,0 +1,64 @@
+name: Build APK Release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "mobile/ProvaVida.Maui/**"
+      - ".github/workflows/build-apk.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: build-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build APK Release (Android)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      - name: Restore
+        run: dotnet restore mobile/ProvaVida.Maui/ProvaVida.Maui.csproj
+
+      - name: Decode keystore
+        run: |
+          $keystoreBytes = [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}")
+          [IO.File]::WriteAllBytes("mobile/ProvaVida.Maui/provavida.keystore", $keystoreBytes)
+        shell: pwsh
+
+      - name: Build APK Release
+        run: |
+          dotnet publish mobile/ProvaVida.Maui/ProvaVida.Maui.csproj `
+            -f net10.0-android `
+            -c Release `
+            -p:AndroidKeyStore=true `
+            -p:AndroidSigningKeyStore=provavida.keystore `
+            -p:AndroidSigningKeyAlias="${{ secrets.ANDROID_KEY_ALIAS }}" `
+            -p:AndroidSigningKeyPass="${{ secrets.ANDROID_KEY_PASSWORD }}" `
+            -p:AndroidSigningStorePass="${{ secrets.ANDROID_STORE_PASSWORD }}"
+        shell: pwsh
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProvaVida-Release-APK
+          path: mobile/ProvaVida.Maui/bin/Release/net10.0-android/*-Signed.apk
+          retention-days: 30
+
+      - name: Limpar keystore
+        if: always()
+        run: Remove-Item mobile/ProvaVida.Maui/provavida.keystore -Force -ErrorAction SilentlyContinue
+        shell: pwsh
