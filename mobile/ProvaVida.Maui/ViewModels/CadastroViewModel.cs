@@ -17,6 +17,7 @@ public class CadastroViewModel : BaseViewModel
     private string _contatoNome = string.Empty;
     private string _contatoEmail = string.Empty;
     private string _contatoWhatsApp = string.Empty;
+    private bool _aceitouTermos = false;
 
     private int _passo = 1;
 
@@ -27,6 +28,7 @@ public class CadastroViewModel : BaseViewModel
     public string ContatoNome { get => _contatoNome; set => SetProperty(ref _contatoNome, value); }
     public string ContatoEmail { get => _contatoEmail; set => SetProperty(ref _contatoEmail, value); }
     public string ContatoWhatsApp { get => _contatoWhatsApp; set => SetProperty(ref _contatoWhatsApp, value); }
+    public bool AceitouTermos { get => _aceitouTermos; set => SetProperty(ref _aceitouTermos, value); }
     public int Passo
     {
         get => _passo;
@@ -87,6 +89,12 @@ public class CadastroViewModel : BaseViewModel
             string.IsNullOrWhiteSpace(ContatoWhatsApp))
         {
             ErrorMessage = "Preencha todos os dados do contato de emergência.";
+            return;
+        }
+
+        if (!AceitouTermos)
+        {
+            ErrorMessage = "Você precisa aceitar os Termos de Uso e a Política de Privacidade.";
             return;
         }
 

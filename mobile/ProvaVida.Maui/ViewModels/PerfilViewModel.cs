@@ -11,6 +11,7 @@ public class PerfilViewModel : BaseViewModel
     private readonly IAuthService _authService;
     private readonly ITokenStorage _tokenStorage;
     private readonly IUsuarioStorage _usuarioStorage;
+    private readonly LocalDatabase _localDatabase;
 
     private string _nome = string.Empty;
     private string _whatsApp = string.Empty;
@@ -34,12 +35,14 @@ public class PerfilViewModel : BaseViewModel
         IContaService contaService,
         IAuthService authService,
         ITokenStorage tokenStorage,
-        IUsuarioStorage usuarioStorage)
+        IUsuarioStorage usuarioStorage,
+        LocalDatabase localDatabase)
     {
         _contaService = contaService;
         _authService = authService;
         _tokenStorage = tokenStorage;
         _usuarioStorage = usuarioStorage;
+        _localDatabase = localDatabase;
 
         SalvarCommand = new Command(async () => await SalvarAsync(), () => !IsLoading);
         LogoffCommand = new Command(async () => await LogoffAsync());
@@ -120,7 +123,7 @@ public class PerfilViewModel : BaseViewModel
     {
         var confirmar = await Application.Current!.Windows[0].Page!.DisplayAlertAsync(
             "Excluir conta",
-            "Seus dados serão removidos permanentemente. Esta ação não pode ser desfeita.",
+            "Todos os seus dados serão removidos permanentemente. Esta ação não pode ser desfeita.",
             "Continuar", "Cancelar");
 
         if (!confirmar) return;
@@ -137,8 +140,12 @@ public class PerfilViewModel : BaseViewModel
         try
         {
             await _contaService.ExcluirAsync(new ExcluirContaRequest(senha));
+
+            // Limpa dados locais do SQLite e armazenamento
+            await _localDatabase.LimparDadosLocaisAsync();
             await _tokenStorage.RemoverAsync();
             _usuarioStorage.Remover();
+
             await Shell.Current.GoToAsync("//login");
         }
         catch (ApiException ex)

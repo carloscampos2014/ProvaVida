@@ -116,6 +116,21 @@
                 <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="13"
                        IsVisible="{Binding HasError}" HorizontalOptions="Center"/>
 
+                <!-- Consentimento LGPD -->
+                <HorizontalStackLayout Spacing="8" HorizontalOptions="Start">
+                    <CheckBox IsChecked="{Binding AceitouTermos}" Color="{StaticResource Primary}"/>
+                    <Label VerticalOptions="Center" FontSize="13">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Li e aceito os " TextColor="{StaticResource TextSecondary}"/>
+                                <Span Text="Termos de Uso" TextColor="{StaticResource Primary}" FontAttributes="Bold"/>
+                                <Span Text=" e a " TextColor="{StaticResource TextSecondary}"/>
+                                <Span Text="Política de Privacidade" TextColor="{StaticResource Primary}" FontAttributes="Bold"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </HorizontalStackLayout>
+
                 <Button Text="Criar conta" Command="{Binding CadastrarCommand}"
                         BackgroundColor="{StaticResource Primary}" TextColor="White"
                         CornerRadius="14" HeightRequest="52" FontSize="16" FontAttributes="Bold"/>

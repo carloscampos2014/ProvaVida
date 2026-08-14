@@ -91,6 +91,16 @@ public class LocalDatabase
         return count > 0;
     }
 
+    /// <summary>
+    /// Remove todos os dados locais do usuário (chamado ao excluir conta — LGPD).
+    /// </summary>
+    public async Task LimparDadosLocaisAsync()
+    {
+        var db = await GetDbAsync();
+        await db.DeleteAllAsync<CheckInLocal>();
+        await db.DeleteAllAsync<HeartbeatLocal>();
+    }
+
     // --- Heartbeat ---
 
     public async Task SalvarHeartbeatAsync(HeartbeatLocal item)
