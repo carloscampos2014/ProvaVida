@@ -14,7 +14,7 @@ App mobile de check-in diário de bem-estar. O usuário registra sua presença u
 | 6. Backend – Job e Notificações | ✅ Concluída | Job Hangfire (23h50 + horário); fluxo 3 camadas anti-falso-positivo; e-mail SMTP via MailKit; WhatsApp Business API (Meta); 48 testes aprovados |
 | 7. Testes End-to-End | ✅ Concluída | 14 testes de integração (WebApplicationFactory + banco local); fluxos: auth, check-in, inatividade; 62 testes totais aprovados |
 | 8. Homologação (QA) | ✅ Concluída | QA_Checklist.md e Seguranca_LGPD.md; correções: limpeza SQLite na exclusão, checkbox de consentimento LGPD no cadastro |
-| 9. Publicação e Lançamento | ⏳ Pendente | — |
+| 9. Publicação e Lançamento | ✅ Concluída | GitHub Actions: deploy automático API (SSH+rsync+systemd) e build APK Release; scripts setup-vm.sh, nginx, systemd, setup-github-secrets.ps1 |
 
 ## Stack
 

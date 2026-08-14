@@ -5,6 +5,9 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Notifica o systemd quando o app está pronto (Type=notify no service)
+builder.Host.UseSystemd();
+
 // Serilog
 builder.Host.UseSerilog((ctx, cfg) =>
     cfg.ReadFrom.Configuration(ctx.Configuration));
@@ -60,6 +63,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Health check — usado pelo GitHub Actions para verificar o deploy
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
+   .AllowAnonymous();
 
 if (!app.Environment.IsEnvironment("IntegrationTests"))
     app.MapHangfireDashboard();
