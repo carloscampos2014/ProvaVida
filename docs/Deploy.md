@@ -75,6 +75,12 @@ No Windows, com GitHub CLI autenticado:
 .\scripts\setup-github-secrets.ps1
 ```
 
+> **SSH_KNOWN_HOST** — Para obter o fingerprint da VM da sua máquina local (onde a VM já é confiável):
+> ```bash
+> ssh-keyscan -p 22 -H IP_DA_VM
+> ```
+> Cole a linha completa gerada como valor do secret. Isso garante que o GitHub Actions verifique o fingerprint antes de se conectar, prevenindo ataques MITM no CI/CD.
+
 Secrets necessários:
 
 | Secret | Descrição |
@@ -83,6 +89,7 @@ Secrets necessários:
 | `SSH_PORT` | Porta SSH (22 por padrão) |
 | `SSH_USER` | `ubuntu` |
 | `SSH_KEY` | Conteúdo da chave privada SSH |
+| `SSH_KNOWN_HOST` | Fingerprint do host (ver abaixo) |
 | `DB_CONNECTION_STRING` | Connection string PostgreSQL de produção |
 | `JWT_SECRET` | Chave JWT (mínimo 32 chars) |
 | `EMAIL_HOST` | Host SMTP (ex: smtp.sendgrid.net) |

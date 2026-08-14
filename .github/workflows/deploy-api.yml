@@ -56,7 +56,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          # Usa o fingerprint pré-aprovado do host (stored como secret) — evita MITM no keyscan dinâmico
+          echo "${{ secrets.SSH_KNOWN_HOST }}" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
       - name: Parar serviço na VM
         run: |

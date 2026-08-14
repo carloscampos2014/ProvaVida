@@ -67,6 +67,18 @@ if (-not $ApenasAndroid) {
         Write-Host "[!!] Chave SSH não encontrada em $sshKeyPath" -ForegroundColor Red
     }
 
+    Write-Host "[4b] SSH_KNOWN_HOST (fingerprint do host — evita MITM no CI/CD)..." -ForegroundColor Yellow
+    Write-Host "     Execute na sua maquina local (que ja confia na VM):" -ForegroundColor Gray
+    Write-Host "       ssh-keyscan -p $sshPort -H $sshHost" -ForegroundColor Gray
+    Write-Host "     Cole o resultado abaixo (linha completa do known_hosts):" -ForegroundColor Gray
+    $sshKnownHost = Read-Host "known_host entry"
+    if (-not [string]::IsNullOrWhiteSpace($sshKnownHost)) {
+        gh secret set SSH_KNOWN_HOST --body $sshKnownHost --repo $repo
+        Write-Host "     SSH_KNOWN_HOST configurado." -ForegroundColor Gray
+    } else {
+        Write-Host "[!!] SSH_KNOWN_HOST nao configurado. O deploy vai falhar por seguranca." -ForegroundColor Red
+    }
+
     # ── Banco de dados ────────────────────────────────────────────────────────
     Write-Host "[5/11] DB_CONNECTION_STRING..." -ForegroundColor Yellow
     $dbHost   = Read-Host "Host PostgreSQL (padrão localhost)"
