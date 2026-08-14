@@ -29,22 +29,10 @@ builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// Migrations DbUp e jobs Hangfire apenas fora de testes de integração
+// Migrations DbUp apenas fora de testes de integração
 if (!app.Environment.IsEnvironment("IntegrationTests"))
 {
     app.ApplyMigrations();
-
-    RecurringJob.AddOrUpdate<VerificacaoInatividadeJob>(
-        "verificacao-inatividade",
-        job => job.ExecutarAsync(),
-        "50 23 * * *",
-        new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
-
-    RecurringJob.AddOrUpdate<DispararAlertaJob>(
-        "disparar-alerta",
-        job => job.ExecutarAsync(),
-        "0 * * * *",
-        new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
 }
 
 app.UseGlobalExceptionHandler();
@@ -69,7 +57,22 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = Dat
    .AllowAnonymous();
 
 if (!app.Environment.IsEnvironment("IntegrationTests"))
+{
     app.MapHangfireDashboard();
+
+    // Registrar jobs após o Hangfire middleware estar configurado (JobStorage já inicializado)
+    RecurringJob.AddOrUpdate<VerificacaoInatividadeJob>(
+        "verificacao-inatividade",
+        job => job.ExecutarAsync(),
+        "50 23 * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+
+    RecurringJob.AddOrUpdate<DispararAlertaJob>(
+        "disparar-alerta",
+        job => job.ExecutarAsync(),
+        "0 * * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+}
 
 app.Run();
 
