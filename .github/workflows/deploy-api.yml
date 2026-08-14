@@ -56,13 +56,12 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Parar serviço na VM
         run: |
           ssh -i ~/.ssh/deploy_key \
               -p ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
               "sudo systemctl stop provavida-api || true"
 
@@ -70,14 +69,13 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key \
               -p ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
               "sudo mkdir -p /opt/provavida/api && sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} /opt/provavida/api"
 
       - name: Enviar arquivos para VM
         run: |
           rsync -rlptz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
             ./publish/api/ \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/provavida/api/
 
@@ -85,7 +83,6 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key \
               -p ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           sudo mkdir -p /etc/provavida
           sudo tee /etc/provavida/env > /dev/null << ENVEOF
@@ -113,7 +110,6 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key \
               -p ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
               "sudo chown -R www-data:www-data /opt/provavida/api && \
                sudo systemctl enable provavida-api && \
@@ -126,7 +122,6 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key \
               -p ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
               "curl -f -H 'Host: provida-api.enzojb.com.br' http://localhost:80/health || \
                (sudo systemctl status provavida-api && exit 1)"

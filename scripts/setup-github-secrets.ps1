@@ -85,9 +85,10 @@ if (-not $ApenasAndroid) {
     Write-Host "[6/11] JWT_SECRET..." -ForegroundColor Yellow
     $jwtSecret = -join ((65..90) + (97..122) + (48..57) |
         Get-Random -Count 64 | ForEach-Object { [char]$_ })
-    Write-Host "     JWT_SECRET gerado (64 chars). Guarde uma cópia!" -ForegroundColor Yellow
-    Write-Host "     $jwtSecret" -ForegroundColor Gray
+    # Não exibir o secret no console — copie-o do painel do GitHub após configurar
     gh secret set JWT_SECRET --body $jwtSecret --repo $repo
+    Write-Host "     JWT_SECRET configurado (64 chars). Copie-o em: https://github.com/$repo/settings/secrets/actions" -ForegroundColor Gray
+    Write-Host "     AVISO: O valor nao sera exibido novamente." -ForegroundColor Yellow
 
     # ── E-mail SMTP ───────────────────────────────────────────────────────────
     Write-Host "[7/11] Email (SMTP)..." -ForegroundColor Yellow
