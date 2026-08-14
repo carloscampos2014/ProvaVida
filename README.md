@@ -12,7 +12,7 @@ App mobile de check-in diário de bem-estar. O usuário registra sua presença u
 | 4. Backend – Check-in | ✅ Concluída | Entidades CheckIn e Heartbeat; migration V002; endpoints POST /checkin (idempotência via id_local), POST /heartbeat, GET /checkin/historico; 37 testes aprovados |
 | 5. App Mobile – Check-in | ✅ Concluída | Check-in offline-first (SQLite), sync agressivo, heartbeat automático, captura de localização, push de lembrete diário (20h) |
 | 6. Backend – Job e Notificações | ✅ Concluída | Job Hangfire (23h50 + horário); fluxo 3 camadas anti-falso-positivo; e-mail SMTP via MailKit; WhatsApp Business API (Meta); 48 testes aprovados |
-| 7. Testes End-to-End | 🔜 Próxima | — |
+| 7. Testes End-to-End | ✅ Concluída | 14 testes de integração (WebApplicationFactory + banco local); fluxos: auth, check-in, inatividade; 62 testes totais aprovados |
 | 8. Homologação (QA) | ⏳ Pendente | — |
 | 9. Publicação e Lançamento | ⏳ Pendente | — |
 

@@ -14,48 +14,55 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddHangfireServices(builder.Configuration);
+// Em IntegrationTests, DbConnectionFactory e DatabaseMigrator são registrados pela factory
+if (!builder.Environment.IsEnvironment("IntegrationTests"))
+{
+    builder.Services.AddDatabase(builder.Configuration);
+    builder.Services.AddHangfireServices(builder.Configuration);
+}
+
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// Migrations DbUp
-app.ApplyMigrations();
+// Migrations DbUp e jobs Hangfire apenas fora de testes de integração
+if (!app.Environment.IsEnvironment("IntegrationTests"))
+{
+    app.ApplyMigrations();
+
+    RecurringJob.AddOrUpdate<VerificacaoInatividadeJob>(
+        "verificacao-inatividade",
+        job => job.ExecutarAsync(),
+        "50 23 * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+
+    RecurringJob.AddOrUpdate<DispararAlertaJob>(
+        "disparar-alerta",
+        job => job.ExecutarAsync(),
+        "0 * * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+}
 
 app.UseGlobalExceptionHandler();
-
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Hangfire Dashboard (apenas em Development — em produção, proteger com autenticação)
 if (app.Environment.IsDevelopment())
 {
     app.UseHangfireDashboard("/hangfire", new DashboardOptions
     {
-        Authorization = [] // sem autenticação em dev
+        Authorization = []
     });
 }
-
-// Agendar jobs recorrentes
-RecurringJob.AddOrUpdate<VerificacaoInatividadeJob>(
-    "verificacao-inatividade",
-    job => job.ExecutarAsync(),
-    "50 23 * * *",          // 23h50 diariamente (UTC)
-    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
-
-RecurringJob.AddOrUpdate<DispararAlertaJob>(
-    "disparar-alerta",
-    job => job.ExecutarAsync(),
-    "0 * * * *",            // a cada hora
-    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHangfireDashboard();
+
+if (!app.Environment.IsEnvironment("IntegrationTests"))
+    app.MapHangfireDashboard();
 
 app.Run();
 

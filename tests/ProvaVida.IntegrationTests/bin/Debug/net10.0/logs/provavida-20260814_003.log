@@ -1,0 +1,159 @@
+2026-08-14 16:17:10.099 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:17:10.113 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:17:10.113 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:17:17.200 -03:00 [ERR] Erro inesperado.
+Npgsql.PostgresException (0x80004005): 23503: insert or update on table "sessoes_login" violates foreign key constraint "FK_sessoes_login_usuarios_usuario_id"
+
+DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.ExecuteImplAsync(IDbConnection cnn, CommandDefinition command, Object param) in /_/Dapper/SqlMapper.Async.cs:line 662
+   at ProvaVida.Infrastructure.Persistence.Repositories.SessaoLoginRepository.AdicionarAsync(SessaoLogin sessao, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Infrastructure\Persistence\Repositories\SessaoLoginRepository.cs:line 68
+   at ProvaVida.Application.UseCases.Login.LoginUseCase.ExecutarAsync(LoginInput input, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Application\UseCases\Login\LoginUseCase.cs:line 46
+   at ProvaVida.Application.UseCases.Login.LoginUseCase.ExecutarAsync(LoginInput input, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Application\UseCases\Login\LoginUseCase.cs:line 52
+   at ProvaVida.Api.Controllers.AuthController.Login(LoginInput input, LoginUseCase useCase, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Api\Controllers\AuthController.cs:line 36
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at ProvaVida.Api.Extensions.WebApplicationExtensions.<>c.<<UseGlobalExceptionHandler>b__1_0>d.MoveNext() in C:\Dev\ProvaVida\src\ProvaVida.Api\Extensions\WebApplicationExtensions.cs:line 24
+  Exception data:
+    Severity: ERROR
+    SqlState: 23503
+    MessageText: insert or update on table "sessoes_login" violates foreign key constraint "FK_sessoes_login_usuarios_usuario_id"
+    Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+    SchemaName: public
+    TableName: sessoes_login
+    ConstraintName: FK_sessoes_login_usuarios_usuario_id
+    File: ri_triggers.c
+    Line: 2599
+    Routine: ri_ReportViolation
+2026-08-14 16:17:18.382 -03:00 [ERR] Erro inesperado.
+Npgsql.PostgresException (0x80004005): 23503: insert or update on table "sessoes_login" violates foreign key constraint "FK_sessoes_login_usuarios_usuario_id"
+
+DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.ExecuteImplAsync(IDbConnection cnn, CommandDefinition command, Object param) in /_/Dapper/SqlMapper.Async.cs:line 662
+   at ProvaVida.Infrastructure.Persistence.Repositories.SessaoLoginRepository.AdicionarAsync(SessaoLogin sessao, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Infrastructure\Persistence\Repositories\SessaoLoginRepository.cs:line 68
+   at ProvaVida.Application.UseCases.Login.LoginUseCase.ExecutarAsync(LoginInput input, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Application\UseCases\Login\LoginUseCase.cs:line 46
+   at ProvaVida.Application.UseCases.Login.LoginUseCase.ExecutarAsync(LoginInput input, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Application\UseCases\Login\LoginUseCase.cs:line 52
+   at ProvaVida.Api.Controllers.AuthController.Login(LoginInput input, LoginUseCase useCase, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Api\Controllers\AuthController.cs:line 36
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at ProvaVida.Api.Extensions.WebApplicationExtensions.<>c.<<UseGlobalExceptionHandler>b__1_0>d.MoveNext() in C:\Dev\ProvaVida\src\ProvaVida.Api\Extensions\WebApplicationExtensions.cs:line 24
+  Exception data:
+    Severity: ERROR
+    SqlState: 23503
+    MessageText: insert or update on table "sessoes_login" violates foreign key constraint "FK_sessoes_login_usuarios_usuario_id"
+    Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+    SchemaName: public
+    TableName: sessoes_login
+    ConstraintName: FK_sessoes_login_usuarios_usuario_id
+    File: ri_triggers.c
+    Line: 2599
+    Routine: ri_ReportViolation
+2026-08-14 16:17:19.595 -03:00 [ERR] Erro inesperado.
+Npgsql.PostgresException (0x80004005): 23503: insert or update on table "sessoes_login" violates foreign key constraint "FK_sessoes_login_usuarios_usuario_id"
+
+DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.ExecuteImplAsync(IDbConnection cnn, CommandDefinition command, Object param) in /_/Dapper/SqlMapper.Async.cs:line 662
+   at ProvaVida.Infrastructure.Persistence.Repositories.SessaoLoginRepository.AdicionarAsync(SessaoLogin sessao, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Infrastructure\Persistence\Repositories\SessaoLoginRepository.cs:line 68
+   at ProvaVida.Application.UseCases.Login.LoginUseCase.ExecutarAsync(LoginInput input, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Application\UseCases\Login\LoginUseCase.cs:line 46
+   at ProvaVida.Application.UseCases.Login.LoginUseCase.ExecutarAsync(LoginInput input, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Application\UseCases\Login\LoginUseCase.cs:line 52
+   at ProvaVida.Api.Controllers.AuthController.Login(LoginInput input, LoginUseCase useCase, CancellationToken ct) in C:\Dev\ProvaVida\src\ProvaVida.Api\Controllers\AuthController.cs:line 36
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at ProvaVida.Api.Extensions.WebApplicationExtensions.<>c.<<UseGlobalExceptionHandler>b__1_0>d.MoveNext() in C:\Dev\ProvaVida\src\ProvaVida.Api\Extensions\WebApplicationExtensions.cs:line 24
+  Exception data:
+    Severity: ERROR
+    SqlState: 23503
+    MessageText: insert or update on table "sessoes_login" violates foreign key constraint "FK_sessoes_login_usuarios_usuario_id"
+    Detail: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+    SchemaName: public
+    TableName: sessoes_login
+    ConstraintName: FK_sessoes_login_usuarios_usuario_id
+    File: ri_triggers.c
+    Line: 2599
+    Routine: ri_ReportViolation
+2026-08-14 16:17:19.627 -03:00 [INF] Application is shutting down...
+2026-08-14 16:17:52.603 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:17:52.661 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:17:52.664 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:17:54.766 -03:00 [INF] Application is shutting down...
+2026-08-14 16:18:54.143 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:18:54.212 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:18:54.214 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:18:56.412 -03:00 [INF] Application is shutting down...
+2026-08-14 16:21:12.723 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:21:12.785 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:21:12.787 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:21:18.586 -03:00 [INF] Application is shutting down...
+2026-08-14 16:21:18.688 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:21:18.697 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:21:18.697 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:21:22.903 -03:00 [INF] Application is shutting down...
+2026-08-14 16:21:22.935 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:21:22.942 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:21:22.942 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:21:25.904 -03:00 [INF] Application is shutting down...
+2026-08-14 16:22:22.378 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:22:22.444 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:22:22.445 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:22:27.194 -03:00 [INF] Application is shutting down...
+2026-08-14 16:22:27.274 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:22:27.281 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:22:27.281 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:22:30.679 -03:00 [INF] Application is shutting down...
+2026-08-14 16:22:30.734 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-08-14 16:22:30.743 -03:00 [INF] Hosting environment: IntegrationTests
+2026-08-14 16:22:30.743 -03:00 [INF] Content root path: C:\Dev\ProvaVida\src\ProvaVida.Api
+2026-08-14 16:22:35.776 -03:00 [INF] Application is shutting down...
