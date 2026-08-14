@@ -3,7 +3,6 @@ using ProvaVida.Maui.Pages;
 using ProvaVida.Maui.Services;
 using ProvaVida.Maui.Storage;
 using ProvaVida.Maui.ViewModels;
-
 namespace ProvaVida.Maui;
 
 public static class MauiProgram
@@ -36,20 +35,27 @@ public static class MauiProgram
         // Storage
         builder.Services.AddSingleton<ITokenStorage, TokenStorage>();
         builder.Services.AddSingleton<IUsuarioStorage, UsuarioStorage>();
+        builder.Services.AddSingleton<LocalDatabase>();
 
         // Services
         builder.Services.AddSingleton<IAuthService, AuthService>();
         builder.Services.AddSingleton<IContaService, ContaService>();
+        builder.Services.AddSingleton<ICheckInService, CheckInService>();
+        builder.Services.AddSingleton<IHeartbeatService, HeartbeatService>();
+        builder.Services.AddSingleton<LocationService>();
+        builder.Services.AddSingleton<SyncService>();
 
         // ViewModels
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<CadastroViewModel>();
         builder.Services.AddTransient<PerfilViewModel>();
+        builder.Services.AddTransient<CheckInViewModel>();
 
         // Pages
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<CadastroPage>();
         builder.Services.AddTransient<PerfilPage>();
+        builder.Services.AddTransient<CheckInPage>();
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddSingleton<App>();
 
