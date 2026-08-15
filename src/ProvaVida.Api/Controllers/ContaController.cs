@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProvaVida.Application.Interfaces;
 using ProvaVida.Application.UseCases.AlterarConta;
 using ProvaVida.Application.UseCases.ExcluirConta;
 
@@ -15,6 +16,25 @@ public class ContaController : ControllerBase
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? User.FindFirstValue("sub")
         ?? throw new UnauthorizedAccessException("Token inválido."));
+
+    [HttpGet]
+    [ProducesResponseType(typeof(ContaResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Obter(
+        [FromServices] IUsuarioRepository usuarioRepository,
+        CancellationToken ct)
+    {
+        var usuario = await usuarioRepository.ObterPorIdAsync(UsuarioId, ct);
+        if (usuario is null) return NotFound();
+
+        return Ok(new ContaResponse(
+            usuario.Nome,
+            usuario.Email,
+            usuario.WhatsApp,
+            usuario.ContatoEmergenciaNome,
+            usuario.ContatoEmergenciaEmail,
+            usuario.ContatoEmergenciaWhatsApp));
+    }
 
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -51,6 +71,14 @@ public class ContaController : ControllerBase
         return NoContent();
     }
 }
+
+public record ContaResponse(
+    string Nome,
+    string Email,
+    string WhatsApp,
+    string ContatoEmergenciaNome,
+    string ContatoEmergenciaEmail,
+    string ContatoEmergenciaWhatsApp);
 
 public record AlterarContaRequest(
     string Nome,

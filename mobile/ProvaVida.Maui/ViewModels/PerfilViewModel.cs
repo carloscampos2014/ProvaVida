@@ -20,7 +20,16 @@ public class PerfilViewModel : BaseViewModel
     private string _contatoWhatsApp = string.Empty;
     private string _email = string.Empty;
 
-    public string Nome { get => _nome; set => SetProperty(ref _nome, value); }
+    public string Nome
+    {
+        get => _nome;
+        set
+        {
+            if (SetProperty(ref _nome, value))
+                OnPropertyChanged(nameof(Inicial));
+        }
+    }
+    public string Inicial => string.IsNullOrEmpty(_nome) ? "?" : _nome[0].ToString().ToUpper();
     public string Email { get => _email; set => SetProperty(ref _email, value); }
     public string WhatsApp { get => _whatsApp; set => SetProperty(ref _whatsApp, value); }
     public string ContatoNome { get => _contatoNome; set => SetProperty(ref _contatoNome, value); }
@@ -49,6 +58,7 @@ public class PerfilViewModel : BaseViewModel
         ExcluirContaCommand = new Command(async () => await ExcluirContaAsync());
 
         CarregarDadosLocais();
+        _ = Task.Run(CarregarDadosDaApiAsync);
     }
 
     private void CarregarDadosLocais()
@@ -64,7 +74,33 @@ public class PerfilViewModel : BaseViewModel
         ContatoWhatsApp = usuario.ContatoEmergenciaWhatsApp;
     }
 
-    private async Task SalvarAsync()
+    private async Task CarregarDadosDaApiAsync()
+    {
+        try
+        {
+            var perfil = await _contaService.ObterPerfilAsync();
+            if (perfil is null) return;
+
+            // Atualiza UI e cache local com dados completos da API
+            Nome           = perfil.Nome;
+            Email          = perfil.Email;
+            WhatsApp       = perfil.WhatsApp;
+            ContatoNome    = perfil.ContatoEmergenciaNome;
+            ContatoEmail   = perfil.ContatoEmergenciaEmail;
+            ContatoWhatsApp = perfil.ContatoEmergenciaWhatsApp;
+
+            _usuarioStorage.Salvar(new UsuarioLocal
+            {
+                Nome                    = perfil.Nome,
+                Email                   = perfil.Email,
+                WhatsApp                = perfil.WhatsApp,
+                ContatoEmergenciaNome   = perfil.ContatoEmergenciaNome,
+                ContatoEmergenciaEmail  = perfil.ContatoEmergenciaEmail,
+                ContatoEmergenciaWhatsApp = perfil.ContatoEmergenciaWhatsApp
+            });
+        }
+        catch { /* falha silenciosa — dados locais continuam visíveis */ }
+    }    private async Task SalvarAsync()
     {
         LimparErro();
 

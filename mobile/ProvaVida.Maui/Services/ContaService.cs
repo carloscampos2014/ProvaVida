@@ -14,6 +14,19 @@ public class ContaService : IContaService
         _tokenStorage = tokenStorage;
     }
 
+    public async Task<ContaResponse?> ObterPerfilAsync(CancellationToken ct = default)
+    {
+        await SetAuthHeaderAsync();
+        try
+        {
+            return await _http.GetFromJsonAsync<ContaResponse>("conta", ct);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task AlterarAsync(AlterarContaRequest request, CancellationToken ct = default)
     {
         await SetAuthHeaderAsync();

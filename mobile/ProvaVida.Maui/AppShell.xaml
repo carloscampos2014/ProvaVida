@@ -3,7 +3,8 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:pages="clr-namespace:ProvaVida.Maui.Pages"
        x:Class="ProvaVida.Maui.AppShell"
-       Shell.NavBarIsVisible="False">
+       Shell.NavBarIsVisible="False"
+       FlyoutBehavior="Disabled">
 
     <!-- LoadingPage como rota inicial — verifica sessao antes de exibir login ou checkin -->
     <ShellContent Route="loading"
