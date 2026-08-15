@@ -13,6 +13,7 @@ public class LoginViewModel : BaseViewModel
 
     private string _email = string.Empty;
     private string _senha = string.Empty;
+    private bool _senhaOculta = true;
 
     public string Email
     {
@@ -26,8 +27,15 @@ public class LoginViewModel : BaseViewModel
         set => SetProperty(ref _senha, value);
     }
 
+    public bool SenhaOculta
+    {
+        get => _senhaOculta;
+        set => SetProperty(ref _senhaOculta, value);
+    }
+
     public ICommand EntrarCommand { get; }
     public ICommand IrParaCadastroCommand { get; }
+    public ICommand AlternarSenhaCommand { get; }
 
     public LoginViewModel(
         IAuthService authService,
@@ -41,6 +49,7 @@ public class LoginViewModel : BaseViewModel
         EntrarCommand = new Command(async () => await EntrarAsync(), () => !IsLoading);
         IrParaCadastroCommand = new Command(async () =>
             await Shell.Current.GoToAsync("//cadastro"));
+        AlternarSenhaCommand = new Command(() => SenhaOculta = !SenhaOculta);
     }
 
     /// <summary>

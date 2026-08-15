@@ -13,6 +13,7 @@
             <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
             <converters:BoolToCheckInTextConverter x:Key="BoolToCheckInTextConverter"/>
             <converters:BoolToCheckInHintConverter x:Key="BoolToCheckInHintConverter"/>
+            <converters:BoolToEyeIconConverter x:Key="BoolToEyeIconConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

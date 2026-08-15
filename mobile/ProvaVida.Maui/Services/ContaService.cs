@@ -14,10 +14,30 @@ public class ContaService : IContaService
         _tokenStorage = tokenStorage;
     }
 
+    public async Task<ContaResponse?> ObterPerfilAsync(CancellationToken ct = default)
+    {
+        await SetAuthHeaderAsync();
+        try
+        {
+            return await _http.GetFromJsonAsync<ContaResponse>("conta", ct);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task AlterarAsync(AlterarContaRequest request, CancellationToken ct = default)
     {
         await SetAuthHeaderAsync();
         var response = await _http.PutAsJsonAsync("conta", request, ct);
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task AlterarSenhaAsync(AlterarSenhaRequest request, CancellationToken ct = default)
+    {
+        await SetAuthHeaderAsync();
+        var response = await _http.PutAsJsonAsync("conta/senha", request, ct);
         await EnsureSuccessAsync(response);
     }
 

@@ -17,7 +17,7 @@
                             StrokeThickness="0"
                             WidthRequest="96" HeightRequest="96"
                             HorizontalOptions="Center">
-                        <Label Text="J" FontSize="36" FontAttributes="Bold"
+                        <Label Text="{Binding Inicial}" FontSize="36" FontAttributes="Bold"
                                TextColor="{StaticResource Primary}"
                                HorizontalOptions="Center" VerticalOptions="Center"/>
                     </Border>
@@ -102,6 +102,12 @@
                 <Button Text="Salvar alterações" Command="{Binding SalvarCommand}"
                         BackgroundColor="{StaticResource Primary}" TextColor="White"
                         CornerRadius="14" HeightRequest="52" FontSize="16" FontAttributes="Bold"/>
+
+                <!-- Botão Alterar Senha -->
+                <Button Text="Alterar senha" Command="{Binding AlterarSenhaCommand}"
+                        BackgroundColor="White" TextColor="{StaticResource Primary}"
+                        BorderColor="{StaticResource Primary}" BorderWidth="1.5"
+                        CornerRadius="14" HeightRequest="48" FontSize="15"/>
 
                 <!-- Botão Logoff -->
                 <Button Text="Sair da conta" Command="{Binding LogoffCommand}"

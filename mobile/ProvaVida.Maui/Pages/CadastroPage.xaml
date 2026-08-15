@@ -57,7 +57,18 @@
                     <Label Text="Senha" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
                     <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
                             StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
-                        <Entry Text="{Binding Senha}" Placeholder="Mínimo 8 caracteres" IsPassword="True" VerticalOptions="Center"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry Grid.Column="0" Text="{Binding Senha}"
+                                   Placeholder="Mínimo 8 caracteres"
+                                   IsPassword="{Binding SenhaOculta}" VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="{Binding SenhaOculta, Converter={StaticResource BoolToEyeIconConverter}}"
+                                   FontSize="18" VerticalOptions="Center" Margin="0,0,4,0">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AlternarSenhaCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
                     </Border>
                 </VerticalStackLayout>
 
