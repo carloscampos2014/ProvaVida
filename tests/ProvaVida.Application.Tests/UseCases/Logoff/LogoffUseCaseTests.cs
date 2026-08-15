@@ -24,7 +24,7 @@ public class LogoffUseCaseTests
     [Fact]
     public async Task ExecutarAsync_SessaoValida_InvalidaECommita()
     {
-        var sessao = SessaoLogin.Criar(Guid.NewGuid(), "token-valido", DateTime.UtcNow.AddHours(1));
+        var sessao = SessaoLogin.Criar(Guid.NewGuid(), "token-valido", DateTime.UtcNow.AddHours(1), "refresh", DateTime.UtcNow.AddDays(365));
         _sessaoMock.Setup(s => s.ObterPorTokenAsync("token-valido", default)).ReturnsAsync(sessao);
         _sessaoMock.Setup(s => s.SalvarAlteracoesAsync(default)).Returns(Task.CompletedTask);
 
@@ -49,7 +49,7 @@ public class LogoffUseCaseTests
     [Fact]
     public async Task ExecutarAsync_SessaoExpirada_LancaAppException()
     {
-        var sessao = SessaoLogin.Criar(Guid.NewGuid(), "token-exp", DateTime.UtcNow.AddSeconds(-1));
+        var sessao = SessaoLogin.Criar(Guid.NewGuid(), "token-exp", DateTime.UtcNow.AddSeconds(-1), "refresh", DateTime.UtcNow.AddDays(365));
         _sessaoMock.Setup(s => s.ObterPorTokenAsync("token-exp", default)).ReturnsAsync(sessao);
 
         var act = () => _useCase.ExecutarAsync(new LogoffInput("token-exp"));

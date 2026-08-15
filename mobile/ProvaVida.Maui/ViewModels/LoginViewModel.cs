@@ -58,6 +58,8 @@ public class LoginViewModel : BaseViewModel
         {
             var result = await _authService.LoginAsync(new LoginRequest(Email.Trim(), Senha));
             await _tokenStorage.SalvarAsync(result.Token);
+            await _tokenStorage.SalvarExpiraEmAsync(result.ExpiraEm);
+            await _tokenStorage.SalvarRefreshTokenAsync(result.RefreshToken);
             await Shell.Current.GoToAsync("//checkin");
         }
         catch (ApiException ex)
