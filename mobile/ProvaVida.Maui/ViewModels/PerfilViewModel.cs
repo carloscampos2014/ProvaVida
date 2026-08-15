@@ -25,7 +25,7 @@ public class PerfilViewModel : BaseViewModel
         get => _nome;
         set
         {
-            if (SetProperty(ref _nome, value))
+            if (SetPropertyInternal(ref _nome, value))
                 OnPropertyChanged(nameof(Inicial));
         }
     }
