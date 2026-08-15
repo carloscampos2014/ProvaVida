@@ -65,6 +65,9 @@ public partial class CheckInPage : ContentPage
             _ = Task.Run(() => _syncService.SincronizarAsync());
     }
 
+    private async void OnPerfilTapped(object? sender, TappedEventArgs e)
+        => await Shell.Current.GoToAsync("//perfil");
+
     private void AtualizarSemanaVisual()
     {
         SemanaLayout.Children.Clear();
