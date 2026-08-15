@@ -60,6 +60,12 @@ public class Usuario
         AtualizadoEm = DateTime.UtcNow;
     }
 
+    public void AlterarSenha(string novaSenhaHash)
+    {
+        SenhaHash = novaSenhaHash;
+        AtualizadoEm = DateTime.UtcNow;
+    }
+
     /// <summary>
     /// Anonimiza os dados pessoais conforme LGPD.
     /// O registro é mantido para integridade referencial, mas sem dados identificáveis.

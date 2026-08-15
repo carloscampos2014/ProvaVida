@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ProvaVida.Application.Interfaces;
 using ProvaVida.Application.UseCases.AlterarConta;
+using ProvaVida.Application.UseCases.AlterarSenha;
 using ProvaVida.Application.UseCases.CadastrarUsuario;
 using ProvaVida.Application.UseCases.ExcluirConta;
 using ProvaVida.Application.UseCases.Login;
@@ -117,6 +118,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LogoffUseCase>();
         services.AddScoped<RefreshTokenUseCase>();
         services.AddScoped<AlterarContaUseCase>();
+        services.AddScoped<AlterarSenhaUseCase>();
         services.AddScoped<ExcluirContaUseCase>();
         services.AddScoped<RegistrarCheckInUseCase>();
         services.AddScoped<RegistrarHeartbeatUseCase>();

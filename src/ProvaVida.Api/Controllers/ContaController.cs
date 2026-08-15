@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProvaVida.Application.Interfaces;
 using ProvaVida.Application.UseCases.AlterarConta;
+using ProvaVida.Application.UseCases.AlterarSenha;
 using ProvaVida.Application.UseCases.ExcluirConta;
 
 namespace ProvaVida.Api.Controllers;
@@ -57,6 +58,20 @@ public class ContaController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("senha")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> AlterarSenha(
+        [FromBody] AlterarSenhaRequest request,
+        [FromServices] AlterarSenhaUseCase useCase,
+        CancellationToken ct)
+    {
+        var input = new AlterarSenhaInput(UsuarioId, request.SenhaAtual, request.NovaSenha);
+        await useCase.ExecutarAsync(input, ct);
+        return NoContent();
+    }
+
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -71,6 +86,8 @@ public class ContaController : ControllerBase
         return NoContent();
     }
 }
+
+public record AlterarSenhaRequest(string SenhaAtual, string NovaSenha);
 
 public record ContaResponse(
     string Nome,

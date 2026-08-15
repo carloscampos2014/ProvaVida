@@ -103,6 +103,12 @@
                         BackgroundColor="{StaticResource Primary}" TextColor="White"
                         CornerRadius="14" HeightRequest="52" FontSize="16" FontAttributes="Bold"/>
 
+                <!-- Botão Alterar Senha -->
+                <Button Text="Alterar senha" Command="{Binding AlterarSenhaCommand}"
+                        BackgroundColor="White" TextColor="{StaticResource Primary}"
+                        BorderColor="{StaticResource Primary}" BorderWidth="1.5"
+                        CornerRadius="14" HeightRequest="48" FontSize="15"/>
+
                 <!-- Botão Logoff -->
                 <Button Text="Sair da conta" Command="{Binding LogoffCommand}"
                         BackgroundColor="{StaticResource Surface}"

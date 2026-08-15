@@ -27,12 +27,22 @@ public partial class CheckInPage : ContentPage
         await _vm.InicializarAsync();
         AtualizarSemanaVisual();
 
-        // Solicita permissão de localização proativamente na primeira abertura
+        // Solicita permissões proativamente na primeira abertura
         _ = Task.Run(async () =>
         {
-            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-            if (status != PermissionStatus.Granted)
+            var statusLoc = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (statusLoc != PermissionStatus.Granted)
                 await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+
+#if ANDROID
+            // Permissão de notificações obrigatória no Android 13+ (API 33)
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Tiramisu)
+            {
+                var statusNotif = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+                if (statusNotif != PermissionStatus.Granted)
+                    await Permissions.RequestAsync<Permissions.PostNotifications>();
+            }
+#endif
         });
 
         // Heartbeat ao abrir a tela — best effort

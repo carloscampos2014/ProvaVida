@@ -37,6 +37,7 @@ public class PerfilViewModel : BaseViewModel
     public string ContatoWhatsApp { get => _contatoWhatsApp; set => SetProperty(ref _contatoWhatsApp, value); }
 
     public ICommand SalvarCommand { get; }
+    public ICommand AlterarSenhaCommand { get; }
     public ICommand LogoffCommand { get; }
     public ICommand ExcluirContaCommand { get; }
 
@@ -54,6 +55,7 @@ public class PerfilViewModel : BaseViewModel
         _localDatabase = localDatabase;
 
         SalvarCommand = new Command(async () => await SalvarAsync(), () => !IsLoading);
+        AlterarSenhaCommand = new Command(async () => await AlterarSenhaAsync());
         LogoffCommand = new Command(async () => await LogoffAsync());
         ExcluirContaCommand = new Command(async () => await ExcluirContaAsync());
 
@@ -147,8 +149,53 @@ public class PerfilViewModel : BaseViewModel
         }
     }
 
-    private async Task LogoffAsync()
+    private async Task AlterarSenhaAsync()
     {
+        var page = Application.Current!.Windows[0].Page!;
+
+        var senhaAtual = await page.DisplayPromptAsync(
+            "Alterar senha",
+            "Digite sua senha atual:",
+            keyboard: Keyboard.Default,
+            maxLength: 100);
+
+        if (string.IsNullOrWhiteSpace(senhaAtual)) return;
+
+        var novaSenha = await page.DisplayPromptAsync(
+            "Alterar senha",
+            "Digite a nova senha (mínimo 8 caracteres):",
+            keyboard: Keyboard.Default,
+            maxLength: 100);
+
+        if (string.IsNullOrWhiteSpace(novaSenha)) return;
+
+        if (novaSenha.Length < 8)
+        {
+            await page.DisplayAlertAsync("Erro", "A nova senha deve ter no mínimo 8 caracteres.", "OK");
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            await _contaService.AlterarSenhaAsync(new AlterarSenhaRequest(senhaAtual, novaSenha));
+            await page.DisplayAlertAsync("Sucesso", "Senha alterada com sucesso.", "OK");
+        }
+        catch (ApiException ex)
+        {
+            await page.DisplayAlertAsync("Erro", ex.Message, "OK");
+        }
+        catch
+        {
+            await page.DisplayAlertAsync("Erro", "Sem conexão. Tente novamente.", "OK");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LogoffAsync()    {
         await _authService.LogoffAsync();
         await _tokenStorage.RemoverAsync();
         _usuarioStorage.Remover();
