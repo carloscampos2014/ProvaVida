@@ -117,9 +117,11 @@
                        IsVisible="{Binding HasError}" HorizontalOptions="Center"/>
 
                 <!-- Consentimento LGPD -->
-                <HorizontalStackLayout Spacing="8" HorizontalOptions="Start">
-                    <CheckBox IsChecked="{Binding AceitouTermos}" Color="{StaticResource Primary}"/>
-                    <Label VerticalOptions="Center" FontSize="13">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <CheckBox Grid.Column="0" IsChecked="{Binding AceitouTermos}"
+                              Color="{StaticResource Primary}" VerticalOptions="Start"
+                              Margin="0,2,0,0"/>
+                    <Label Grid.Column="1" FontSize="13" LineBreakMode="WordWrap">
                         <Label.FormattedText>
                             <FormattedString>
                                 <Span Text="Li e aceito os " TextColor="{StaticResource TextSecondary}"/>
@@ -129,7 +131,7 @@
                             </FormattedString>
                         </Label.FormattedText>
                     </Label>
-                </HorizontalStackLayout>
+                </Grid>
 
                 <Button Text="Criar conta" Command="{Binding CadastrarCommand}"
                         BackgroundColor="{StaticResource Primary}" TextColor="White"

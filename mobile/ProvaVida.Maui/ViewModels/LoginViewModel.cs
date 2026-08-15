@@ -43,6 +43,29 @@ public class LoginViewModel : BaseViewModel
             await Shell.Current.GoToAsync("//cadastro"));
     }
 
+    /// <summary>
+    /// Extrai um claim do payload do JWT sem validar a assinatura.
+    /// Usado apenas para leitura de dados não-sensíveis (nome, email).
+    /// </summary>
+    private static string? ExtrairClaimDoToken(string token, string claim)
+    {
+        try
+        {
+            var parts = token.Split('.');
+            if (parts.Length < 2) return null;
+
+            // Padding Base64
+            var payload = parts[1];
+            payload = payload.Replace('-', '+').Replace('_', '/');
+            while (payload.Length % 4 != 0) payload += '=';
+
+            var json = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(payload));
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            return doc.RootElement.TryGetProperty(claim, out var v) ? v.GetString() : null;
+        }
+        catch { return null; }
+    }
+
     private async Task EntrarAsync()
     {
         LimparErro();
@@ -60,6 +83,19 @@ public class LoginViewModel : BaseViewModel
             await _tokenStorage.SalvarAsync(result.Token);
             await _tokenStorage.SalvarExpiraEmAsync(result.ExpiraEm);
             await _tokenStorage.SalvarRefreshTokenAsync(result.RefreshToken);
+
+            // Salva nome e email localmente extraindo do JWT para exibir na tela de check-in
+            var nome = ExtrairClaimDoToken(result.Token, "nome");
+            var email = ExtrairClaimDoToken(result.Token, "email");
+            if (!string.IsNullOrEmpty(nome))
+            {
+                _usuarioStorage.Salvar(new Models.UsuarioLocal
+                {
+                    Nome  = nome,
+                    Email = email ?? Email.Trim()
+                });
+            }
+
             await Shell.Current.GoToAsync("//checkin");
         }
         catch (ApiException ex)
