@@ -22,6 +22,7 @@ appsettings.*.json
 *.pfx
 *.p12
 secrets.json
+*.keystore
 
 ## Logs
 logs/
