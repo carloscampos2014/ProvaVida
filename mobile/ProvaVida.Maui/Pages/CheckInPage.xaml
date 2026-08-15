@@ -45,13 +45,13 @@
 
                 <!-- Botão principal Check-in -->
                 <VerticalStackLayout HorizontalOptions="Center" Spacing="16"
-                                     MinimumHeightRequest="280">
+                                     HeightRequest="300">
                     <Border BackgroundColor="{StaticResource PrimaryLight}"
                             StrokeShape="RoundRectangle 126"
                             StrokeThickness="0"
                             WidthRequest="252" HeightRequest="252"
                             HorizontalOptions="Center"
-                            VerticalOptions="Center">
+                            VerticalOptions="Start">
                         <Border BackgroundColor="{StaticResource Primary}"
                                 StrokeShape="RoundRectangle 110"
                                 StrokeThickness="0"
