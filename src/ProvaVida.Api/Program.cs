@@ -1,4 +1,5 @@
 using Hangfire;
+using Scalar.AspNetCore;
 using ProvaVida.Api.Extensions;
 using ProvaVida.Infrastructure.Jobs;
 using Serilog;
@@ -14,8 +15,7 @@ builder.Host.UseSerilog((ctx, cfg) =>
 
 // Serviços
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 // Em IntegrationTests, DbConnectionFactory e DatabaseMigrator são registrados pela factory
 if (!builder.Environment.IsEnvironment("IntegrationTests"))
@@ -36,8 +36,14 @@ if (!app.Environment.IsEnvironment("IntegrationTests"))
 }
 
 app.UseGlobalExceptionHandler();
-app.UseSwagger();
-app.UseSwaggerUI();
+
+// Scalar — disponível em /scalar
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
+{
+    options.Title = "ProvaVida API";
+    options.Theme = ScalarTheme.Purple;
+});
 
 if (app.Environment.IsDevelopment())
 {
