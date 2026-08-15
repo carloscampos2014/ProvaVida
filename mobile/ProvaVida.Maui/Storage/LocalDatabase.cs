@@ -79,8 +79,14 @@ public class LocalDatabase
             .ToListAsync();
     }
 
-    public async Task<bool> FezCheckInHojeAsync(string usuarioId)
+    public async Task<bool> ExisteCheckInAsync(string idLocal)
     {
+        var db = await GetDbAsync();
+        return await db.Table<CheckInLocal>()
+            .CountAsync(c => c.IdLocal == idLocal) > 0;
+    }
+
+    public async Task<bool> FezCheckInHojeAsync(string usuarioId)    {
         var db = await GetDbAsync();
         // Usa horário local para evitar problemas de fuso — início e fim do dia local em UTC
         var hojeLocal = DateTime.Now.Date;
