@@ -49,6 +49,12 @@ jobs:
 
       - name: Build APK Release
         run: |
+          $version = "${{ github.event.inputs.version }}"
+          # Remove o 'v' prefixo para o ApplicationDisplayVersion (ex: v1.0.3 → 1.0.3)
+          $displayVersion = if ($version -match '^v?(.+)$') { $Matches[1] } else { "1.0.0" }
+          # ApplicationVersion é um inteiro incremental — usa o run_number do GitHub
+          $appVersion = "${{ github.run_number }}"
+
           dotnet publish mobile/ProvaVida.Maui/ProvaVida.Maui.csproj `
             -f net10.0-android `
             -c Release `
@@ -56,7 +62,9 @@ jobs:
             -p:AndroidSigningKeyStore=provavida.keystore `
             -p:AndroidSigningKeyAlias="${{ secrets.ANDROID_KEY_ALIAS }}" `
             -p:AndroidSigningKeyPass="${{ secrets.ANDROID_KEY_PASSWORD }}" `
-            -p:AndroidSigningStorePass="${{ secrets.ANDROID_STORE_PASSWORD }}"
+            -p:AndroidSigningStorePass="${{ secrets.ANDROID_STORE_PASSWORD }}" `
+            -p:ApplicationDisplayVersion="$displayVersion" `
+            -p:ApplicationVersion="$appVersion"
         shell: pwsh
 
       - name: Renomear APK
