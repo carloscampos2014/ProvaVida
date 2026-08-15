@@ -2,7 +2,6 @@ namespace ProvaVida.Maui.Services;
 
 /// <summary>
 /// Gerencia notificações push locais para lembrete de check-in diário.
-/// Usa a API nativa do MAUI via LocalNotification.
 /// </summary>
 public static class LocalNotificationService
 {
@@ -44,42 +43,47 @@ public static class LocalNotificationService
 #if ANDROID
     private static void AgendarNotificacaoAndroid(DateTime horario)
     {
-        var intent = new Android.Content.Intent(
-            Android.App.Application.Context,
-            typeof(LembreteReceiver));
+        var context = Android.App.Application.Context;
+        var intent  = new Android.Content.Intent(context, typeof(LembreteReceiver));
 
-        var pendingIntent = Android.App.PendingIntent.GetBroadcast(
-            Android.App.Application.Context,
-            LembreteId,
-            intent,
-            Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable);
+        // PendingIntentFlags.Immutable exige API 23+
+        var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
+            ? Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable
+            : Android.App.PendingIntentFlags.UpdateCurrent;
 
-        var alarmManager = (Android.App.AlarmManager)Android.App.Application.Context
-            .GetSystemService(Android.Content.Context.AlarmService)!;
+        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, LembreteId, intent, flags);
+        if (pendingIntent is null) return;
+
+        var alarmManager = context.GetSystemService(Android.Content.Context.AlarmService)
+            as Android.App.AlarmManager;
+        if (alarmManager is null) return;
 
         var triggerAtMillis = new DateTimeOffset(horario).ToUnixTimeMilliseconds();
-        alarmManager.SetExactAndAllowWhileIdle(
-            Android.App.AlarmType.RtcWakeup,
-            triggerAtMillis,
-            pendingIntent!);
+
+        // SetExactAndAllowWhileIdle exige API 23+
+        if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M)
+            alarmManager.SetExactAndAllowWhileIdle(
+                Android.App.AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
+        else
+            alarmManager.SetExact(
+                Android.App.AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
     }
 
     private static void CancelarNotificacaoAndroid()
     {
-        var intent = new Android.Content.Intent(
-            Android.App.Application.Context,
-            typeof(LembreteReceiver));
+        var context = Android.App.Application.Context;
+        var intent  = new Android.Content.Intent(context, typeof(LembreteReceiver));
 
-        var pendingIntent = Android.App.PendingIntent.GetBroadcast(
-            Android.App.Application.Context,
-            LembreteId,
-            intent,
-            Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable);
+        var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
+            ? Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable
+            : Android.App.PendingIntentFlags.UpdateCurrent;
 
-        var alarmManager = (Android.App.AlarmManager)Android.App.Application.Context
-            .GetSystemService(Android.Content.Context.AlarmService)!;
+        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, LembreteId, intent, flags);
+        if (pendingIntent is null) return;
 
-        alarmManager.Cancel(pendingIntent!);
+        var alarmManager = context.GetSystemService(Android.Content.Context.AlarmService)
+            as Android.App.AlarmManager;
+        alarmManager?.Cancel(pendingIntent);
     }
 #endif
 }

@@ -51,19 +51,32 @@ public partial class CheckInPage : ContentPage
     {
         SemanaLayout.Children.Clear();
 
-        var dias = new[] { "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom" };
         var semana = _vm.Semana;
+        var hoje   = DateTime.Now.Date;
+
+        // Nomes dos dias alinhados com DayOfWeek (.NET: 0=Dom, 1=Seg... 6=Sab)
+        var nomesDias = new[] { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
 
         for (int i = 0; i < 7; i++)
         {
+            var dia   = hoje.AddDays(-(6 - i));   // mesmo cálculo do ViewModel
             var feito = i < semana.Count && semana[i];
+            var ehHoje = dia == hoje;
+
             var stack = new VerticalStackLayout { Spacing = 4, HorizontalOptions = LayoutOptions.Center };
+
+            // Cor do círculo: verde se feito hoje, roxo nos outros dias feitos, cinza se não feito
+            Color corCirculo;
+            if (feito && ehHoje)
+                corCirculo = Colors.Green;
+            else if (feito)
+                corCirculo = (Color)Application.Current!.Resources["Primary"];
+            else
+                corCirculo = (Color)Application.Current!.Resources["Border"];
 
             var dot = new Border
             {
-                BackgroundColor = feito
-                    ? (Color)Application.Current!.Resources["Primary"]
-                    : (Color)Application.Current!.Resources["Border"],
+                BackgroundColor = corCirculo,
                 StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 17 },
                 StrokeThickness = 0,
                 WidthRequest = 34,
@@ -85,11 +98,11 @@ public partial class CheckInPage : ContentPage
 
             var label = new Label
             {
-                Text = dias[i],
+                Text = nomesDias[(int)dia.DayOfWeek], // nome correto pelo dia real
                 FontSize = 10,
                 FontAttributes = feito ? FontAttributes.Bold : FontAttributes.None,
                 TextColor = feito
-                    ? (Color)Application.Current!.Resources["Primary"]
+                    ? (ehHoje ? Colors.Green : (Color)Application.Current!.Resources["Primary"])
                     : (Color)Application.Current!.Resources["TextHint"],
                 HorizontalOptions = LayoutOptions.Center
             };

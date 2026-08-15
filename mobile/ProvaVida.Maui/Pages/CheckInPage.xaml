@@ -44,40 +44,39 @@
                 </Border>
 
                 <!-- Botão principal Check-in -->
-                <VerticalStackLayout HorizontalOptions="Center" Spacing="16"
-                                     HeightRequest="300">
-                    <Border BackgroundColor="{StaticResource PrimaryLight}"
-                            StrokeShape="RoundRectangle 126"
+                <Border BackgroundColor="{StaticResource PrimaryLight}"
+                        StrokeShape="RoundRectangle 126"
+                        StrokeThickness="0"
+                        WidthRequest="252" HeightRequest="252"
+                        HorizontalOptions="Center">
+                    <Border BackgroundColor="{Binding FezCheckInHoje, Converter={StaticResource BoolToColorConverter}}"
+                            StrokeShape="RoundRectangle 110"
                             StrokeThickness="0"
-                            WidthRequest="252" HeightRequest="252"
+                            WidthRequest="220" HeightRequest="220"
                             HorizontalOptions="Center"
-                            VerticalOptions="Start">
-                        <Border BackgroundColor="{StaticResource Primary}"
-                                StrokeShape="RoundRectangle 110"
-                                StrokeThickness="0"
-                                WidthRequest="220" HeightRequest="220"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center">
-                            <Border.Shadow>
-                                <Shadow Brush="{StaticResource Primary}"
-                                        Offset="0,16" Radius="40" Opacity="0.40"/>
-                            </Border.Shadow>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding CheckInCommand}"/>
-                            </Border.GestureRecognizers>
-                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="4">
-                                <Label Text="✓" FontSize="52" FontAttributes="Bold"
-                                       TextColor="White" HorizontalOptions="Center"/>
-                                <Label Text="Check-in" FontSize="18" FontAttributes="Bold"
-                                       TextColor="White" HorizontalOptions="Center"/>
-                            </VerticalStackLayout>
-                        </Border>
+                            VerticalOptions="Center">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource Primary}"
+                                    Offset="0,16" Radius="40" Opacity="0.40"/>
+                        </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CheckInCommand}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="4">
+                            <Label Text="✓" FontSize="52" FontAttributes="Bold"
+                                   TextColor="White" HorizontalOptions="Center"/>
+                            <Label Text="{Binding FezCheckInHoje, Converter={StaticResource BoolToCheckInTextConverter}}"
+                                   FontSize="18" FontAttributes="Bold"
+                                   TextColor="White" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
                     </Border>
-                    <Label x:Name="HintLabel" FontSize="13"
-                           TextColor="{StaticResource TextSecondary}"
-                           HorizontalOptions="Center"
-                           Text="Toque para registrar sua presença hoje"/>
-                </VerticalStackLayout>
+                </Border>
+
+                <!-- Hint abaixo do botão -->
+                <Label FontSize="13"
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center"
+                       Text="{Binding FezCheckInHoje, Converter={StaticResource BoolToCheckInHintConverter}}"/>
 
                 <!-- Erro -->
                 <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="13"
