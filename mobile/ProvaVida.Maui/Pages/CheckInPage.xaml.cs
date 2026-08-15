@@ -27,6 +27,14 @@ public partial class CheckInPage : ContentPage
         await _vm.InicializarAsync();
         AtualizarSemanaVisual();
 
+        // Solicita permissão de localização proativamente na primeira abertura
+        _ = Task.Run(async () =>
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (status != PermissionStatus.Granted)
+                await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+        });
+
         // Heartbeat ao abrir a tela — best effort
         _ = Task.Run(() => _heartbeatService.EnviarAsync());
 
