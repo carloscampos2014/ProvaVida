@@ -52,7 +52,7 @@
                             WidthRequest="252" HeightRequest="252"
                             HorizontalOptions="Center"
                             VerticalOptions="Start">
-                        <Border BackgroundColor="{StaticResource Primary}"
+                        <Border BackgroundColor="{Binding FezCheckInHoje, Converter={StaticResource BoolToColorConverter}}"
                                 StrokeShape="RoundRectangle 110"
                                 StrokeThickness="0"
                                 WidthRequest="220" HeightRequest="220"
@@ -68,7 +68,8 @@
                             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="4">
                                 <Label Text="✓" FontSize="52" FontAttributes="Bold"
                                        TextColor="White" HorizontalOptions="Center"/>
-                                <Label Text="Check-in" FontSize="18" FontAttributes="Bold"
+                                <Label Text="{Binding FezCheckInHoje, Converter={StaticResource BoolToCheckInTextConverter}}"
+                                       FontSize="18" FontAttributes="Bold"
                                        TextColor="White" HorizontalOptions="Center"/>
                             </VerticalStackLayout>
                         </Border>
@@ -76,7 +77,7 @@
                     <Label x:Name="HintLabel" FontSize="13"
                            TextColor="{StaticResource TextSecondary}"
                            HorizontalOptions="Center"
-                           Text="Toque para registrar sua presença hoje"/>
+                           Text="{Binding FezCheckInHoje, Converter={StaticResource BoolToCheckInHintConverter}}"/>
                 </VerticalStackLayout>
 
                 <!-- Erro -->

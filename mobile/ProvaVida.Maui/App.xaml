@@ -2,6 +2,7 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:ProvaVida.Maui"
+             xmlns:converters="clr-namespace:ProvaVida.Maui.Converters"
              x:Class="ProvaVida.Maui.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -9,6 +10,9 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:BoolToCheckInTextConverter x:Key="BoolToCheckInTextConverter"/>
+            <converters:BoolToCheckInHintConverter x:Key="BoolToCheckInHintConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
