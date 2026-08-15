@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProvaVida.Maui.Pages.LoadingPage"
+             BackgroundColor="{StaticResource Primary}"
+             Shell.NavBarIsVisible="False">
+
+    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="24">
+        <!-- Ícone coração -->
+        <Border BackgroundColor="White"
+                StrokeShape="RoundRectangle 44"
+                StrokeThickness="0"
+                Padding="16"
+                WidthRequest="96" HeightRequest="96"
+                HorizontalOptions="Center">
+            <Label Text="♥" FontSize="44" TextColor="{StaticResource Primary}"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Border>
+
+        <Label Text="ProvaVida" FontSize="26" FontAttributes="Bold"
+               TextColor="White" HorizontalOptions="Center"/>
+
+        <ActivityIndicator IsRunning="True" Color="White"
+                           HorizontalOptions="Center" Margin="0,8,0,0"/>
+    </VerticalStackLayout>
+
+</ContentPage>

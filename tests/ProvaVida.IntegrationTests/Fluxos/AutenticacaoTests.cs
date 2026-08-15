@@ -115,5 +115,5 @@ public class AutenticacaoTests : IClassFixture<ProvaVidaWebFactory>, IAsyncLifet
         res.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
-    private record LoginResponse(string Token, DateTime ExpiraEm);
+    private record LoginResponse(string Token, DateTime ExpiraEm, string RefreshToken, DateTime RefreshTokenExpiraEm);
 }

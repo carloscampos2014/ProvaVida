@@ -82,12 +82,14 @@ public class LocalDatabase
     public async Task<bool> FezCheckInHojeAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        var hoje = DateTime.UtcNow.Date;
-        var amanha = hoje.AddDays(1);
+        // Usa horário local para evitar problemas de fuso — início e fim do dia local em UTC
+        var hojeLocal = DateTime.Now.Date;
+        var inicioUtc = hojeLocal.ToUniversalTime();
+        var fimUtc = hojeLocal.AddDays(1).ToUniversalTime();
         var count = await db.Table<CheckInLocal>()
             .CountAsync(c => c.UsuarioId == usuarioId
-                          && c.DataHora >= hoje
-                          && c.DataHora < amanha);
+                          && c.DataHora >= inicioUtc
+                          && c.DataHora < fimUtc);
         return count > 0;
     }
 

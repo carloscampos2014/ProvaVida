@@ -10,11 +10,9 @@
   </PropertyGroup>
 
   <!-- Suppresses known MailKit/MimeKit advisories — no patch available yet -->
-  <!-- Suppresses Microsoft.OpenApi vulnerability — transitiva do Scalar, sem patch disponível -->
   <ItemGroup>
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-9j88-vvj5-vhgr" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g7hc-96xr-gvvx" />
-    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-v5pm-xwqc-g5wc" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +23,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.0" />
     <PackageReference Include="MimeKit" Version="4.13.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Força versao corrigida do Microsoft.OpenApi (dependencia transitiva do Scalar com vulnerabilidade GHSA-v5pm-xwqc-g5wc) -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.6.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
   </ItemGroup>

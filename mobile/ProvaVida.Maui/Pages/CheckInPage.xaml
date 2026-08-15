@@ -14,7 +14,7 @@
                        FontSize="16" TextColor="{StaticResource TextSecondary}"/>
             </Border>
 
-            <VerticalStackLayout Padding="20,12,20,24" Spacing="20">
+            <VerticalStackLayout Padding="20,12,20,32" Spacing="20">
 
                 <!-- Card sequência -->
                 <Border BackgroundColor="White" StrokeShape="RoundRectangle 20"

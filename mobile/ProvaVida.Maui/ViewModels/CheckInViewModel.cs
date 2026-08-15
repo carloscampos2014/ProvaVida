@@ -62,13 +62,14 @@ public class CheckInViewModel : BaseViewModel
 
         var checkInsSemana = await _db.ObterCheckInsDaSemanaAsync(usuario.Email);
 
-        // Monta array de 7 dias (Dom..Sab ou Seg..Dom dependendo da semana)
-        var hoje = DateTime.UtcNow.Date;
+        // Usa horário local do dispositivo para evitar problemas de fuso horário
+        var hoje = DateTime.Now.Date;
         var semana = new List<bool>();
         for (int i = 6; i >= 0; i--)
         {
             var dia = hoje.AddDays(-i);
-            semana.Add(checkInsSemana.Any(c => c.DataHora.Date == dia));
+            // Converte DataHora (UTC) para local antes de comparar
+            semana.Add(checkInsSemana.Any(c => c.DataHora.ToLocalTime().Date == dia));
         }
         Semana = semana;
 
