@@ -15,12 +15,19 @@ public class LembreteReceiver : BroadcastReceiver
 
         CriarCanal(context);
 
-        var notificationIntent = context.PackageManager!
-            .GetLaunchIntentForPackage(context.PackageName!);
+        var packageManager = context.PackageManager;
+        if (packageManager is null) return;
 
-        var pendingIntent = PendingIntent.GetActivity(
-            context, 0, notificationIntent,
-            PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+        var packageName = context.PackageName;
+        if (packageName is null) return;
+
+        var notificationIntent = packageManager.GetLaunchIntentForPackage(packageName);
+
+        var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
+            ? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
+            : PendingIntentFlags.UpdateCurrent;
+
+        var pendingIntent = PendingIntent.GetActivity(context, 0, notificationIntent, flags);
 
         var notification = new NotificationCompat.Builder(context, ChannelId)
             .SetContentTitle("Está tudo bem com você?")
@@ -47,7 +54,7 @@ public class LembreteReceiver : BroadcastReceiver
             Description = "Lembrete diário para fazer o check-in de bem-estar"
         };
 
-        var manager = (NotificationManager)context.GetSystemService(Context.NotificationService)!;
-        manager.CreateNotificationChannel(channel);
+        var manager = context.GetSystemService(Context.NotificationService) as NotificationManager;
+        manager?.CreateNotificationChannel(channel);
     }
 }
