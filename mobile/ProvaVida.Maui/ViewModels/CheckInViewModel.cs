@@ -47,9 +47,12 @@ public class CheckInViewModel : BaseViewModel
         if (usuario is not null)
             NomeUsuario = usuario.Nome.Split(' ')[0]; // primeiro nome
 
+        // Faz sync reversa ANTES de carregar o estado — garante dados atualizados após reinstalação
+        await _syncService.SincronizarAsync();
+
         await CarregarEstadoAsync();
 
-        // Sync em background — não bloqueia a UI
+        // Sync dos pendentes em background — não bloqueia a UI
         _ = Task.Run(() => _syncService.SincronizarAsync());
     }
 

@@ -12,15 +12,18 @@ public class SyncService
     private readonly LocalDatabase _db;
     private readonly ICheckInService _checkInService;
     private readonly IHeartbeatService _heartbeatService;
+    private readonly IUsuarioStorage _usuarioStorage;
 
     public SyncService(
         LocalDatabase db,
         ICheckInService checkInService,
-        IHeartbeatService heartbeatService)
+        IHeartbeatService heartbeatService,
+        IUsuarioStorage usuarioStorage)
     {
         _db = db;
         _checkInService = checkInService;
         _heartbeatService = heartbeatService;
+        _usuarioStorage = usuarioStorage;
     }
 
     public async Task SincronizarAsync()
@@ -28,6 +31,7 @@ public class SyncService
         if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet) return;
 
         await SincronizarCheckInsAsync();
+        await SincronizarReversaAsync();
         await SincronizarHeartbeatsAsync();
     }
 
@@ -53,6 +57,45 @@ public class SyncService
             {
                 await _db.IncrementarTentativaCheckInAsync(checkIn.IdLocal);
             }
+        }
+    }
+
+    /// <summary>
+    /// Sincronização reversa: busca check-ins dos últimos 30 dias na API
+    /// e salva no SQLite local os que ainda não existem.
+    /// Resolve o problema de reinstalação do app ou troca de dispositivo.
+    /// </summary>
+    private async Task SincronizarReversaAsync()
+    {
+        try
+        {
+            var usuario = _usuarioStorage.Obter();
+            if (usuario is null) return;
+
+            var historico = await _checkInService.ObterHistoricoAsync(
+                dataInicio: DateTime.UtcNow.AddDays(-30));
+
+            foreach (var item in historico)
+            {
+                var idLocal = item.IdLocal.ToString();
+                if (await _db.ExisteCheckInAsync(idLocal)) continue;
+
+                // Check-in existe na API mas não no SQLite local — importa
+                await _db.SalvarCheckInAsync(new CheckInLocal
+                {
+                    IdLocal      = idLocal,
+                    UsuarioId    = usuario.Email,
+                    DataHora     = item.DataHora,
+                    Latitude     = item.Latitude,
+                    Longitude    = item.Longitude,
+                    DeviceId     = item.DeviceId,
+                    Sincronizado = true
+                });
+            }
+        }
+        catch
+        {
+            // Falha silenciosa — o app continua funcional com dados locais
         }
     }
 
