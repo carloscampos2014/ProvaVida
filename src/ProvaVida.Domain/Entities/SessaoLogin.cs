@@ -9,12 +9,21 @@ public class SessaoLogin
     public DateTime ExpiraEm { get; private set; }
     public bool Ativo { get; private set; }
 
+    // Refresh token — opaco (Base64 de 64 bytes), expira em 365 dias
+    public string? RefreshToken { get; private set; }
+    public DateTime? RefreshTokenExpiraEm { get; private set; }
+
     // EF Core navigation
     public Usuario? Usuario { get; private set; }
 
     protected SessaoLogin() { }
 
-    public static SessaoLogin Criar(Guid usuarioId, string token, DateTime expiraEm)
+    public static SessaoLogin Criar(
+        Guid usuarioId,
+        string token,
+        DateTime expiraEm,
+        string refreshToken,
+        DateTime refreshTokenExpiraEm)
     {
         return new SessaoLogin
         {
@@ -23,7 +32,9 @@ public class SessaoLogin
             Token = token,
             CriadoEm = DateTime.UtcNow,
             ExpiraEm = expiraEm,
-            Ativo = true
+            Ativo = true,
+            RefreshToken = refreshToken,
+            RefreshTokenExpiraEm = refreshTokenExpiraEm
         };
     }
 
@@ -33,4 +44,10 @@ public class SessaoLogin
     }
 
     public bool EstaValida() => Ativo && ExpiraEm > DateTime.UtcNow;
+
+    public bool RefreshTokenValido() =>
+        Ativo &&
+        RefreshToken is not null &&
+        RefreshTokenExpiraEm.HasValue &&
+        RefreshTokenExpiraEm.Value > DateTime.UtcNow;
 }

@@ -38,7 +38,10 @@ public class LoginUseCase
             throw AppException.NaoAutorizado("Credenciais inválidas.");
 
         var token = _jwtService.GerarToken(usuario, out var expiraEm);
-        var sessao = SessaoLogin.Criar(usuario.Id, token, expiraEm);
+        var refreshToken = _jwtService.GerarRefreshToken();
+        var refreshTokenExpiraEm = DateTime.UtcNow.AddDays(365);
+
+        var sessao = SessaoLogin.Criar(usuario.Id, token, expiraEm, refreshToken, refreshTokenExpiraEm);
 
         await _uow.BeginAsync(cancellationToken: ct);
         try
@@ -52,6 +55,6 @@ public class LoginUseCase
             throw;
         }
 
-        return new LoginOutput(token, expiraEm);
+        return new LoginOutput(token, expiraEm, refreshToken, refreshTokenExpiraEm);
     }
 }

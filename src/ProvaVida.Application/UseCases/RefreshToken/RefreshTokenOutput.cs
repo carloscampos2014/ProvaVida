@@ -1,6 +1,6 @@
-namespace ProvaVida.Application.UseCases.Login;
+namespace ProvaVida.Application.UseCases.RefreshToken;
 
-public record LoginOutput(
+public record RefreshTokenOutput(
     string Token,
     DateTime ExpiraEm,
     string RefreshToken,

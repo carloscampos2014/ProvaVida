@@ -34,14 +34,48 @@ public class AuthService : IAuthService
     public async Task LogoffAsync(CancellationToken ct = default)
     {
         var token = await _tokenStorage.ObterAsync();
-        if (string.IsNullOrEmpty(token)) return;
+        if (!string.IsNullOrEmpty(token))
+        {
+            _http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-        _http.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            // Melhor esforço — se falhar, limpa localmente mesmo assim
+            try { await _http.PostAsync("auth/logoff", null, ct); }
+            catch { /* ignora falha de rede no logoff */ }
+        }
 
-        // Melhor esforço — se falhar, limpa localmente mesmo assim
-        try { await _http.PostAsync("auth/logoff", null, ct); }
-        catch { /* ignora falha de rede no logoff */ }
+        // Sempre limpa o storage local
+        await _tokenStorage.LimparTudoAsync();
+    }
+
+    public async Task<bool> TentarRenovarTokenAsync(CancellationToken ct = default)
+    {
+        var refreshToken = await _tokenStorage.ObterRefreshTokenAsync();
+        if (string.IsNullOrEmpty(refreshToken)) return false;
+
+        try
+        {
+            var response = await _http.PostAsJsonAsync(
+                "auth/refresh",
+                new RefreshTokenRequest(refreshToken),
+                ct);
+
+            if (!response.IsSuccessStatusCode) return false;
+
+            var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(ct);
+            if (result is null) return false;
+
+            await _tokenStorage.SalvarAsync(result.Token);
+            await _tokenStorage.SalvarExpiraEmAsync(result.ExpiraEm);
+            await _tokenStorage.SalvarRefreshTokenAsync(result.RefreshToken);
+
+            return true;
+        }
+        catch
+        {
+            // Sem internet ou erro inesperado — não renova, mas não limpa o storage
+            return false;
+        }
     }
 
     private static async Task EnsureSuccessAsync(HttpResponseMessage response)

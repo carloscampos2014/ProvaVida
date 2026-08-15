@@ -48,4 +48,11 @@ public class JwtService : IJwtService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public string GerarRefreshToken()
+    {
+        var bytes = new byte[64];
+        System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes);
+    }
 }

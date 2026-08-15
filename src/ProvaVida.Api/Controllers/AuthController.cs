@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProvaVida.Application.UseCases.CadastrarUsuario;
 using ProvaVida.Application.UseCases.Login;
 using ProvaVida.Application.UseCases.Logoff;
+using ProvaVida.Application.UseCases.RefreshToken;
 
 namespace ProvaVida.Api.Controllers;
 
@@ -31,6 +32,19 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(
         [FromBody] LoginInput input,
         [FromServices] LoginUseCase useCase,
+        CancellationToken ct)
+    {
+        var output = await useCase.ExecutarAsync(input, ct);
+        return Ok(output);
+    }
+
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(RefreshTokenOutput), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Refresh(
+        [FromBody] RefreshTokenInput input,
+        [FromServices] RefreshTokenUseCase useCase,
         CancellationToken ct)
     {
         var output = await useCase.ExecutarAsync(input, ct);

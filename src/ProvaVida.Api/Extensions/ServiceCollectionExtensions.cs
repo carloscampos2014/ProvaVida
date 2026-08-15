@@ -11,6 +11,7 @@ using ProvaVida.Application.UseCases.ExcluirConta;
 using ProvaVida.Application.UseCases.Login;
 using ProvaVida.Application.UseCases.Logoff;
 using ProvaVida.Application.UseCases.ObterHistoricoCheckIn;
+using ProvaVida.Application.UseCases.RefreshToken;
 using ProvaVida.Application.UseCases.RegistrarCheckIn;
 using ProvaVida.Application.UseCases.RegistrarHeartbeat;
 using ProvaVida.Application.UseCases.VerificarInatividade;
@@ -114,6 +115,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CadastrarUsuarioUseCase>();
         services.AddScoped<LoginUseCase>();
         services.AddScoped<LogoffUseCase>();
+        services.AddScoped<RefreshTokenUseCase>();
         services.AddScoped<AlterarContaUseCase>();
         services.AddScoped<ExcluirContaUseCase>();
         services.AddScoped<RegistrarCheckInUseCase>();
