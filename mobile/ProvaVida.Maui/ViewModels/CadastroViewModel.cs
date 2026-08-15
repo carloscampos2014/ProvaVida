@@ -12,6 +12,7 @@ public class CadastroViewModel : BaseViewModel
     private string _email = string.Empty;
     private string _whatsApp = string.Empty;
     private string _senha = string.Empty;
+    private bool _senhaOculta = true;
 
     // Passo 2 — Contato de emergência
     private string _contatoNome = string.Empty;
@@ -25,6 +26,7 @@ public class CadastroViewModel : BaseViewModel
     public string Email { get => _email; set => SetProperty(ref _email, value); }
     public string WhatsApp { get => _whatsApp; set => SetProperty(ref _whatsApp, value); }
     public string Senha { get => _senha; set => SetProperty(ref _senha, value); }
+    public bool SenhaOculta { get => _senhaOculta; set => SetProperty(ref _senhaOculta, value); }
     public string ContatoNome { get => _contatoNome; set => SetProperty(ref _contatoNome, value); }
     public string ContatoEmail { get => _contatoEmail; set => SetProperty(ref _contatoEmail, value); }
     public string ContatoWhatsApp { get => _contatoWhatsApp; set => SetProperty(ref _contatoWhatsApp, value); }
@@ -48,6 +50,7 @@ public class CadastroViewModel : BaseViewModel
     public ICommand VoltarCommand { get; }
     public ICommand CadastrarCommand { get; }
     public ICommand IrParaLoginCommand { get; }
+    public ICommand AlternarSenhaCommand { get; }
 
     public CadastroViewModel(IAuthService authService)
     {
@@ -79,6 +82,8 @@ public class CadastroViewModel : BaseViewModel
 
         IrParaLoginCommand = new Command(async () =>
             await Shell.Current.GoToAsync("//login"));
+
+        AlternarSenhaCommand = new Command(() => SenhaOculta = !SenhaOculta);
     }
 
     private async Task CadastrarAsync()
