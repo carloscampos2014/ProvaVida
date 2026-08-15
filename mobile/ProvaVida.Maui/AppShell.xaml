@@ -5,6 +5,10 @@
        x:Class="ProvaVida.Maui.AppShell"
        Shell.NavBarIsVisible="False">
 
+    <!-- LoadingPage como rota inicial — verifica sessao antes de exibir login ou checkin -->
+    <ShellContent Route="loading"
+                  ContentTemplate="{DataTemplate pages:LoadingPage}"/>
+
     <ShellContent Route="login"
                   ContentTemplate="{DataTemplate pages:LoginPage}"/>
 
