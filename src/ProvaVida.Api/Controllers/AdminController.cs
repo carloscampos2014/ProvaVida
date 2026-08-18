@@ -158,7 +158,7 @@ public class AdminController : ControllerBase
                     }
                     .grid-diag {
                         display: grid;
-                        grid-template-columns: 160px 1fr 1fr;
+                        grid-template-columns: 160px 240px 240px;
                         gap: 10px;
                     }
                     .card {
@@ -276,13 +276,13 @@ public class AdminController : ControllerBase
                     <div class="card">
                         <div class="label">✉️ Teste de E-mail</div>
                         <input id="email-dest" type="email" placeholder="email@exemplo.com"/>
-                        <button class="btn" style="width:100%" onclick="testar('email')">Enviar teste</button>
+                        <button class="btn" onclick="testar('email')">Enviar teste</button>
                         <div class="resultado" id="email-res"></div>
                     </div>
                     <div class="card">
                         <div class="label">📱 Teste de WhatsApp</div>
                         <input id="wapp-dest" type="tel" placeholder="5511999999999"/>
-                        <button class="btn" style="width:100%" onclick="testar('whatsapp')">Enviar teste</button>
+                        <button class="btn" onclick="testar('whatsapp')">Enviar teste</button>
                         <div class="resultado" id="wapp-res"></div>
                     </div>
                 </div>
