@@ -96,7 +96,8 @@ jobs:
           Jwt__Audience=ProvaVida
           Jwt__ExpirationHours=24
           Email__Usuario=${{ secrets.EMAIL_USUARIO }}
-          Email__Senha=${{ secrets.EMAIL_SENHA }}          WhatsApp__Token=${{ secrets.WHATSAPP_TOKEN }}
+          Email__Senha=${{ secrets.EMAIL_SENHA }}
+          WhatsApp__Token=${{ secrets.WHATSAPP_TOKEN }}
           WhatsApp__PhoneNumberId=${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
           ENVEOF
           sudo chmod 600 /etc/provavida/env
