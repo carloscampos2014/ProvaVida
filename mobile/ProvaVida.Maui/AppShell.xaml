@@ -4,7 +4,7 @@
        xmlns:pages="clr-namespace:ProvaVida.Maui.Pages"
        x:Class="ProvaVida.Maui.AppShell"
        Shell.NavBarIsVisible="False"
-       FlyoutBackgroundColor="{StaticResource White}">
+       FlyoutBackgroundColor="White">
 
     <!-- Header do flyout com avatar e nome do usuário -->
     <Shell.FlyoutHeader>
