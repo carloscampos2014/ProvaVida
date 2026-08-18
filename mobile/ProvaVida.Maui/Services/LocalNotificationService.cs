@@ -5,8 +5,10 @@ namespace ProvaVida.Maui.Services;
 /// </summary>
 public static class LocalNotificationService
 {
-    private const int LembreteId = 1001;
-    private const int HoraLembrete = 20; // 20h
+    private const int LembreteId       = 1001;
+    private const int AvisoInatividadeId = 1002;
+    private const int HoraLembrete     = 20; // 20h
+    private const int HoraAvisoInatividade = 21; // 21h
 
     /// <summary>
     /// Agenda o lembrete diário de check-in se ainda não foi feito hoje.
@@ -23,7 +25,29 @@ public static class LocalNotificationService
                 horario = horario.AddDays(1);
 
 #if ANDROID
-            AgendarNotificacaoAndroid(horario);
+            AgendarNotificacaoAndroid(horario, LembreteId, typeof(LembreteReceiver));
+#endif
+        }
+        catch { /* ignora se permissão negada */ }
+    }
+
+    /// <summary>
+    /// Agenda o aviso de inatividade diário para as 21h.
+    /// Verifica localmente se há check-in nas últimas 48h antes de disparar.
+    /// </summary>
+    public static void AgendarAvisoInatividade()
+    {
+        try
+        {
+            var agora = DateTime.Now;
+            var horario = new DateTime(agora.Year, agora.Month, agora.Day, HoraAvisoInatividade, 0, 0);
+
+            // Se já passou das 21h hoje, agenda para amanhã
+            if (agora >= horario)
+                horario = horario.AddDays(1);
+
+#if ANDROID
+            AgendarNotificacaoAndroid(horario, AvisoInatividadeId, typeof(AvisoInatividadeReceiver));
 #endif
         }
         catch { /* ignora se permissão negada */ }
@@ -34,24 +58,24 @@ public static class LocalNotificationService
         try
         {
 #if ANDROID
-            CancelarNotificacaoAndroid();
+            CancelarNotificacaoAndroid(LembreteId, typeof(LembreteReceiver));
 #endif
         }
         catch { }
     }
 
 #if ANDROID
-    private static void AgendarNotificacaoAndroid(DateTime horario)
+    private static void AgendarNotificacaoAndroid(DateTime horario, int requestCode, Type receiverType)
     {
         var context = Android.App.Application.Context;
-        var intent  = new Android.Content.Intent(context, typeof(LembreteReceiver));
+        var intent  = new Android.Content.Intent(context, receiverType);
 
         // PendingIntentFlags.Immutable exige API 23+
         var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
             ? Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable
             : Android.App.PendingIntentFlags.UpdateCurrent;
 
-        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, LembreteId, intent, flags);
+        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, requestCode, intent, flags);
         if (pendingIntent is null) return;
 
         var alarmManager = context.GetSystemService(Android.Content.Context.AlarmService)
@@ -69,16 +93,16 @@ public static class LocalNotificationService
                 Android.App.AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
     }
 
-    private static void CancelarNotificacaoAndroid()
+    private static void CancelarNotificacaoAndroid(int requestCode, Type receiverType)
     {
         var context = Android.App.Application.Context;
-        var intent  = new Android.Content.Intent(context, typeof(LembreteReceiver));
+        var intent  = new Android.Content.Intent(context, receiverType);
 
         var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
             ? Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable
             : Android.App.PendingIntentFlags.UpdateCurrent;
 
-        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, LembreteId, intent, flags);
+        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, requestCode, intent, flags);
         if (pendingIntent is null) return;
 
         var alarmManager = context.GetSystemService(Android.Content.Context.AlarmService)

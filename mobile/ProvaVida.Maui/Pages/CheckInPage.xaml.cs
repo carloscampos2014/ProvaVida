@@ -51,6 +51,9 @@ public partial class CheckInPage : ContentPage
         // Agenda lembrete se ainda não fez check-in hoje
         if (!_vm.FezCheckInHoje)
             LocalNotificationService.AgendarLembrete();
+
+        // Agenda aviso de inatividade diário às 21h (verifica SQLite local)
+        LocalNotificationService.AgendarAvisoInatividade();
     }
 
     protected override void OnDisappearing()
