@@ -45,11 +45,45 @@ public class AdminController : ControllerBase
                     header {
                         display: flex;
                         align-items: center;
-                        gap: 12px;
+                        gap: 16px;
                         margin-bottom: 32px;
+                        flex-wrap: wrap;
                     }
                     header h1 { font-size: 24px; font-weight: 700; color: #774CCC; }
-                    header span { font-size: 13px; color: #6E648B; margin-left: auto; }
+                    .header-right {
+                        margin-left: auto;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        flex-wrap: wrap;
+                    }
+                    .gerado-em { font-size: 12px; color: #6E648B; }
+                    .countdown {
+                        font-size: 13px;
+                        font-weight: 600;
+                        color: #774CCC;
+                        background: #EFE9FB;
+                        padding: 6px 12px;
+                        border-radius: 8px;
+                        min-width: 110px;
+                        text-align: center;
+                    }
+                    .countdown.urgente { color: #E73C3C; background: #FEE5E5; }
+                    .btn-refresh {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 16px;
+                        background: #774CCC;
+                        color: #fff;
+                        border-radius: 8px;
+                        text-decoration: none;
+                        font-size: 13px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        border: none;
+                    }
+                    .btn-refresh:hover { background: #57329F; }
                     h2 {
                         font-size: 13px;
                         font-weight: 600;
@@ -75,24 +109,16 @@ public class AdminController : ControllerBase
                     .card.success .value { color: #2E9E6B; }
                     .card.warning .value { color: #D97706; }
                     .card.neutral .value { color: #1E1930; }
-                    .refresh {
-                        display: inline-block;
-                        margin-top: 32px;
-                        padding: 10px 24px;
-                        background: #774CCC;
-                        color: #fff;
-                        border-radius: 8px;
-                        text-decoration: none;
-                        font-size: 14px;
-                        font-weight: 600;
-                    }
-                    .refresh:hover { background: #57329F; }
                 </style>
             </head>
             <body>
                 <header>
                     <h1>ProvaVida — Painel Admin</h1>
-                    <span>Gerado em {{geradoEm}}</span>
+                    <div class="header-right">
+                        <span class="gerado-em">Gerado em {{geradoEm}}</span>
+                        <span class="countdown" id="countdown">Atualizando em 60s</span>
+                        <button class="btn-refresh" onclick="location.reload()">↻ Atualizar agora</button>
+                    </div>
                 </header>
 
                 <h2>Usuários</h2>
@@ -143,7 +169,30 @@ public class AdminController : ControllerBase
                     </div>
                 </div>
 
-                <a class="refresh" href="/admin">↻ Atualizar</a>
+                <script>
+                    (function () {
+                        var INTERVALO = 60;
+                        var restante = INTERVALO;
+                        var el = document.getElementById('countdown');
+
+                        function atualizar() {
+                            el.textContent = 'Atualizando em ' + restante + 's';
+                            if (restante <= 10) {
+                                el.classList.add('urgente');
+                            } else {
+                                el.classList.remove('urgente');
+                            }
+                            if (restante <= 0) {
+                                location.reload();
+                                return;
+                            }
+                            restante--;
+                            setTimeout(atualizar, 1000);
+                        }
+
+                        atualizar();
+                    })();
+                </script>
             </body>
             </html>
             """;
