@@ -99,6 +99,9 @@ jobs:
           Email__Senha=${{ secrets.EMAIL_SENHA }}
           WhatsApp__Token=${{ secrets.WHATSAPP_TOKEN }}
           WhatsApp__PhoneNumberId=${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
+          Twilio__AccountSid=${{ secrets.TWILIO_ACCOUNT_SID }}
+          Twilio__AuthToken=${{ secrets.TWILIO_AUTH_TOKEN }}
+          Twilio__FromWhatsApp=${{ secrets.TWILIO_WHATSAPP_FROM }}
           ENVEOF
           sudo chmod 600 /etc/provavida/env
           sudo chown root:root /etc/provavida/env
