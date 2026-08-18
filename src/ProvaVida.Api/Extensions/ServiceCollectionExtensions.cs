@@ -12,6 +12,7 @@ using ProvaVida.Application.UseCases.ExcluirConta;
 using ProvaVida.Application.UseCases.Login;
 using ProvaVida.Application.UseCases.Logoff;
 using ProvaVida.Application.UseCases.ObterHistoricoCheckIn;
+using ProvaVida.Application.UseCases.ObterMetricasAdmin;
 using ProvaVida.Application.UseCases.RefreshToken;
 using ProvaVida.Application.UseCases.RegistrarCheckIn;
 using ProvaVida.Application.UseCases.RegistrarHeartbeat;
@@ -99,6 +100,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICheckInRepository, CheckInRepository>();
         services.AddScoped<IHeartbeatRepository, HeartbeatRepository>();
         services.AddScoped<INotificacaoEmergenciaRepository, NotificacaoEmergenciaRepository>();
+        services.AddScoped<IAdminMetricasRepository, AdminMetricasRepository>();
 
         // Segurança
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
@@ -128,6 +130,9 @@ public static class ServiceCollectionExtensions
         // Jobs
         services.AddScoped<VerificacaoInatividadeJob>();
         services.AddScoped<DispararAlertaJob>();
+
+        // Admin
+        services.AddScoped<ObterMetricasAdminUseCase>();
 
         return services;
     }
