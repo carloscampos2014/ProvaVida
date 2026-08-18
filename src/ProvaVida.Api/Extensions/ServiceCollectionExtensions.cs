@@ -109,6 +109,7 @@ public static class ServiceCollectionExtensions
 
         // Notificações
         services.AddHttpClient<IWhatsAppService, WhatsAppService>();
+        services.AddScoped<IWhatsAppService, TwilioWhatsAppService>();
         services.AddScoped<IEmailService, EmailService>();
 
         // Validadores
