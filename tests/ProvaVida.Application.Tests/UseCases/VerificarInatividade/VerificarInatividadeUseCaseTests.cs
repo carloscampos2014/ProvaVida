@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using ProvaVida.Application.Interfaces;
 using ProvaVida.Application.UseCases.VerificarInatividade;
@@ -25,7 +26,8 @@ public class VerificarInatividadeUseCaseTests
 
         _useCase = new VerificarInatividadeUseCase(
             _usuarioRepo.Object, _checkInRepo.Object, _heartbeatRepo.Object,
-            _notifRepo.Object, _emailSvc.Object, _wappSvc.Object, _uow.Object);
+            _notifRepo.Object, _emailSvc.Object, _wappSvc.Object, _uow.Object,
+            NullLogger<VerificarInatividadeUseCase>.Instance);
     }
 
     private static Usuario CriarUsuario() => Usuario.Criar(

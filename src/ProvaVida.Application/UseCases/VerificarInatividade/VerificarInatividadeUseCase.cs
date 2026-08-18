@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using ProvaVida.Application.Interfaces;
 using ProvaVida.Domain.Entities;
 
@@ -18,10 +19,11 @@ public class VerificarInatividadeUseCase
     private readonly IEmailService _emailService;
     private readonly IWhatsAppService _whatsAppService;
     private readonly IUnitOfWork _uow;
+    private readonly ILogger<VerificarInatividadeUseCase> _logger;
 
-    private const int HorasInatividade    = 48;
-    private const int HorasHeartbeat      = 24;
-    private const int HorasJanelaGraca    = 6;
+    private const int HorasInatividade = 48;
+    private const int HorasHeartbeat   = 24;
+    private const int HorasJanelaGraca = 6;
 
     public VerificarInatividadeUseCase(
         IUsuarioRepository usuarioRepository,
@@ -30,15 +32,17 @@ public class VerificarInatividadeUseCase
         INotificacaoEmergenciaRepository notificacaoRepository,
         IEmailService emailService,
         IWhatsAppService whatsAppService,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        ILogger<VerificarInatividadeUseCase> logger)
     {
-        _usuarioRepository = usuarioRepository;
-        _checkInRepository = checkInRepository;
-        _heartbeatRepository = heartbeatRepository;
+        _usuarioRepository    = usuarioRepository;
+        _checkInRepository    = checkInRepository;
+        _heartbeatRepository  = heartbeatRepository;
         _notificacaoRepository = notificacaoRepository;
-        _emailService = emailService;
-        _whatsAppService = whatsAppService;
-        _uow = uow;
+        _emailService         = emailService;
+        _whatsAppService      = whatsAppService;
+        _uow                  = uow;
+        _logger               = logger;
     }
 
     /// <summary>
@@ -104,7 +108,7 @@ public class VerificarInatividadeUseCase
             if (usuario is null || !usuario.Ativo) continue;
 
             // Camada 3 — Dispara e-mail e WhatsApp ao contato de emergência (independentes)
-            var emailEnviado = false;
+            var emailEnviado    = false;
             var whatsappEnviado = false;
 
             try
@@ -116,8 +120,16 @@ public class VerificarInatividadeUseCase
                     CorpoHtml: MontarCorpoEmailEmergencia(usuario.Nome, usuario.ContatoEmergenciaNome)
                 ), ct);
                 emailEnviado = true;
+                _logger.LogInformation(
+                    "E-mail de emergência enviado para {Contato} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaEmail, usuario.Id);
             }
-            catch { /* log seria registrado pelo Serilog via Hangfire */ }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Falha ao enviar e-mail de emergência para {Contato} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaEmail, usuario.Id);
+            }
 
             try
             {
@@ -126,16 +138,28 @@ public class VerificarInatividadeUseCase
                     MontarMensagemWhatsApp(usuario.Nome, usuario.ContatoEmergenciaNome),
                     ct);
                 whatsappEnviado = true;
+                _logger.LogInformation(
+                    "WhatsApp de emergência enviado para {Telefone} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaWhatsApp, usuario.Id);
             }
-            catch { /* fallback — e-mail já foi tentado */ }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Falha ao enviar WhatsApp de emergência para {Telefone} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaWhatsApp, usuario.Id);
+            }
 
             var canal = (emailEnviado, whatsappEnviado) switch
             {
-                (true, true)  => "email+whatsapp",
-                (true, false) => "email",
-                (false, true) => "whatsapp",
-                _             => "falha"
+                (true, true)   => "email+whatsapp",
+                (true, false)  => "email",
+                (false, true)  => "whatsapp",
+                _              => "falha"
             };
+
+            _logger.LogInformation(
+                "Resultado do disparo para usuário {UsuarioId}: canal={Canal}",
+                usuario.Id, canal);
 
             await GravarNotificacaoAsync(
                 NotificacaoEmergencia.CriarDisparado(notificacao.UsuarioId, canal), ct);
@@ -167,8 +191,16 @@ public class VerificarInatividadeUseCase
                 Assunto: "Está tudo bem com você?",
                 CorpoHtml: MontarCorpoEmailAviso(usuario.Nome)
             ), ct);
+            _logger.LogInformation(
+                "Aviso de inatividade enviado ao usuário {UsuarioId} ({Email})",
+                usuario.Id, usuario.Email);
         }
-        catch { /* melhor esforço — continua mesmo se falhar */ }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Falha ao enviar aviso de inatividade ao usuário {UsuarioId} ({Email})",
+                usuario.Id, usuario.Email);
+        }
     }
 
     private static string MontarCorpoEmailAviso(string nomeUsuario) => $"""
