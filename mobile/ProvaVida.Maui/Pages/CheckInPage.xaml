@@ -62,10 +62,6 @@
                         WidthRequest="220" HeightRequest="220"
                         HorizontalOptions="Center"
                         VerticalOptions="Center">
-                    <Border.Shadow>
-                        <Shadow Brush="{StaticResource Primary}"
-                                Offset="0,16" Radius="40" Opacity="0.40"/>
-                    </Border.Shadow>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding CheckInCommand}"/>
                     </Border.GestureRecognizers>
