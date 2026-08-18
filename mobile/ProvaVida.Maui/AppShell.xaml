@@ -4,27 +4,27 @@
        xmlns:pages="clr-namespace:ProvaVida.Maui.Pages"
        x:Class="ProvaVida.Maui.AppShell"
        Shell.NavBarIsVisible="False"
-       FlyoutBackgroundColor="White">
+       FlyoutBackgroundColor="#FFFFFF">
 
     <!-- Header do flyout com avatar e nome do usuário -->
     <Shell.FlyoutHeader>
-        <Grid BackgroundColor="{StaticResource Primary}"
+        <Grid BackgroundColor="#774CCC"
               Padding="20,48,20,24" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
             <Border Grid.Row="0"
-                    BackgroundColor="{StaticResource PrimaryLight}"
+                    BackgroundColor="#EFE9FB"
                     StrokeShape="RoundRectangle 36"
                     StrokeThickness="0"
                     WidthRequest="72" HeightRequest="72"
                     HorizontalOptions="Start">
                 <Label x:Name="FlyoutAvatar"
                        FontSize="28" FontAttributes="Bold"
-                       TextColor="{StaticResource Primary}"
+                       TextColor="#774CCC"
                        HorizontalOptions="Center" VerticalOptions="Center"/>
             </Border>
             <Label Grid.Row="1" x:Name="FlyoutNome"
-                   FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                   FontSize="16" FontAttributes="Bold" TextColor="#FFFFFF"/>
             <Label Grid.Row="2" x:Name="FlyoutEmail"
-                   FontSize="13" TextColor="White" Opacity="0.8"/>
+                   FontSize="13" TextColor="#FFFFFF" Opacity="0.8"/>
         </Grid>
     </Shell.FlyoutHeader>
 
