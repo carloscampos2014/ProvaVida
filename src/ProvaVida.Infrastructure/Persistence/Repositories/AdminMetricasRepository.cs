@@ -41,7 +41,6 @@ public class AdminMetricasRepository : IAdminMetricasRepository
     public async Task<int> ContarUsuariosComCheckInAtrasadoAsync(int diasSemCheckIn, CancellationToken ct = default)
     {
         using var conn = _db.CreateConnection();
-        // Usuários ativos cujo último check-in foi há mais de N dias (ou nunca fizeram)
         return await conn.ExecuteScalarAsync<int>(
             """
             SELECT COUNT(*)
@@ -59,8 +58,6 @@ public class AdminMetricasRepository : IAdminMetricasRepository
     public async Task<int> ContarUsuariosPossivelmnteSemInternetAsync(CancellationToken ct = default)
     {
         using var conn = _db.CreateConnection();
-        // Teve heartbeat nas últimas 48h mas não fez check-in nas últimas 24h
-        // Indica app aberto mas sem conseguir sincronizar o check-in
         return await conn.ExecuteScalarAsync<int>(
             """
             SELECT COUNT(DISTINCT h.usuario_id)
@@ -93,5 +90,37 @@ public class AdminMetricasRepository : IAdminMetricasRepository
         return await conn.ExecuteScalarAsync<int>(
             "SELECT COUNT(*) FROM notificacoes_emergencia WHERE status = @status",
             new { status });
+    }
+
+    public async Task<int> ContarTotalEventosAsync(CancellationToken ct = default)
+    {
+        using var conn = _db.CreateConnection();
+        return await conn.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM notificacoes_emergencia");
+    }
+
+    public async Task<IEnumerable<EventosNotificacaoRow>> ListarEventosAsync(
+        int pagina, int tamanhoPagina, CancellationToken ct = default)
+    {
+        using var conn = _db.CreateConnection();
+        var offset = (pagina - 1) * tamanhoPagina;
+
+        var rows = await conn.QueryAsync<EventosNotificacaoRow>(
+            """
+            SELECT
+                ne.id                AS Id,
+                u.nome               AS NomeUsuario,
+                ne.status            AS Status,
+                ne.canal             AS Canal,
+                ne.data_disparo      AS DataDisparo,
+                ne.janela_expira_em  AS JanelaExpiraEm
+            FROM notificacoes_emergencia ne
+            JOIN usuarios u ON u.id = ne.usuario_id
+            ORDER BY ne.data_disparo DESC
+            LIMIT @limite OFFSET @offset
+            """,
+            new { limite = tamanhoPagina, offset });
+
+        return rows;
     }
 }

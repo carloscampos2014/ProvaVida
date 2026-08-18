@@ -10,23 +10,56 @@ public class AdminController : ControllerBase
     [HttpGet("metricas")]
     [ProducesResponseType(typeof(MetricasAdminOutput), StatusCodes.Status200OK)]
     public async Task<IActionResult> Metricas(
-        [FromServices] ObterMetricasAdminUseCase useCase,
-        CancellationToken ct)
+        [FromQuery] int pagina = 1,
+        [FromServices] ObterMetricasAdminUseCase useCase = null!,
+        CancellationToken ct = default)
     {
-        var resultado = await useCase.ExecutarAsync(ct);
+        var resultado = await useCase.ExecutarAsync(pagina, ct);
         return Ok(resultado);
     }
 
     [HttpGet]
     [Produces("text/html")]
     public async Task<ContentResult> Painel(
-        [FromServices] ObterMetricasAdminUseCase useCase,
-        CancellationToken ct)
+        [FromQuery] int pagina = 1,
+        [FromServices] ObterMetricasAdminUseCase useCase = null!,
+        CancellationToken ct = default)
     {
-        var m = await useCase.ExecutarAsync(ct);
+        var m = await useCase.ExecutarAsync(pagina, ct);
         var geradoEm = m.GeradoEm.ToString("dd/MM/yyyy HH:mm:ss") + " UTC";
+        var paginaAnterior = m.PaginaAtual > 1 ? m.PaginaAtual - 1 : 1;
+        var paginaProxima  = m.PaginaAtual < m.TotalPaginas ? m.PaginaAtual + 1 : m.TotalPaginas;
 
-        // $$""" permite usar {{ }} como literais e {{( )}} como interpolação
+        static string IconeStatus(string status) => status switch
+        {
+            "disparado"          => "🔴",
+            "aguardando_resposta" => "⏳",
+            "cancelado"          => "✅",
+            "heartbeat_ativo"    => "💚",
+            _                    => "⚪"
+        };
+
+        static string IconeCanal(string canal) => canal switch
+        {
+            "email+whatsapp" => "✉️ + 📱",
+            "email"          => "✉️",
+            "whatsapp"       => "📱",
+            "email_usuario"  => "✉️ usuário",
+            "falha"          => "❌",
+            _                => "—"
+        };
+
+        var linhasTabela = string.Join("\n", m.Eventos.Select(e =>
+            $"""
+                    <tr>
+                        <td>{System.Net.WebUtility.HtmlEncode(e.NomeUsuario)}</td>
+                        <td>{IconeStatus(e.Status)} {e.Status.Replace("_", " ")}</td>
+                        <td>{IconeCanal(e.Canal)}</td>
+                        <td>{e.DataDisparo.ToString("dd/MM/yyyy HH:mm")} UTC</td>
+                        <td>{(e.JanelaExpiraEm.HasValue ? e.JanelaExpiraEm.Value.ToString("dd/MM HH:mm") : "—")}</td>
+                    </tr>
+            """));
+
         var html = $$"""
             <!DOCTYPE html>
             <html lang="pt-BR">
@@ -69,7 +102,7 @@ public class AdminController : ControllerBase
                         text-align: center;
                     }
                     .countdown.urgente { color: #E73C3C; background: #FEE5E5; }
-                    .btn-refresh {
+                    .btn {
                         display: inline-flex;
                         align-items: center;
                         gap: 6px;
@@ -83,7 +116,16 @@ public class AdminController : ControllerBase
                         cursor: pointer;
                         border: none;
                     }
-                    .btn-refresh:hover { background: #57329F; }
+                    .btn:hover { background: #57329F; }
+                    .btn.secundario {
+                        background: #EFE9FB;
+                        color: #774CCC;
+                    }
+                    .btn.secundario:hover { background: #DFD8F7; }
+                    .btn:disabled, .btn[disabled] {
+                        opacity: 0.4;
+                        pointer-events: none;
+                    }
                     h2 {
                         font-size: 13px;
                         font-weight: 600;
@@ -109,6 +151,42 @@ public class AdminController : ControllerBase
                     .card.success .value { color: #2E9E6B; }
                     .card.warning .value { color: #D97706; }
                     .card.neutral .value { color: #1E1930; }
+                    .tabela-wrap {
+                        background: #fff;
+                        border-radius: 16px;
+                        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+                        overflow: hidden;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                    }
+                    thead th {
+                        background: #774CCC;
+                        color: #fff;
+                        padding: 12px 16px;
+                        text-align: left;
+                        font-weight: 600;
+                        font-size: 12px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                    }
+                    tbody tr:nth-child(even) { background: #F8F7FD; }
+                    tbody tr:hover { background: #EFE9FB; }
+                    tbody td { padding: 11px 16px; color: #1E1930; }
+                    .paginacao {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 16px 20px;
+                        border-top: 1px solid #E4E0F2;
+                        background: #fff;
+                        border-radius: 0 0 16px 16px;
+                        font-size: 13px;
+                        color: #6E648B;
+                    }
+                    .paginacao-nav { display: flex; gap: 8px; align-items: center; }
                 </style>
             </head>
             <body>
@@ -117,7 +195,7 @@ public class AdminController : ControllerBase
                     <div class="header-right">
                         <span class="gerado-em">Gerado em {{geradoEm}}</span>
                         <span class="countdown" id="countdown">Atualizando em 60s</span>
-                        <button class="btn-refresh" onclick="location.reload()">↻ Atualizar agora</button>
+                        <button class="btn" onclick="location.reload()">↻ Atualizar agora</button>
                     </div>
                 </header>
 
@@ -169,10 +247,38 @@ public class AdminController : ControllerBase
                     </div>
                 </div>
 
+                <h2>Eventos de Notificação — {{m.TotalEventos}} registros</h2>
+                <div class="tabela-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Status</th>
+                                <th>Canal</th>
+                                <th>Data/Hora</th>
+                                <th>Janela expira</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{linhasTabela}}
+                        </tbody>
+                    </table>
+                    <div class="paginacao">
+                        <span>Página <strong>{{m.PaginaAtual}}</strong> de <strong>{{m.TotalPaginas}}</strong></span>
+                        <div class="paginacao-nav">
+                            <a href="/admin?pagina=1" class="btn secundario" {{(m.PaginaAtual <= 1 ? "style=\"opacity:0.4;pointer-events:none\"" : "")}}>« Primeira</a>
+                            <a href="/admin?pagina={{paginaAnterior}}" class="btn secundario" {{(m.PaginaAtual <= 1 ? "style=\"opacity:0.4;pointer-events:none\"" : "")}}>‹ Anterior</a>
+                            <a href="/admin?pagina={{paginaProxima}}" class="btn secundario" {{(m.PaginaAtual >= m.TotalPaginas ? "style=\"opacity:0.4;pointer-events:none\"" : "")}}>Próxima ›</a>
+                            <a href="/admin?pagina={{m.TotalPaginas}}" class="btn secundario" {{(m.PaginaAtual >= m.TotalPaginas ? "style=\"opacity:0.4;pointer-events:none\"" : "")}}>Última »</a>
+                        </div>
+                    </div>
+                </div>
+
                 <script>
                     (function () {
                         var INTERVALO = 60;
                         var restante = INTERVALO;
+                        var paginaAtual = {{m.PaginaAtual}};
                         var el = document.getElementById('countdown');
 
                         function atualizar() {
@@ -183,7 +289,7 @@ public class AdminController : ControllerBase
                                 el.classList.remove('urgente');
                             }
                             if (restante <= 0) {
-                                location.reload();
+                                window.location.href = '/admin?pagina=' + paginaAtual;
                                 return;
                             }
                             restante--;

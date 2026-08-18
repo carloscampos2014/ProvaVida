@@ -21,5 +21,12 @@ public class MetricasAdminOutput
     // Notificações — histórico total
     public int TotalAlertasDisparadosHistorico { get; init; }
 
+    // Eventos paginados
+    public IEnumerable<EventoNotificacaoDto> Eventos { get; init; } = [];
+    public int TotalEventos { get; init; }
+    public int PaginaAtual { get; init; }
+    public int TamanhoPagina { get; init; }
+    public int TotalPaginas => TamanhoPagina > 0 ? (int)Math.Ceiling((double)TotalEventos / TamanhoPagina) : 0;
+
     public DateTime GeradoEm { get; init; } = DateTime.UtcNow;
 }
