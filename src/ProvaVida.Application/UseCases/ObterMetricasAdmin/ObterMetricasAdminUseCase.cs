@@ -6,7 +6,7 @@ namespace ProvaVida.Application.UseCases.ObterMetricasAdmin;
 public class ObterMetricasAdminUseCase
 {
     private readonly IAdminMetricasRepository _repo;
-    public const int TamanhoPaginaDefault = 20;
+    public const int TamanhoPaginaDefault = 10;
 
     public ObterMetricasAdminUseCase(IAdminMetricasRepository repo)
     {

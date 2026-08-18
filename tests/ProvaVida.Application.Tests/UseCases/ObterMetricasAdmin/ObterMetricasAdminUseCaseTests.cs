@@ -64,13 +64,13 @@ public class ObterMetricasAdminUseCaseTests
     [Fact]
     public async Task ExecutarAsync_PaginacaoCorreta_CalculaTotalPaginas()
     {
-        ConfigurarRespostasDefault(totalEventos: 45);
+        ConfigurarRespostasDefault(totalEventos: 25);
 
         var resultado = await _useCase.ExecutarAsync(pagina: 2);
 
         resultado.PaginaAtual.Should().Be(2);
         resultado.TamanhoPagina.Should().Be(ObterMetricasAdminUseCase.TamanhoPaginaDefault);
-        resultado.TotalPaginas.Should().Be(3); // ceil(45/20) = 3
+        resultado.TotalPaginas.Should().Be(3); // ceil(25/10) = 3
         _repoMock.Verify(r => r.ListarEventosAsync(2, ObterMetricasAdminUseCase.TamanhoPaginaDefault, default), Times.Once);
     }
 

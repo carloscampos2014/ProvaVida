@@ -13,6 +13,7 @@ using ProvaVida.Application.UseCases.Login;
 using ProvaVida.Application.UseCases.Logoff;
 using ProvaVida.Application.UseCases.ObterHistoricoCheckIn;
 using ProvaVida.Application.UseCases.ObterMetricasAdmin;
+using ProvaVida.Application.UseCases.TestarNotificacao;
 using ProvaVida.Application.UseCases.RefreshToken;
 using ProvaVida.Application.UseCases.RegistrarCheckIn;
 using ProvaVida.Application.UseCases.RegistrarHeartbeat;
@@ -133,6 +134,7 @@ public static class ServiceCollectionExtensions
 
         // Admin
         services.AddScoped<ObterMetricasAdminUseCase>();
+        services.AddScoped<TestarNotificacaoUseCase>();
 
         return services;
     }
