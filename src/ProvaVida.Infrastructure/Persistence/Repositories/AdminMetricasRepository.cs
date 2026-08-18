@@ -33,7 +33,7 @@ public class AdminMetricasRepository : IAdminMetricasRepository
         return await conn.ExecuteScalarAsync<int>(
             """
             SELECT COUNT(DISTINCT usuario_id)
-            FROM check_ins
+            FROM checkins
             WHERE data_hora >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
             """);
     }
@@ -48,7 +48,7 @@ public class AdminMetricasRepository : IAdminMetricasRepository
             FROM usuarios u
             WHERE u.ativo = true
               AND NOT EXISTS (
-                  SELECT 1 FROM check_ins c
+                  SELECT 1 FROM checkins c
                   WHERE c.usuario_id = u.id
                     AND c.data_hora >= NOW() - INTERVAL '1 day' * @dias
               )
@@ -67,7 +67,7 @@ public class AdminMetricasRepository : IAdminMetricasRepository
             FROM heartbeats h
             WHERE h.data_hora >= NOW() - INTERVAL '48 hours'
               AND NOT EXISTS (
-                  SELECT 1 FROM check_ins c
+                  SELECT 1 FROM checkins c
                   WHERE c.usuario_id = h.usuario_id
                     AND c.data_hora >= NOW() - INTERVAL '24 hours'
               )
