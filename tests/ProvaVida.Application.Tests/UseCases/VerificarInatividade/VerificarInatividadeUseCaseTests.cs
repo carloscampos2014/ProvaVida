@@ -16,6 +16,7 @@ public class VerificarInatividadeUseCaseTests
     private readonly Mock<IEmailService>                    _emailSvc     = new();
     private readonly Mock<IWhatsAppService>                 _wappSvc      = new();
     private readonly Mock<ISmsService>                      _smsSvc       = new();
+    private readonly Mock<IVoiceService>                    _voiceSvc     = new();
     private readonly Mock<IUnitOfWork>                      _uow          = new();
     private readonly VerificarInatividadeUseCase            _useCase;
 
@@ -27,7 +28,7 @@ public class VerificarInatividadeUseCaseTests
 
         _useCase = new VerificarInatividadeUseCase(
             _usuarioRepo.Object, _checkInRepo.Object, _heartbeatRepo.Object,
-            _notifRepo.Object, _emailSvc.Object, _wappSvc.Object, _smsSvc.Object, _uow.Object,
+            _notifRepo.Object, _emailSvc.Object, _wappSvc.Object, _smsSvc.Object, _voiceSvc.Object, _uow.Object,
             NullLogger<VerificarInatividadeUseCase>.Instance);
     }
 
@@ -126,6 +127,7 @@ public class VerificarInatividadeUseCaseTests
         _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);
         _wappSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
         _smsSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
+        _voiceSvc.Setup(v => v.LigarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
 
         await _useCase.ExecutarDisparoAsync();
 
@@ -148,12 +150,14 @@ public class VerificarInatividadeUseCaseTests
         _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);
         _wappSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
         _smsSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
+        _voiceSvc.Setup(v => v.LigarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
 
         await _useCase.ExecutarDisparoAsync();
 
         _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
         _wappSvc.Verify(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
         _smsSvc.Verify(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
+        _voiceSvc.Verify(v => v.LigarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n => n.Status == NotificacaoEmergencia.Statuses.Disparado),
             default), Times.Exactly(2));
@@ -173,6 +177,7 @@ public class VerificarInatividadeUseCaseTests
         _wappSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default))
             .ThrowsAsync(new Exception("WhatsApp API timeout"));
         _smsSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
+        _voiceSvc.Setup(v => v.LigarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
 
         await _useCase.ExecutarDisparoAsync();
 
@@ -180,7 +185,7 @@ public class VerificarInatividadeUseCaseTests
         _smsSvc.Verify(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n =>
-                n.Status == NotificacaoEmergencia.Statuses.Disparado && n.Canal == "email+sms"),
+                n.Status == NotificacaoEmergencia.Statuses.Disparado && n.Canal == "email+sms+voz"),
             default), Times.Exactly(2));
     }
 }

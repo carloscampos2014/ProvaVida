@@ -10,11 +10,13 @@ public class TestarNotificacaoUseCaseTests
     private readonly Mock<IEmailService>    _emailMock    = new();
     private readonly Mock<IWhatsAppService> _whatsAppMock = new();
     private readonly Mock<ISmsService>      _smsMock      = new();
+    private readonly Mock<IVoiceService>    _voiceMock    = new();
     private readonly TestarNotificacaoUseCase _useCase;
 
     public TestarNotificacaoUseCaseTests()
     {
-        _useCase = new TestarNotificacaoUseCase(_emailMock.Object, _whatsAppMock.Object, _smsMock.Object);
+        _useCase = new TestarNotificacaoUseCase(
+            _emailMock.Object, _whatsAppMock.Object, _smsMock.Object, _voiceMock.Object);
     }
 
     // ── E-mail ────────────────────────────────────────────────────────────────
@@ -137,6 +139,47 @@ public class TestarNotificacaoUseCaseTests
                 .Returns(Task.CompletedTask);
 
         await _useCase.TestarSmsAsync("5511988887777");
+
+        telefoneCapturado.Should().Be("5511988887777");
+    }
+
+    // ── Voz ───────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task TestarVozAsync_Sucesso_RetornaSucessoComDuracao()
+    {
+        _voiceMock.Setup(v => v.LigarAsync(It.IsAny<string>(), It.IsAny<string>(), default))
+                  .Returns(Task.CompletedTask);
+
+        var resultado = await _useCase.TestarVozAsync("5511999999999");
+
+        resultado.Sucesso.Should().BeTrue();
+        resultado.Mensagem.Should().Contain("sucesso");
+        resultado.DuracaoMs.Should().BeGreaterThanOrEqualTo(0);
+    }
+
+    [Fact]
+    public async Task TestarVozAsync_Falha_RetornaFalhaComMensagemDeErro()
+    {
+        _voiceMock.Setup(v => v.LigarAsync(It.IsAny<string>(), It.IsAny<string>(), default))
+                  .ThrowsAsync(new Exception("Permission denied"));
+
+        var resultado = await _useCase.TestarVozAsync("5511999999999");
+
+        resultado.Sucesso.Should().BeFalse();
+        resultado.Mensagem.Should().Contain("Permission denied");
+        resultado.DuracaoMs.Should().BeGreaterThanOrEqualTo(0);
+    }
+
+    [Fact]
+    public async Task TestarVozAsync_LigaParaTelefoneCorreto()
+    {
+        string? telefoneCapturado = null;
+        _voiceMock.Setup(v => v.LigarAsync(It.IsAny<string>(), It.IsAny<string>(), default))
+                  .Callback<string, string, CancellationToken>((t, _, _) => telefoneCapturado = t)
+                  .Returns(Task.CompletedTask);
+
+        await _useCase.TestarVozAsync("5511988887777");
 
         telefoneCapturado.Should().Be("5511988887777");
     }
