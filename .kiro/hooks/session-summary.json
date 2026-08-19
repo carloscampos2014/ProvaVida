@@ -1,0 +1,14 @@
+﻿{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Resumo de Sessão",
+      "description": "Gera um resumo da sessão ao encerrar, salvo em .kiro/knowledge/sessions/ para continuidade futura",
+      "trigger": "Stop",
+      "action": {
+        "type": "agent",
+        "prompt": "O agente está encerrando a sessão. Gere um resumo e salve em `.kiro/knowledge/sessions/` com nome `YYYY-MM-DD-HH-resumo.md`.\n\nO resumo deve conter:\n\n```markdown\n# Sessão YYYY-MM-DD HH:MM\n\n## O que foi feito\n[Lista em bullets do que foi implementado/modificado]\n\n## Arquivos modificados\n[Lista de arquivos com descrição breve de cada mudança]\n\n## Decisões tomadas\n| Decisão | Rationale |\n|---------|----------|\n| [decisão] | [por que] |\n\n## Problemas encontrados\n[Lista de bloqueadores ou erros encontrados e como foram resolvidos]\n\n## Estado atual\n[O que está funcionando, o que falta, próximo passo recomendado]\n\n## Conhecimento capturado\n[Padrões ou armadilhas descobertos que merecem ser adicionados a .kiro/knowledge/patterns/]\n```\n\nSe a sessão foi curta (apenas perguntas, sem código), o resumo pode ser bem conciso (3-5 linhas).\nSe não houve nada relevante para registrar, não criar o arquivo."
+      }
+    }
+  ]
+}

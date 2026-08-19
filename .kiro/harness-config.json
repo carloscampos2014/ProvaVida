@@ -1,0 +1,32 @@
+﻿{
+  "version": "1.0",
+  "project": "ProvaVida",
+  "components": {
+    "templates": true,
+    "knowledge_capture": true,
+    "review_validation": true,
+    "pre_requirements": true,
+    "quality_reporting": true,
+    "retrospective": true,
+    "onboarding": true,
+    "tech_debt_detector": true,
+    "agent_router": true,
+    "git_guardrails": true
+  },
+  "thresholds": {
+    "quality_score_verde": 90,
+    "quality_score_amarelo": 70,
+    "completude_minima": 70,
+    "padrao_captura_repeticoes": 3
+  },
+  "build": {
+    "command": "dotnet build src/ProvaVida.Api/ProvaVida.Api.csproj -c Debug --no-restore",
+    "test_command": "dotnet test tests/ProvaVida.Application.Tests/ --logger console;verbosity=minimal --no-restore",
+    "lint_command": ""
+  },
+  "repo": {
+    "owner": "carloscampos2014",
+    "name": "ProvaVida",
+    "default_branch": "master"
+  }
+}
