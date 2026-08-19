@@ -38,6 +38,10 @@ TestResults/
 .vscode/
 *.DotSettings.user
 
+## Kiro — não versionar histórico de sessão e quality scores (específicos de cada dev)
+.kiro/quality/
+.kiro/knowledge/sessions/
+
 ## OS
 .DS_Store
 Thumbs.db
