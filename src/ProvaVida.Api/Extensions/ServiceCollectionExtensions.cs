@@ -112,6 +112,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWhatsAppService, TwilioWhatsAppService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<ISmsService, TwilioSmsService>();
+        services.AddScoped<IVoiceService, TwilioVoiceService>();
 
         // Validadores
         services.AddScoped<IValidator<CadastrarUsuarioInput>, CadastrarUsuarioValidator>();

@@ -8,15 +8,18 @@ public class TestarNotificacaoUseCase
     private readonly IEmailService _emailService;
     private readonly IWhatsAppService _whatsAppService;
     private readonly ISmsService _smsService;
+    private readonly IVoiceService _voiceService;
 
     public TestarNotificacaoUseCase(
         IEmailService emailService,
         IWhatsAppService whatsAppService,
-        ISmsService smsService)
+        ISmsService smsService,
+        IVoiceService voiceService)
     {
         _emailService    = emailService;
         _whatsAppService = whatsAppService;
         _smsService      = smsService;
+        _voiceService    = voiceService;
     }
 
     public async Task<TesteNotificacaoOutput> TestarEmailAsync(string destinatario, CancellationToken ct = default)
@@ -74,6 +77,25 @@ public class TestarNotificacaoUseCase
                 ct);
             sw.Stop();
             return new TesteNotificacaoOutput(true, "SMS enviado com sucesso.", sw.ElapsedMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            sw.Stop();
+            return new TesteNotificacaoOutput(false, $"Falha: {ex.Message}", sw.ElapsedMilliseconds);
+        }
+    }
+
+    public async Task<TesteNotificacaoOutput> TestarVozAsync(string telefone, CancellationToken ct = default)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            await _voiceService.LigarAsync(
+                telefone,
+                "Ola! Esta e uma ligacao de teste do ProvaVida. Se voce recebeu esta chamada, o servico de voz esta funcionando corretamente.",
+                ct);
+            sw.Stop();
+            return new TesteNotificacaoOutput(true, "Ligação iniciada com sucesso.", sw.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {

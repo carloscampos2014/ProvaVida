@@ -41,6 +41,17 @@ public class AdminController : ControllerBase
         return Ok(resultado);
     }
 
+    [HttpPost("testar-voz")]
+    [ProducesResponseType(typeof(TesteNotificacaoOutput), StatusCodes.Status200OK)]
+    public async Task<IActionResult> TestarVoz(
+        [FromBody] TesteDestinatarioRequest request,
+        [FromServices] TestarNotificacaoUseCase useCase,
+        CancellationToken ct)
+    {
+        var resultado = await useCase.TestarVozAsync(request.Destinatario, ct);
+        return Ok(resultado);
+    }
+
     [HttpGet("metricas")]
     [ProducesResponseType(typeof(MetricasAdminOutput), StatusCodes.Status200OK)]
     public async Task<IActionResult> Metricas(
@@ -279,7 +290,7 @@ public class AdminController : ControllerBase
                 </div>
 
                 <h2>Histórico Total e Diagnóstico</h2>
-                <div style="display:grid;grid-template-columns:160px 1fr 1fr 1fr;gap:10px;">
+                <div style="display:grid;grid-template-columns:160px 1fr 1fr 1fr 1fr;gap:10px;">
                     <div class="card neutral">
                         <div class="label">Alertas disparados (total)</div>
                         <div class="value">{{m.TotalAlertasDisparadosHistorico}}</div>
@@ -301,6 +312,12 @@ public class AdminController : ControllerBase
                         <input id="sms-dest" type="tel" placeholder="5511999999999"/>
                         <button class="btn" onclick="testar('sms')">Enviar teste</button>
                         <div class="resultado" id="sms-res"></div>
+                    </div>
+                    <div class="card">
+                        <div class="label">📞 Teste de Voz</div>
+                        <input id="voz-dest" type="tel" placeholder="5511999999999"/>
+                        <button class="btn" onclick="testar('voz')">Ligar</button>
+                        <div class="resultado" id="voz-res"></div>
                     </div>
                 </div>
 
@@ -333,8 +350,8 @@ public class AdminController : ControllerBase
 
                 <script>
                     function testar(tipo) {
-                        var idMap = { email: 'email-dest', whatsapp: 'wapp-dest', sms: 'sms-dest' };
-                        var resMap = { email: 'email-res', whatsapp: 'wapp-res', sms: 'sms-res' };
+                        var idMap = { email: 'email-dest', whatsapp: 'wapp-dest', sms: 'sms-dest', voz: 'voz-dest' };
+                        var resMap = { email: 'email-res', whatsapp: 'wapp-res', sms: 'sms-res', voz: 'voz-res' };
                         var dest = document.getElementById(idMap[tipo]).value.trim();
                         var res  = document.getElementById(resMap[tipo]);
                         if (!dest) { res.innerHTML = '<span style="color:#E73C3C">⚠️ Informe o destinatário.</span>'; return; }

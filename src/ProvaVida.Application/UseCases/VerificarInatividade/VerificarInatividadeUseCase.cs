@@ -19,6 +19,7 @@ public class VerificarInatividadeUseCase
     private readonly IEmailService _emailService;
     private readonly IWhatsAppService _whatsAppService;
     private readonly ISmsService _smsService;
+    private readonly IVoiceService _voiceService;
     private readonly IUnitOfWork _uow;
     private readonly ILogger<VerificarInatividadeUseCase> _logger;
 
@@ -34,18 +35,20 @@ public class VerificarInatividadeUseCase
         IEmailService emailService,
         IWhatsAppService whatsAppService,
         ISmsService smsService,
+        IVoiceService voiceService,
         IUnitOfWork uow,
         ILogger<VerificarInatividadeUseCase> logger)
     {
-        _usuarioRepository    = usuarioRepository;
-        _checkInRepository    = checkInRepository;
-        _heartbeatRepository  = heartbeatRepository;
+        _usuarioRepository     = usuarioRepository;
+        _checkInRepository     = checkInRepository;
+        _heartbeatRepository   = heartbeatRepository;
         _notificacaoRepository = notificacaoRepository;
-        _emailService         = emailService;
-        _whatsAppService      = whatsAppService;
-        _smsService           = smsService;
-        _uow                  = uow;
-        _logger               = logger;
+        _emailService          = emailService;
+        _whatsAppService       = whatsAppService;
+        _smsService            = smsService;
+        _voiceService          = voiceService;
+        _uow                   = uow;
+        _logger                = logger;
     }
 
     /// <summary>
@@ -172,17 +175,31 @@ public class VerificarInatividadeUseCase
                     usuario.ContatoEmergenciaWhatsApp, usuario.Id);
             }
 
-            var canal = (emailEnviado, whatsappEnviado, smsEnviado) switch
+            var vozEnviada = false;
+            try
             {
-                (true,  true,  true)  => "email+whatsapp+sms",
-                (true,  true,  false) => "email+whatsapp",
-                (true,  false, true)  => "email+sms",
-                (false, true,  true)  => "whatsapp+sms",
-                (true,  false, false) => "email",
-                (false, true,  false) => "whatsapp",
-                (false, false, true)  => "sms",
-                _                     => "falha"
-            };
+                await _voiceService.LigarAsync(
+                    usuario.ContatoEmergenciaWhatsApp,
+                    MontarMensagemVoz(usuario.Nome, usuario.ContatoEmergenciaNome),
+                    ct);
+                vozEnviada = true;
+                _logger.LogInformation(
+                    "Ligação de emergência iniciada para {Telefone} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaWhatsApp, usuario.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Falha ao iniciar ligação de emergência para {Telefone} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaWhatsApp, usuario.Id);
+            }
+
+            var canais = new List<string>();
+            if (emailEnviado)    canais.Add("email");
+            if (whatsappEnviado) canais.Add("whatsapp");
+            if (smsEnviado)      canais.Add("sms");
+            if (vozEnviada)      canais.Add("voz");
+            var canal = canais.Count > 0 ? string.Join("+", canais) : "falha";
 
             _logger.LogInformation(
                 "Resultado do disparo para usuário {UsuarioId}: canal={Canal}",
@@ -262,4 +279,9 @@ public class VerificarInatividadeUseCase
     private static string MontarMensagemSms(string nomeUsuario, string nomeContato) =>
         $"ProvaVida: Ola {nomeContato}! {nomeUsuario} nao fez check-in ha mais de 48h e nao respondeu ao aviso. " +
         $"Por favor, verifique se esta bem.";
+
+    private static string MontarMensagemVoz(string nomeUsuario, string nomeContato) =>
+        $"Olá! Você é contato de emergência de {nomeUsuario} no ProvaVida. " +
+        $"{nomeUsuario} não fez check-in há mais de 48 horas e não respondeu ao aviso enviado. " +
+        $"Por favor, verifique se está bem. Esta mensagem foi enviada automaticamente pelo ProvaVida.";
 }
