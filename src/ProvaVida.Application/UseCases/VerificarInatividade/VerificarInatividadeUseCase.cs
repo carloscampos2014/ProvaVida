@@ -93,11 +93,12 @@ public class VerificarInatividadeUseCase
 
         foreach (var notificacao in janelasExpiradas)
         {
-            // Verifica se o usuário respondeu (novo heartbeat ou check-in desde o disparo)
-            var respondeu = await _heartbeatRepository
-                .ExisteHeartbeatRecenteAsync(notificacao.UsuarioId, HorasJanelaGraca, ct);
+            // Cancela APENAS se o usuário fez check-in dentro da janela de graça
+            // Heartbeat não é suficiente — só check-in confirma que o usuário está bem
+            var fezCheckIn = await _checkInRepository
+                .ExisteCheckInRecenteAsync(notificacao.UsuarioId, HorasJanelaGraca, ct);
 
-            if (respondeu)
+            if (fezCheckIn)
             {
                 notificacao.Cancelar();
                 await GravarNotificacaoAsync(notificacao, ct);
