@@ -5,9 +5,17 @@ using Android.OS;
 
 namespace ProvaVida.Maui;
 
-[Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
+[Activity(
+    Theme = "@style/Maui.SplashTheme",
+    MainLauncher = true,
+    LaunchMode = LaunchMode.SingleTop,
     ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode |
                            ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
+[IntentFilter(new[] { "com.enzojb.provavida.ACTION_CHECKIN" },
+    Categories = new[] { Intent.CategoryDefault })]
+[IntentFilter(new[] { "com.enzojb.provavida.ACTION_LOGIN" },
+    Categories = new[] { Intent.CategoryDefault })]
+[MetaData("android.app.shortcuts", Resource = "@xml/shortcuts")]
 public class MainActivity : MauiAppCompatActivity
 {
     private const string ActionCheckIn = "com.enzojb.provavida.ACTION_CHECKIN";
@@ -29,10 +37,9 @@ public class MainActivity : MauiAppCompatActivity
     {
         if (intent?.Action is null) return;
 
-        // Aguarda o Shell estar pronto antes de navegar
         _ = Task.Run(async () =>
         {
-            await Task.Delay(800); // tempo para o Shell inicializar
+            await Task.Delay(800);
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 try
@@ -42,7 +49,7 @@ public class MainActivity : MauiAppCompatActivity
                     else if (intent.Action == ActionLogin)
                         await Shell.Current.GoToAsync("//login");
                 }
-                catch { /* ignora se Shell não estiver pronto */ }
+                catch { }
             });
         });
     }
