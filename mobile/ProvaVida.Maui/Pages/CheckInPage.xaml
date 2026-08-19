@@ -11,9 +11,36 @@
         <VerticalStackLayout Grid.Row="0" Spacing="0">
 
             <!-- Top bar -->
-            <Border BackgroundColor="White" StrokeThickness="0" Padding="20,16,20,16">
-                <Label Text="{Binding NomeUsuario, StringFormat='Olá, {0} 👋'}"
-                       FontSize="16" TextColor="{StaticResource TextSecondary}"/>
+            <Border BackgroundColor="White" StrokeThickness="0" Padding="16,12,20,12">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <!-- Botão hamburger -->
+                    <Label Grid.Column="0"
+                           Text="☰"
+                           FontSize="22"
+                           TextColor="{StaticResource Primary}"
+                           VerticalOptions="Center"
+                           Margin="0,0,12,0">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnHamburgerTapped"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <!-- Saudação -->
+                    <Label Grid.Column="1"
+                           Text="{Binding NomeUsuario, StringFormat='Olá, {0} 👋'}"
+                           FontSize="16"
+                           TextColor="{StaticResource TextSecondary}"
+                           VerticalOptions="Center"/>
+                    <!-- Ícone de perfil -->
+                    <Label Grid.Column="2"
+                           x:Name="TopBarAvatar"
+                           FontSize="22"
+                           VerticalOptions="Center"
+                           HorizontalOptions="End">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPerfilTapped"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
             </Border>
 
             <!-- Card sequência -->

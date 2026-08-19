@@ -56,6 +56,9 @@ public partial class CheckInPage : ContentPage
             _ = Task.Run(() => _syncService.SincronizarAsync());
     }
 
+    private async void OnHamburgerTapped(object? sender, TappedEventArgs e)
+        => Shell.Current.FlyoutIsPresented = true;
+
     private async void OnPerfilTapped(object? sender, TappedEventArgs e)
         => await Shell.Current.GoToAsync("//perfil");
 
