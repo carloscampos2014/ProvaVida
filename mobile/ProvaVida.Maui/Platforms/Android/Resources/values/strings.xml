@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_abrir">Abrir</string>
+    <string name="shortcut_abrir_long">Abrir ProvaVida</string>
+    <string name="shortcut_checkin">Check-in</string>
+    <string name="shortcut_checkin_long">Fazer Check-in agora</string>
+    <string name="shortcut_checkin_feito">Feito hoje</string>
+    <string name="shortcut_checkin_feito_long">Check-in registrado hoje</string>
+    <string name="shortcut_login">Login</string>
+    <string name="shortcut_login_long">Fazer Login no ProvaVida</string>
+</resources>
