@@ -10,9 +10,6 @@ namespace ProvaVida.Maui;
 /// <summary>
 /// Widget simples (2x1) — mostra status e permite acesso rápido ao app.
 /// </summary>
-[BroadcastReceiver(Label = "ProvaVida — Simples", Exported = true)]
-[IntentFilter(new[] { "android.appwidget.action.APPWIDGET_UPDATE" })]
-[MetaData("android.appwidget.provider", Resource = "@xml/widget_simples_info")]
 public class CheckInWidgetSimples : AppWidgetProvider
 {
     public override void OnUpdate(Context? context, AppWidgetManager? appWidgetManager, int[]? appWidgetIds)
@@ -91,7 +88,7 @@ public class CheckInWidgetSimples : AppWidgetProvider
     {
         try
         {
-            var token = SecureStorage.Default.GetAsync("jwt_token").GetAwaiter().GetResult();
+            var token = SecureStorage.Default.GetAsync("auth_token").GetAwaiter().GetResult();
             return !string.IsNullOrWhiteSpace(token);
         }
         catch { return false; }

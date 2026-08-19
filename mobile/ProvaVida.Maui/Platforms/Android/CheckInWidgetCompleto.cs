@@ -10,9 +10,6 @@ namespace ProvaVida.Maui;
 /// <summary>
 /// Widget completo (4x2) — mostra os 7 dias da semana e status do check-in.
 /// </summary>
-[BroadcastReceiver(Label = "ProvaVida — Semana", Exported = true)]
-[IntentFilter(new[] { "android.appwidget.action.APPWIDGET_UPDATE" })]
-[MetaData("android.appwidget.provider", Resource = "@xml/widget_completo_info")]
 public class CheckInWidgetCompleto : AppWidgetProvider
 {
     private static readonly int[] DiaIds =
@@ -139,7 +136,7 @@ public class CheckInWidgetCompleto : AppWidgetProvider
     {
         try
         {
-            var token = SecureStorage.Default.GetAsync("jwt_token").GetAwaiter().GetResult();
+            var token = SecureStorage.Default.GetAsync("auth_token").GetAwaiter().GetResult();
             return !string.IsNullOrWhiteSpace(token);
         }
         catch { return false; }

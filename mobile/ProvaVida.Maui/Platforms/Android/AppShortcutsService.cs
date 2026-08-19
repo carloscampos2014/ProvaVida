@@ -94,7 +94,7 @@ public static class AppShortcutsService
         try
         {
             // Verifica se há token salvo no SecureStorage
-            var token = SecureStorage.Default.GetAsync("jwt_token").GetAwaiter().GetResult();
+            var token = SecureStorage.Default.GetAsync("auth_token").GetAwaiter().GetResult();
             return !string.IsNullOrWhiteSpace(token);
         }
         catch { return false; }

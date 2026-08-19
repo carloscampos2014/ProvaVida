@@ -13,12 +13,6 @@ namespace ProvaVida.Maui;
 /// Exibido na área de configurações rápidas do Android (onde ficam Wi-Fi, Bluetooth, etc.).
 /// Requer Android 7.0+ (API 24).
 /// </summary>
-[Service(
-    Label = "ProvaVida",
-    Icon  = "@mipmap/appicon",
-    Exported = true,
-    Permission = "android.permission.BIND_QUICK_SETTINGS_TILE")]
-[IntentFilter(new[] { ActionQsTile })]
 [SupportedOSPlatform("android24.0")]
 public class CheckInTileService : TileService
 {
@@ -87,7 +81,7 @@ public class CheckInTileService : TileService
     {
         try
         {
-            var token = SecureStorage.Default.GetAsync("jwt_token").GetAwaiter().GetResult();
+            var token = SecureStorage.Default.GetAsync("auth_token").GetAwaiter().GetResult();
             return !string.IsNullOrWhiteSpace(token);
         }
         catch { return false; }
