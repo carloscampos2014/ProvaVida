@@ -42,6 +42,12 @@ public partial class CheckInPage : ContentPage
 
         // Agenda aviso de inatividade diário às 21h (verifica SQLite local)
         LocalNotificationService.AgendarAvisoInatividade();
+
+        // Atualiza App Shortcuts conforme estado atual (Android 7.1+)
+#if ANDROID
+        if (OperatingSystem.IsAndroidVersionAtLeast(25))
+            AppShortcutsService.Atualizar();
+#endif
     }
 
     protected override void OnDisappearing()
