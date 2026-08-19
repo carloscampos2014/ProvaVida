@@ -18,4 +18,10 @@ public interface ICheckInRepository
     /// Usado pelo job de verificação de inatividade.
     /// </summary>
     Task<IEnumerable<Guid>> ListarUsuariosInativosDesdeAsync(DateTime dataCorte, CancellationToken ct = default);
+
+    /// <summary>
+    /// Retorna true se o usuário fez check-in nas últimas <paramref name="horas"/> horas.
+    /// Usado pelo job disparar-alerta para cancelar o ciclo apenas se houve check-in real.
+    /// </summary>
+    Task<bool> ExisteCheckInRecenteAsync(Guid usuarioId, int horas, CancellationToken ct = default);
 }

@@ -98,18 +98,39 @@ public class VerificarInatividadeUseCaseTests
     }
 
     [Fact]
-    public async Task ExecutarDisparoAsync_UsuarioRespondeu_CancelaNotificacao()
+    public async Task ExecutarDisparoAsync_UsuarioFezCheckIn_CancelaNotificacao()
     {
         var usuario = CriarUsuario();
         var notif = NotificacaoEmergencia.CriarAguardandoResposta(usuario.Id);
 
         _notifRepo.Setup(r => r.ListarJanelasExpiradasAsync(default)).ReturnsAsync([notif]);
-        _heartbeatRepo.Setup(r => r.ExisteHeartbeatRecenteAsync(usuario.Id, It.IsAny<int>(), default))
+        _checkInRepo.Setup(r => r.ExisteCheckInRecenteAsync(usuario.Id, It.IsAny<int>(), default))
             .ReturnsAsync(true);
 
         await _useCase.ExecutarDisparoAsync();
 
         notif.Status.Should().Be(NotificacaoEmergencia.Statuses.Cancelado);
+    }
+
+    [Fact]
+    public async Task ExecutarDisparoAsync_HeartbeatSemCheckIn_NaoCancela_DispararAlerta()
+    {
+        var usuario = CriarUsuario();
+        var notif = NotificacaoEmergencia.CriarAguardandoResposta(usuario.Id);
+
+        _notifRepo.Setup(r => r.ListarJanelasExpiradasAsync(default)).ReturnsAsync([notif]);
+        _checkInRepo.Setup(r => r.ExisteCheckInRecenteAsync(usuario.Id, It.IsAny<int>(), default))
+            .ReturnsAsync(false); // heartbeat existe mas check-in não — deve disparar
+        _usuarioRepo.Setup(r => r.ObterPorIdAsync(usuario.Id, default)).ReturnsAsync(usuario);
+        _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);
+        _wappSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
+
+        await _useCase.ExecutarDisparoAsync();
+
+        _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
+        _notifRepo.Verify(r => r.AdicionarAsync(
+            It.Is<NotificacaoEmergencia>(n => n.Status == NotificacaoEmergencia.Statuses.Disparado),
+            default), Times.Once);
     }
 
     [Fact]
@@ -119,7 +140,7 @@ public class VerificarInatividadeUseCaseTests
         var notif = NotificacaoEmergencia.CriarAguardandoResposta(usuario.Id);
 
         _notifRepo.Setup(r => r.ListarJanelasExpiradasAsync(default)).ReturnsAsync([notif]);
-        _heartbeatRepo.Setup(r => r.ExisteHeartbeatRecenteAsync(usuario.Id, It.IsAny<int>(), default))
+        _checkInRepo.Setup(r => r.ExisteCheckInRecenteAsync(usuario.Id, It.IsAny<int>(), default))
             .ReturnsAsync(false);
         _usuarioRepo.Setup(r => r.ObterPorIdAsync(usuario.Id, default)).ReturnsAsync(usuario);
         _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);
@@ -141,7 +162,7 @@ public class VerificarInatividadeUseCaseTests
         var notif = NotificacaoEmergencia.CriarAguardandoResposta(usuario.Id);
 
         _notifRepo.Setup(r => r.ListarJanelasExpiradasAsync(default)).ReturnsAsync([notif]);
-        _heartbeatRepo.Setup(r => r.ExisteHeartbeatRecenteAsync(usuario.Id, It.IsAny<int>(), default))
+        _checkInRepo.Setup(r => r.ExisteCheckInRecenteAsync(usuario.Id, It.IsAny<int>(), default))
             .ReturnsAsync(false);
         _usuarioRepo.Setup(r => r.ObterPorIdAsync(usuario.Id, default)).ReturnsAsync(usuario);
         _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);

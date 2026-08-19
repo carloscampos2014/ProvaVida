@@ -87,6 +87,21 @@ public sealed class CheckInRepository : ICheckInRepository
             new CommandDefinition(sql, new { DataCorte = dataCorte }, cancellationToken: ct));
     }
 
+    public async Task<bool> ExisteCheckInRecenteAsync(Guid usuarioId, int horas, CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT COUNT(1)
+            FROM checkins
+            WHERE usuario_id = @UsuarioId
+              AND data_hora >= NOW() - INTERVAL '1 hour' * @Horas
+            """;
+
+        using var conn = _factory.CreateConnection();
+        var count = await conn.ExecuteScalarAsync<int>(
+            new CommandDefinition(sql, new { UsuarioId = usuarioId, Horas = horas }, cancellationToken: ct));
+        return count > 0;
+    }
+
 #pragma warning disable CA1812
     private sealed class CheckInRow
     {
