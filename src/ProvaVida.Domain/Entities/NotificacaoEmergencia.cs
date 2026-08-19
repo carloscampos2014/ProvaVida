@@ -54,4 +54,14 @@ public class NotificacaoEmergencia
     {
         Status = Statuses.Cancelado;
     }
+
+    /// <summary>
+    /// Marca o registro aguardando_resposta como processado após o disparo ao contato.
+    /// Evita que o job horário reprocesse o mesmo registro indefinidamente.
+    /// </summary>
+    public void MarcarComoProcessado(string canal)
+    {
+        Status = Statuses.Disparado;
+        Canal  = canal;
+    }
 }
