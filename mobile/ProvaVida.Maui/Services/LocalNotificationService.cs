@@ -70,10 +70,11 @@ public static class LocalNotificationService
         var context = Android.App.Application.Context;
         var intent  = new Android.Content.Intent(context, receiverType);
 
-        // PendingIntentFlags.Immutable exige API 23+
-        var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
-            ? Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable
-            : Android.App.PendingIntentFlags.UpdateCurrent;
+        Android.App.PendingIntentFlags flags;
+        if (OperatingSystem.IsAndroidVersionAtLeast(23))
+            flags = Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable;
+        else
+            flags = Android.App.PendingIntentFlags.UpdateCurrent;
 
         var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, requestCode, intent, flags);
         if (pendingIntent is null) return;
@@ -84,8 +85,7 @@ public static class LocalNotificationService
 
         var triggerAtMillis = new DateTimeOffset(horario).ToUnixTimeMilliseconds();
 
-        // SetExactAndAllowWhileIdle exige API 23+
-        if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M)
+        if (OperatingSystem.IsAndroidVersionAtLeast(23))
             alarmManager.SetExactAndAllowWhileIdle(
                 Android.App.AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
         else
@@ -98,9 +98,11 @@ public static class LocalNotificationService
         var context = Android.App.Application.Context;
         var intent  = new Android.Content.Intent(context, receiverType);
 
-        var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
-            ? Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable
-            : Android.App.PendingIntentFlags.UpdateCurrent;
+        Android.App.PendingIntentFlags flags;
+        if (OperatingSystem.IsAndroidVersionAtLeast(23))
+            flags = Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable;
+        else
+            flags = Android.App.PendingIntentFlags.UpdateCurrent;
 
         var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, requestCode, intent, flags);
         if (pendingIntent is null) return;
