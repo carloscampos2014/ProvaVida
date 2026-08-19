@@ -5,7 +5,6 @@ using System.Runtime.Versioning;
 
 namespace ProvaVida.Maui;
 
-[BroadcastReceiver(Enabled = true, Exported = false)]
 public class LembreteReceiver : BroadcastReceiver
 {
     private const string ChannelId = "provavida_lembrete";

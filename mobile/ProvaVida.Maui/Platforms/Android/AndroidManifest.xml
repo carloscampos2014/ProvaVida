@@ -1,16 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true">
+
+		<!-- Receivers de notificação local (alarmes agendados) — sem exported pois são internos -->
+		<receiver
+			android:name="com.enzojb.provavida.LembreteReceiver"
+			android:exported="false" />
+		<receiver
+			android:name="com.enzojb.provavida.AvisoInatividadeReceiver"
+			android:exported="false" />
+
+		<!-- Quick Settings Tile -->
 		<service
 			android:name="com.enzojb.provavida.CheckInTileService"
 			android:exported="true"
-			android:label="ProvaVida"
+			android:label="Enzojb Prova de Vida"
 			android:icon="@mipmap/appicon"
 			android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
 			<intent-filter>
 				<action android:name="android.service.quicksettings.action.QS_TILE" />
 			</intent-filter>
 		</service>
+
 		<!-- Widget Simples (2x1) -->
 		<receiver
 			android:name="com.enzojb.provavida.CheckInWidgetSimples"
@@ -23,6 +34,7 @@
 				android:name="android.appwidget.provider"
 				android:resource="@xml/widget_simples_info" />
 		</receiver>
+
 		<!-- Widget Completo (4x2) -->
 		<receiver
 			android:name="com.enzojb.provavida.CheckInWidgetCompleto"
@@ -35,6 +47,7 @@
 				android:name="android.appwidget.provider"
 				android:resource="@xml/widget_completo_info" />
 		</receiver>
+
 	</application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />

@@ -12,7 +12,6 @@ namespace ProvaVida.Maui;
 /// Verifica o SQLite local — se o último check-in for há mais de 48h, dispara
 /// notificação de aviso de inatividade para o próprio usuário.
 /// </summary>
-[BroadcastReceiver(Enabled = true, Exported = false)]
 public class AvisoInatividadeReceiver : BroadcastReceiver
 {
     private const string ChannelId   = "provavida_inatividade";
