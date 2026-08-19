@@ -9,14 +9,15 @@ namespace ProvaVida.Application.Tests.UseCases.VerificarInatividade;
 
 public class VerificarInatividadeUseCaseTests
 {
-    private readonly Mock<IUsuarioRepository>             _usuarioRepo  = new();
-    private readonly Mock<ICheckInRepository>             _checkInRepo  = new();
-    private readonly Mock<IHeartbeatRepository>           _heartbeatRepo = new();
-    private readonly Mock<INotificacaoEmergenciaRepository> _notifRepo  = new();
-    private readonly Mock<IEmailService>                  _emailSvc     = new();
-    private readonly Mock<IWhatsAppService>               _wappSvc      = new();
-    private readonly Mock<IUnitOfWork>                    _uow          = new();
-    private readonly VerificarInatividadeUseCase          _useCase;
+    private readonly Mock<IUsuarioRepository>               _usuarioRepo  = new();
+    private readonly Mock<ICheckInRepository>               _checkInRepo  = new();
+    private readonly Mock<IHeartbeatRepository>             _heartbeatRepo = new();
+    private readonly Mock<INotificacaoEmergenciaRepository> _notifRepo    = new();
+    private readonly Mock<IEmailService>                    _emailSvc     = new();
+    private readonly Mock<IWhatsAppService>                 _wappSvc      = new();
+    private readonly Mock<ISmsService>                      _smsSvc       = new();
+    private readonly Mock<IUnitOfWork>                      _uow          = new();
+    private readonly VerificarInatividadeUseCase            _useCase;
 
     public VerificarInatividadeUseCaseTests()
     {
@@ -26,7 +27,7 @@ public class VerificarInatividadeUseCaseTests
 
         _useCase = new VerificarInatividadeUseCase(
             _usuarioRepo.Object, _checkInRepo.Object, _heartbeatRepo.Object,
-            _notifRepo.Object, _emailSvc.Object, _wappSvc.Object, _uow.Object,
+            _notifRepo.Object, _emailSvc.Object, _wappSvc.Object, _smsSvc.Object, _uow.Object,
             NullLogger<VerificarInatividadeUseCase>.Instance);
     }
 
@@ -120,22 +121,22 @@ public class VerificarInatividadeUseCaseTests
 
         _notifRepo.Setup(r => r.ListarJanelasExpiradasAsync(default)).ReturnsAsync([notif]);
         _checkInRepo.Setup(r => r.ExisteCheckInRecenteAsync(usuario.Id, It.IsAny<int>(), default))
-            .ReturnsAsync(false); // heartbeat existe mas check-in não — deve disparar
+            .ReturnsAsync(false);
         _usuarioRepo.Setup(r => r.ObterPorIdAsync(usuario.Id, default)).ReturnsAsync(usuario);
         _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);
         _wappSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
+        _smsSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
 
         await _useCase.ExecutarDisparoAsync();
 
         _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
-        // AdicionarAsync chamado 2x: 1 para atualizar o aguardando_resposta + 1 para o novo evento
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n => n.Status == NotificacaoEmergencia.Statuses.Disparado),
             default), Times.Exactly(2));
     }
 
     [Fact]
-    public async Task ExecutarDisparoAsync_JanelaExpirada_DispararEmailEWhatsapp()
+    public async Task ExecutarDisparoAsync_JanelaExpirada_DispararEmailWhatsappESms()
     {
         var usuario = CriarUsuario();
         var notif = NotificacaoEmergencia.CriarAguardandoResposta(usuario.Id);
@@ -146,19 +147,20 @@ public class VerificarInatividadeUseCaseTests
         _usuarioRepo.Setup(r => r.ObterPorIdAsync(usuario.Id, default)).ReturnsAsync(usuario);
         _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);
         _wappSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
+        _smsSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
 
         await _useCase.ExecutarDisparoAsync();
 
         _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
         _wappSvc.Verify(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
-        // AdicionarAsync chamado 2x: 1 para atualizar o aguardando_resposta + 1 para o novo evento
+        _smsSvc.Verify(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n => n.Status == NotificacaoEmergencia.Statuses.Disparado),
             default), Times.Exactly(2));
     }
 
     [Fact]
-    public async Task ExecutarDisparoAsync_WhatsAppFalha_EmailDisparadoMesmoAssim()
+    public async Task ExecutarDisparoAsync_WhatsAppFalha_EmailESmsDisparadosMesmoAssim()
     {
         var usuario = CriarUsuario();
         var notif = NotificacaoEmergencia.CriarAguardandoResposta(usuario.Id);
@@ -170,14 +172,15 @@ public class VerificarInatividadeUseCaseTests
         _emailSvc.Setup(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default)).Returns(Task.CompletedTask);
         _wappSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default))
             .ThrowsAsync(new Exception("WhatsApp API timeout"));
+        _smsSvc.Setup(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default)).Returns(Task.CompletedTask);
 
         await _useCase.ExecutarDisparoAsync();
 
         _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
-        // AdicionarAsync chamado 2x: 1 para atualizar o aguardando_resposta + 1 para o novo evento
+        _smsSvc.Verify(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n =>
-                n.Status == NotificacaoEmergencia.Statuses.Disparado && n.Canal == "email"),
+                n.Status == NotificacaoEmergencia.Statuses.Disparado && n.Canal == "email+sms"),
             default), Times.Exactly(2));
     }
 }

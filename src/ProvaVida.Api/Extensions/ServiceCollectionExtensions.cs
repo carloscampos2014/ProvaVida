@@ -111,6 +111,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<IWhatsAppService, WhatsAppService>();
         services.AddScoped<IWhatsAppService, TwilioWhatsAppService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<ISmsService, TwilioSmsService>();
 
         // Validadores
         services.AddScoped<IValidator<CadastrarUsuarioInput>, CadastrarUsuarioValidator>();
