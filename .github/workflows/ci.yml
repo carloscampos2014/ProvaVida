@@ -7,6 +7,7 @@ on:
     paths:
       - "src/**"
       - "tests/**"
+      - "mobile/**"
       - ".github/workflows/ci.yml"
 
 concurrency:
@@ -14,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build e Testes Unitários (.NET)
+  backend:
+    name: Backend — Build e Testes (.NET)
     runs-on: ubuntu-latest
 
     steps:
@@ -34,11 +35,8 @@ jobs:
           key: nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: nuget-
 
-      - name: Install MAUI workload
-        run: dotnet workload install maui
-
       - name: Restore
-        run: dotnet restore src/ProvaVida.Api/ProvaVida.Api.csproj; dotnet restore mobile/ProvaVida.Maui/ProvaVida.Maui.csproj
+        run: dotnet restore src/ProvaVida.Api/ProvaVida.Api.csproj
 
       - name: Build
         run: dotnet build src/ProvaVida.Api/ProvaVida.Api.csproj -c Debug --no-restore
@@ -46,7 +44,33 @@ jobs:
       - name: Testes unitários
         run: dotnet test tests/ProvaVida.Application.Tests/ --logger "console;verbosity=minimal" --no-restore
 
-      - name: Build MAUI Android (verificação de erros e warnings)
+  mobile:
+    name: Mobile — Build MAUI Android
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-maui-${{ hashFiles('mobile/**/*.csproj') }}
+          restore-keys: nuget-maui-
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      - name: Restore
+        run: dotnet restore mobile/ProvaVida.Maui/ProvaVida.Maui.csproj
+
+      - name: Build MAUI (verifica erros e warnings)
         run: |
           dotnet build mobile/ProvaVida.Maui/ProvaVida.Maui.csproj `
             -f net10.0-android `
