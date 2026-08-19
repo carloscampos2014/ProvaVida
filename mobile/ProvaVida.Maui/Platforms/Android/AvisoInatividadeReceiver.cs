@@ -3,6 +3,7 @@ using Android.Content;
 using AndroidX.Core.App;
 using ProvaVida.Maui.Models;
 using SQLite;
+using System.Runtime.Versioning;
 
 namespace ProvaVida.Maui;
 
@@ -14,8 +15,8 @@ namespace ProvaVida.Maui;
 [BroadcastReceiver(Enabled = true, Exported = false)]
 public class AvisoInatividadeReceiver : BroadcastReceiver
 {
-    private const string ChannelId  = "provavida_inatividade";
-    private const int    NotifId    = 1002;
+    private const string ChannelId   = "provavida_inatividade";
+    private const int    NotifId     = 1002;
     private const int    HorasLimite = 48;
 
     public override void OnReceive(Context? context, Intent? intent)
@@ -24,7 +25,7 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
 
         try
         {
-            if (!DevePararNotificacao()) return;
+            if (!DeveDispararNotificacao()) return;
 
             CriarCanal(context);
 
@@ -33,10 +34,13 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
             if (packageManager is null || packageName is null) return;
 
             var notificationIntent = packageManager.GetLaunchIntentForPackage(packageName);
+            if (notificationIntent is null) return; // CS8602: null check explícito
 
-            var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
-                ? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
-                : PendingIntentFlags.UpdateCurrent;
+            PendingIntentFlags flags;
+            if (OperatingSystem.IsAndroidVersionAtLeast(23))
+                flags = PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable;
+            else
+                flags = PendingIntentFlags.UpdateCurrent;
 
             var pendingIntent = PendingIntent.GetActivity(context, NotifId, notificationIntent, flags);
 
@@ -58,7 +62,7 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
     /// <summary>
     /// Retorna true se o último check-in local for há mais de 48h (ou nunca houve).
     /// </summary>
-    private static bool DevePararNotificacao()
+    private static bool DeveDispararNotificacao()
     {
         try
         {
@@ -66,26 +70,27 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "provavida.db3");
 
-            if (!File.Exists(dbPath)) return true; // banco não existe = nunca fez check-in
+            if (!File.Exists(dbPath)) return true;
 
             using var db = new SQLiteConnection(dbPath);
             var ultimo = db.Table<CheckInLocal>()
                            .OrderByDescending(c => c.DataHora)
                            .FirstOrDefault();
 
-            if (ultimo is null) return true; // nenhum check-in local
+            if (ultimo is null) return true;
 
             return (DateTime.UtcNow - ultimo.DataHora.ToUniversalTime()).TotalHours >= HorasLimite;
         }
         catch
         {
-            return false; // em caso de erro, não dispara
+            return false;
         }
     }
 
+    [SupportedOSPlatform("android26.0")]
     private static void CriarCanal(Context context)
     {
-        if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.O) return;
+        if (!OperatingSystem.IsAndroidVersionAtLeast(26)) return;
 
         var channel = new NotificationChannel(
             ChannelId,

@@ -1,6 +1,7 @@
 using Android.App;
 using Android.Content;
 using AndroidX.Core.App;
+using System.Runtime.Versioning;
 
 namespace ProvaVida.Maui;
 
@@ -22,10 +23,13 @@ public class LembreteReceiver : BroadcastReceiver
         if (packageName is null) return;
 
         var notificationIntent = packageManager.GetLaunchIntentForPackage(packageName);
+        if (notificationIntent is null) return; // CS8602: null check explícito
 
-        var flags = Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.M
-            ? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
-            : PendingIntentFlags.UpdateCurrent;
+        PendingIntentFlags flags;
+        if (OperatingSystem.IsAndroidVersionAtLeast(23))
+            flags = PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable;
+        else
+            flags = PendingIntentFlags.UpdateCurrent;
 
         var pendingIntent = PendingIntent.GetActivity(context, 0, notificationIntent, flags);
 
@@ -42,9 +46,10 @@ public class LembreteReceiver : BroadcastReceiver
         manager.Notify(1001, notification);
     }
 
+    [SupportedOSPlatform("android26.0")]
     private static void CriarCanal(Context context)
     {
-        if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.O) return;
+        if (!OperatingSystem.IsAndroidVersionAtLeast(26)) return;
 
         var channel = new NotificationChannel(
             ChannelId,
