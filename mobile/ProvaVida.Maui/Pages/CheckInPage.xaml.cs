@@ -27,22 +27,10 @@ public partial class CheckInPage : ContentPage
         await _vm.InicializarAsync();
         AtualizarSemanaVisual();
 
-        // Solicita permissões proativamente na primeira abertura
+        // Solicita permissões proativamente na primeira abertura do dia
         _ = Task.Run(async () =>
         {
-            var statusLoc = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-            if (statusLoc != PermissionStatus.Granted)
-                await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-
-#if ANDROID
-            // Permissão de notificações obrigatória no Android 13+ (API 33)
-            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Tiramisu)
-            {
-                var statusNotif = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
-                if (statusNotif != PermissionStatus.Granted)
-                    await Permissions.RequestAsync<Permissions.PostNotifications>();
-            }
-#endif
+            await SolicitarPermissoesAsync();
         });
 
         // Heartbeat ao abrir a tela — best effort
@@ -70,6 +58,64 @@ public partial class CheckInPage : ContentPage
 
     private async void OnPerfilTapped(object? sender, TappedEventArgs e)
         => await Shell.Current.GoToAsync("//perfil");
+
+    /// <summary>
+    /// Solicita permissões de localização e notificações com dialog explicativo (rationale).
+    /// Cada permissão é solicitada no máximo uma vez por dia enquanto não for concedida.
+    /// </summary>
+    private async Task SolicitarPermissoesAsync()
+    {
+        const string PrefUltimaLocalizacao  = "perm_loc_ultima_solicitacao";
+        const string PrefUltimaNotificacao  = "perm_notif_ultima_solicitacao";
+        var hoje = DateTime.Today.ToString("yyyy-MM-dd");
+
+        // ── Localização ──────────────────────────────────────────────────────
+        var statusLoc = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+        if (statusLoc != PermissionStatus.Granted)
+        {
+            var ultimaLoc = Preferences.Get(PrefUltimaLocalizacao, string.Empty);
+            if (ultimaLoc != hoje)
+            {
+                Preferences.Set(PrefUltimaLocalizacao, hoje);
+
+                var permitir = await MainThread.InvokeOnMainThreadAsync(() =>
+                    Application.Current!.Windows[0].Page!.DisplayAlert(
+                        "📍 Localização desativada",
+                        "A localização é registrada junto com o check-in para confirmar sua presença. O check-in funciona mesmo sem ela.",
+                        "Permitir agora",
+                        "Mais tarde"));
+
+                if (permitir)
+                    await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            }
+        }
+
+        // ── Notificações (Android 13+) ───────────────────────────────────────
+#if ANDROID
+        if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Tiramisu)
+        {
+            var statusNotif = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+            if (statusNotif != PermissionStatus.Granted)
+            {
+                var ultimaNotif = Preferences.Get(PrefUltimaNotificacao, string.Empty);
+                if (ultimaNotif != hoje)
+                {
+                    Preferences.Set(PrefUltimaNotificacao, hoje);
+
+                    var permitir = await MainThread.InvokeOnMainThreadAsync(() =>
+                        Application.Current!.Windows[0].Page!.DisplayAlert(
+                            "🔔 Notificações desativadas",
+                            "O ProvaVida precisa enviar lembretes diários de check-in. Sem isso, você pode esquecer e acionar o alerta de emergência sem querer.",
+                            "Permitir agora",
+                            "Mais tarde"));
+
+                    if (permitir)
+                        await Permissions.RequestAsync<Permissions.PostNotifications>();
+                }
+            }
+        }
+#endif
+    }
 
     private void AtualizarSemanaVisual()
     {
