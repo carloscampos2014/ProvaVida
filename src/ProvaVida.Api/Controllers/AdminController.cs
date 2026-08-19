@@ -30,6 +30,17 @@ public class AdminController : ControllerBase
         return Ok(resultado);
     }
 
+    [HttpPost("testar-sms")]
+    [ProducesResponseType(typeof(TesteNotificacaoOutput), StatusCodes.Status200OK)]
+    public async Task<IActionResult> TestarSms(
+        [FromBody] TesteDestinatarioRequest request,
+        [FromServices] TestarNotificacaoUseCase useCase,
+        CancellationToken ct)
+    {
+        var resultado = await useCase.TestarSmsAsync(request.Destinatario, ct);
+        return Ok(resultado);
+    }
+
     [HttpGet("metricas")]
     [ProducesResponseType(typeof(MetricasAdminOutput), StatusCodes.Status200OK)]
     public async Task<IActionResult> Metricas(
@@ -268,7 +279,7 @@ public class AdminController : ControllerBase
                 </div>
 
                 <h2>Histórico Total e Diagnóstico</h2>
-                <div class="grid-diag">
+                <div style="display:grid;grid-template-columns:160px 1fr 1fr 1fr;gap:10px;">
                     <div class="card neutral">
                         <div class="label">Alertas disparados (total)</div>
                         <div class="value">{{m.TotalAlertasDisparadosHistorico}}</div>
@@ -284,6 +295,12 @@ public class AdminController : ControllerBase
                         <input id="wapp-dest" type="tel" placeholder="5511999999999"/>
                         <button class="btn" onclick="testar('whatsapp')">Enviar teste</button>
                         <div class="resultado" id="wapp-res"></div>
+                    </div>
+                    <div class="card">
+                        <div class="label">💬 Teste de SMS</div>
+                        <input id="sms-dest" type="tel" placeholder="5511999999999"/>
+                        <button class="btn" onclick="testar('sms')">Enviar teste</button>
+                        <div class="resultado" id="sms-res"></div>
                     </div>
                 </div>
 
@@ -316,8 +333,10 @@ public class AdminController : ControllerBase
 
                 <script>
                     function testar(tipo) {
-                        var dest = document.getElementById(tipo === 'email' ? 'email-dest' : 'wapp-dest').value.trim();
-                        var res  = document.getElementById(tipo === 'email' ? 'email-res'  : 'wapp-res');
+                        var idMap = { email: 'email-dest', whatsapp: 'wapp-dest', sms: 'sms-dest' };
+                        var resMap = { email: 'email-res', whatsapp: 'wapp-res', sms: 'sms-res' };
+                        var dest = document.getElementById(idMap[tipo]).value.trim();
+                        var res  = document.getElementById(resMap[tipo]);
                         if (!dest) { res.innerHTML = '<span style="color:#E73C3C">⚠️ Informe o destinatário.</span>'; return; }
                         res.innerHTML = '<span style="color:#6E648B">⏳ Enviando...</span>';
                         fetch('/admin/testar-' + tipo, {

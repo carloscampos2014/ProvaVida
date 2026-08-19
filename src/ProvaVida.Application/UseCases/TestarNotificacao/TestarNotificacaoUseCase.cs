@@ -7,11 +7,16 @@ public class TestarNotificacaoUseCase
 {
     private readonly IEmailService _emailService;
     private readonly IWhatsAppService _whatsAppService;
+    private readonly ISmsService _smsService;
 
-    public TestarNotificacaoUseCase(IEmailService emailService, IWhatsAppService whatsAppService)
+    public TestarNotificacaoUseCase(
+        IEmailService emailService,
+        IWhatsAppService whatsAppService,
+        ISmsService smsService)
     {
         _emailService    = emailService;
         _whatsAppService = whatsAppService;
+        _smsService      = smsService;
     }
 
     public async Task<TesteNotificacaoOutput> TestarEmailAsync(string destinatario, CancellationToken ct = default)
@@ -30,7 +35,7 @@ public class TestarNotificacaoUseCase
                     """
             ), ct);
             sw.Stop();
-            return new TesteNotificacaoOutput(true, $"E-mail enviado com sucesso.", sw.ElapsedMilliseconds);
+            return new TesteNotificacaoOutput(true, "E-mail enviado com sucesso.", sw.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {
@@ -50,6 +55,25 @@ public class TestarNotificacaoUseCase
                 ct);
             sw.Stop();
             return new TesteNotificacaoOutput(true, "Mensagem WhatsApp enviada com sucesso.", sw.ElapsedMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            sw.Stop();
+            return new TesteNotificacaoOutput(false, $"Falha: {ex.Message}", sw.ElapsedMilliseconds);
+        }
+    }
+
+    public async Task<TesteNotificacaoOutput> TestarSmsAsync(string telefone, CancellationToken ct = default)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            await _smsService.EnviarAsync(
+                telefone,
+                "[ProvaVida Admin] Teste de SMS — se recebeu esta mensagem, o envio de SMS esta funcionando corretamente.",
+                ct);
+            sw.Stop();
+            return new TesteNotificacaoOutput(true, "SMS enviado com sucesso.", sw.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {
