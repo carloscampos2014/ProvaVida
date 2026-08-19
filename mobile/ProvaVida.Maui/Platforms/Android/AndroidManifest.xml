@@ -29,6 +29,30 @@
 				<action android:name="android.service.quicksettings.action.QS_TILE" />
 			</intent-filter>
 		</service>
+		<!-- Widget Simples (2x1) -->
+		<receiver
+			android:name="com.enzojb.provavida.CheckInWidgetSimples"
+			android:exported="true"
+			android:label="ProvaVida — Simples">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+			<meta-data
+				android:name="android.appwidget.provider"
+				android:resource="@xml/widget_simples_info" />
+		</receiver>
+		<!-- Widget Completo (4x2) -->
+		<receiver
+			android:name="com.enzojb.provavida.CheckInWidgetCompleto"
+			android:exported="true"
+			android:label="ProvaVida — Semana">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+			<meta-data
+				android:name="android.appwidget.provider"
+				android:resource="@xml/widget_completo_info" />
+		</receiver>
 	</application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />

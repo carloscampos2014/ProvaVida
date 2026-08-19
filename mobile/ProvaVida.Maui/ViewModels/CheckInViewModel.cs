@@ -146,6 +146,17 @@ public class CheckInViewModel : BaseViewModel
 
             // 5. Cancela o lembrete push do dia
             CancelarLembrete();
+
+            // 6. Atualiza widgets com novo estado
+#if ANDROID
+            try
+            {
+                var ctx = Android.App.Application.Context;
+                CheckInWidgetSimples.AtualizarTodos(ctx);
+                CheckInWidgetCompleto.AtualizarTodos(ctx);
+            }
+            catch { }
+#endif
         }
         catch (Exception ex)
         {
