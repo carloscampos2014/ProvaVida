@@ -62,19 +62,19 @@ public class CheckInTileService : TileService
             {
                 tile.Label       = "ProvaVida — Login";
                 tile.ContentDescription = "Toque para fazer login";
-                tile.State       = Tile.StateInactive;
+                tile.State       = TileState.Inactive;
             }
             else if (fezCheckIn)
             {
                 tile.Label       = "Check-in feito ✓";
                 tile.ContentDescription = "Check-in registrado hoje";
-                tile.State       = Tile.StateActive;
+                tile.State       = TileState.Active;
             }
             else
             {
                 tile.Label       = "Fazer Check-in";
                 tile.ContentDescription = "Toque para registrar seu check-in";
-                tile.State       = Tile.StateInactive;
+                tile.State       = TileState.Inactive;
             }
 
             tile.UpdateTile();
