@@ -128,9 +128,10 @@ public class VerificarInatividadeUseCaseTests
         await _useCase.ExecutarDisparoAsync();
 
         _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
+        // AdicionarAsync chamado 2x: 1 para atualizar o aguardando_resposta + 1 para o novo evento
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n => n.Status == NotificacaoEmergencia.Statuses.Disparado),
-            default), Times.Once);
+            default), Times.Exactly(2));
     }
 
     [Fact]
@@ -150,9 +151,10 @@ public class VerificarInatividadeUseCaseTests
 
         _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
         _wappSvc.Verify(s => s.EnviarAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Once);
+        // AdicionarAsync chamado 2x: 1 para atualizar o aguardando_resposta + 1 para o novo evento
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n => n.Status == NotificacaoEmergencia.Statuses.Disparado),
-            default), Times.Once);
+            default), Times.Exactly(2));
     }
 
     [Fact]
@@ -172,9 +174,10 @@ public class VerificarInatividadeUseCaseTests
         await _useCase.ExecutarDisparoAsync();
 
         _emailSvc.Verify(s => s.EnviarAsync(It.IsAny<EmailMensagem>(), default), Times.Once);
+        // AdicionarAsync chamado 2x: 1 para atualizar o aguardando_resposta + 1 para o novo evento
         _notifRepo.Verify(r => r.AdicionarAsync(
             It.Is<NotificacaoEmergencia>(n =>
                 n.Status == NotificacaoEmergencia.Statuses.Disparado && n.Canal == "email"),
-            default), Times.Once);
+            default), Times.Exactly(2));
     }
 }

@@ -162,6 +162,12 @@ public class VerificarInatividadeUseCase
                 "Resultado do disparo para usuário {UsuarioId}: canal={Canal}",
                 usuario.Id, canal);
 
+            // Atualiza o registro aguardando_resposta original para disparado
+            // Sem isso o job horário continuaria reprocessando o mesmo registro
+            notificacao.MarcarComoProcessado(canal);
+            await GravarNotificacaoAsync(notificacao, ct);
+
+            // Registra também um novo evento de disparo para histórico
             await GravarNotificacaoAsync(
                 NotificacaoEmergencia.CriarDisparado(notificacao.UsuarioId, canal), ct);
         }
