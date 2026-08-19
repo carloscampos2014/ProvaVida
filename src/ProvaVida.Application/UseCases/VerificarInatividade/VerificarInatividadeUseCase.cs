@@ -18,6 +18,7 @@ public class VerificarInatividadeUseCase
     private readonly INotificacaoEmergenciaRepository _notificacaoRepository;
     private readonly IEmailService _emailService;
     private readonly IWhatsAppService _whatsAppService;
+    private readonly ISmsService _smsService;
     private readonly IUnitOfWork _uow;
     private readonly ILogger<VerificarInatividadeUseCase> _logger;
 
@@ -32,6 +33,7 @@ public class VerificarInatividadeUseCase
         INotificacaoEmergenciaRepository notificacaoRepository,
         IEmailService emailService,
         IWhatsAppService whatsAppService,
+        ISmsService smsService,
         IUnitOfWork uow,
         ILogger<VerificarInatividadeUseCase> logger)
     {
@@ -41,6 +43,7 @@ public class VerificarInatividadeUseCase
         _notificacaoRepository = notificacaoRepository;
         _emailService         = emailService;
         _whatsAppService      = whatsAppService;
+        _smsService           = smsService;
         _uow                  = uow;
         _logger               = logger;
     }
@@ -108,9 +111,10 @@ public class VerificarInatividadeUseCase
             var usuario = await _usuarioRepository.ObterPorIdAsync(notificacao.UsuarioId, ct);
             if (usuario is null || !usuario.Ativo) continue;
 
-            // Camada 3 — Dispara e-mail e WhatsApp ao contato de emergência (independentes)
+            // Camada 3 — Dispara e-mail, WhatsApp e SMS ao contato de emergência (independentes)
             var emailEnviado    = false;
             var whatsappEnviado = false;
+            var smsEnviado      = false;
 
             try
             {
@@ -150,12 +154,34 @@ public class VerificarInatividadeUseCase
                     usuario.ContatoEmergenciaWhatsApp, usuario.Id);
             }
 
-            var canal = (emailEnviado, whatsappEnviado) switch
+            try
             {
-                (true, true)   => "email+whatsapp",
-                (true, false)  => "email",
-                (false, true)  => "whatsapp",
-                _              => "falha"
+                await _smsService.EnviarAsync(
+                    usuario.ContatoEmergenciaWhatsApp,
+                    MontarMensagemSms(usuario.Nome, usuario.ContatoEmergenciaNome),
+                    ct);
+                smsEnviado = true;
+                _logger.LogInformation(
+                    "SMS de emergência enviado para {Telefone} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaWhatsApp, usuario.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Falha ao enviar SMS de emergência para {Telefone} referente ao usuário {UsuarioId}",
+                    usuario.ContatoEmergenciaWhatsApp, usuario.Id);
+            }
+
+            var canal = (emailEnviado, whatsappEnviado, smsEnviado) switch
+            {
+                (true,  true,  true)  => "email+whatsapp+sms",
+                (true,  true,  false) => "email+whatsapp",
+                (true,  false, true)  => "email+sms",
+                (false, true,  true)  => "whatsapp+sms",
+                (true,  false, false) => "email",
+                (false, true,  false) => "whatsapp",
+                (false, false, true)  => "sms",
+                _                     => "falha"
             };
 
             _logger.LogInformation(
@@ -232,4 +258,8 @@ public class VerificarInatividadeUseCase
         $"Olá {nomeContato}! Você é contato de emergência de *{nomeUsuario}* no ProvaVida. " +
         $"{nomeUsuario} não fez check-in há mais de 48h e não respondeu ao aviso. " +
         $"Por favor, verifique se está bem. - Equipe ProvaVida";
+
+    private static string MontarMensagemSms(string nomeUsuario, string nomeContato) =>
+        $"ProvaVida: Ola {nomeContato}! {nomeUsuario} nao fez check-in ha mais de 48h e nao respondeu ao aviso. " +
+        $"Por favor, verifique se esta bem.";
 }
