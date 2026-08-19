@@ -36,7 +36,7 @@ public class TwilioVoiceService : IVoiceService
         _logger.LogInformation("Iniciando ligação via Twilio para {Para}", toNumber);
 
         // TwiML inline — lê a mensagem em pt-BR e repete uma vez
-        var twiml = $"<Response><Say language=\"pt-BR\" voice=\"Polly.Vitoria\">{System.Net.WebUtility.HtmlEncode(mensagem)}</Say><Pause length=\"1\"/><Say language=\"pt-BR\" voice=\"Polly.Vitoria\">{System.Net.WebUtility.HtmlEncode(mensagem)}</Say></Response>";
+        var twiml = $"<Response><Say language=\"pt-BR\" voice=\"Polly.Camila\">{System.Net.WebUtility.HtmlEncode(mensagem)}</Say><Pause length=\"1\"/><Say language=\"pt-BR\" voice=\"Polly.Camila\">{System.Net.WebUtility.HtmlEncode(mensagem)}</Say></Response>";
 
         var call = await CallResource.CreateAsync(
             to:   new PhoneNumber(toNumber),
