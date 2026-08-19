@@ -16,6 +16,7 @@ namespace ProvaVida.Maui;
 [Service(
     Label = "ProvaVida",
     Icon  = "@mipmap/appicon",
+    Exported = true,
     Permission = "android.permission.BIND_QUICK_SETTINGS_TILE")]
 [IntentFilter(new[] { ActionQsTile })]
 [SupportedOSPlatform("android24.0")]

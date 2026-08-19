@@ -34,11 +34,23 @@ jobs:
           key: nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: nuget-
 
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
       - name: Restore
-        run: dotnet restore src/ProvaVida.Api/ProvaVida.Api.csproj
+        run: dotnet restore src/ProvaVida.Api/ProvaVida.Api.csproj; dotnet restore mobile/ProvaVida.Maui/ProvaVida.Maui.csproj
 
       - name: Build
         run: dotnet build src/ProvaVida.Api/ProvaVida.Api.csproj -c Debug --no-restore
 
       - name: Testes unitários
         run: dotnet test tests/ProvaVida.Application.Tests/ --logger "console;verbosity=minimal" --no-restore
+
+      - name: Build MAUI Android (verificação de erros e warnings)
+        run: |
+          dotnet build mobile/ProvaVida.Maui/ProvaVida.Maui.csproj `
+            -f net10.0-android `
+            -c Release `
+            --no-restore `
+            -p:AndroidBuildApplicationPackage=false
+        shell: pwsh
