@@ -5,6 +5,7 @@ using System.Runtime.Versioning;
 
 namespace ProvaVida.Maui;
 
+[BroadcastReceiver(Enabled = true, Exported = false)]
 public class LembreteReceiver : BroadcastReceiver
 {
     private const string ChannelId = "provavida_lembrete";
@@ -13,7 +14,8 @@ public class LembreteReceiver : BroadcastReceiver
     {
         if (context is null) return;
 
-        CriarCanal(context);
+        if (OperatingSystem.IsAndroidVersionAtLeast(26))
+            CriarCanal(context);
 
         var packageManager = context.PackageManager;
         if (packageManager is null) return;
@@ -22,7 +24,7 @@ public class LembreteReceiver : BroadcastReceiver
         if (packageName is null) return;
 
         var notificationIntent = packageManager.GetLaunchIntentForPackage(packageName);
-        if (notificationIntent is null) return; // CS8602: null check explícito
+        if (notificationIntent is null) return;
 
         PendingIntentFlags flags;
         if (OperatingSystem.IsAndroidVersionAtLeast(23))
@@ -31,6 +33,7 @@ public class LembreteReceiver : BroadcastReceiver
             flags = PendingIntentFlags.UpdateCurrent;
 
         var pendingIntent = PendingIntent.GetActivity(context, 0, notificationIntent, flags);
+        if (pendingIntent is null) return;
 
         var notification = new NotificationCompat.Builder(context, ChannelId)
             .SetContentTitle("Está tudo bem com você?")

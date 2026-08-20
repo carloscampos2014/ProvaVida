@@ -12,6 +12,7 @@ namespace ProvaVida.Maui;
 /// Verifica o SQLite local — se o último check-in for há mais de 48h, dispara
 /// notificação de aviso de inatividade para o próprio usuário.
 /// </summary>
+[BroadcastReceiver(Enabled = true, Exported = false)]
 public class AvisoInatividadeReceiver : BroadcastReceiver
 {
     private const string ChannelId   = "provavida_inatividade";
@@ -26,14 +27,15 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
         {
             if (!DeveDispararNotificacao()) return;
 
-            CriarCanal(context);
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
+                CriarCanal(context);
 
             var packageManager = context.PackageManager;
             var packageName    = context.PackageName;
             if (packageManager is null || packageName is null) return;
 
             var notificationIntent = packageManager.GetLaunchIntentForPackage(packageName);
-            if (notificationIntent is null) return; // CS8602: null check explícito
+            if (notificationIntent is null) return;
 
             PendingIntentFlags flags;
             if (OperatingSystem.IsAndroidVersionAtLeast(23))
@@ -42,6 +44,7 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
                 flags = PendingIntentFlags.UpdateCurrent;
 
             var pendingIntent = PendingIntent.GetActivity(context, NotifId, notificationIntent, flags);
+            if (pendingIntent is null) return;
 
             var notification = new NotificationCompat.Builder(context, ChannelId)
                 .SetContentTitle("Está tudo bem com você? 💙")
@@ -58,9 +61,6 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
         catch { /* ignora — best effort */ }
     }
 
-    /// <summary>
-    /// Retorna true se o último check-in local for há mais de 48h (ou nunca houve).
-    /// </summary>
     private static bool DeveDispararNotificacao()
     {
         try
