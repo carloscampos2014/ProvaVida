@@ -20,18 +20,19 @@ public class HeartbeatService : IHeartbeatService
 
     public async Task EnviarAsync(CancellationToken ct = default)
     {
-        // Renovação proativa: verifica se o token está prestes a expirar
+        // Renovação proativa antes de obter o token — garante que o token mais recente é usado
         await RenovarTokenSeNecessarioAsync(ct);
 
         var token = await _tokenStorage.ObterAsync();
         if (string.IsNullOrEmpty(token)) return;
 
-        _http.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
         try
         {
-            await _http.PostAsync("heartbeat", null, ct);
+            // Header por request — não polui o estado global do HttpClient compartilhado
+            using var request = new HttpRequestMessage(HttpMethod.Post, "heartbeat");
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            await _http.SendAsync(request, ct);
         }
         catch
         {
@@ -50,6 +51,7 @@ public class HeartbeatService : IHeartbeatService
             if (tempoRestante > LimiarRenovacao) return;
 
             // Menos de 7 horas restantes — renova silenciosamente
+            // TentarRenovarTokenAsync é protegido por SemaphoreSlim — chamadas simultâneas são seguras
             await _authService.TentarRenovarTokenAsync(ct);
         }
         catch
