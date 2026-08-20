@@ -4,34 +4,72 @@ inclusion: always
 
 # Padrão de Briefing Detalhado
 
-Todo briefing de feature ou correção de bug deve incluir:
+Todo briefing deve ser visualmente limpo e fácil de escanear. Use separadores, emojis de status e blocos de código curtos.
 
-## Para cada arquivo alterado
+---
 
-- **O que está errado hoje** — comportamento atual com exemplo concreto de código
-- **Por que é um problema** — consequência real para o usuário ou sistema
-- **O que exatamente vai mudar** — trecho de código antes vs. depois (mesmo que resumido)
-- **Por que essa abordagem** — decisão de design em 1 frase
+## Estrutura do briefing
 
-## Formato obrigatório por item
+### Cabeçalho
 
 ```
-**Arquivo: NomeDoArquivo.cs**
-Problema: [o que acontece hoje, com código ou fluxo concreto]
-Consequência: [o que o usuário ou sistema experimenta]
-Correção: [o que muda — antes/depois ou descrição precisa]
-Decisão: [por que essa abordagem e não outra]
+## 🔧 Briefing — #NNN Título da issue
+
+> Uma frase resumindo o problema central e o impacto.
 ```
 
-## Nível de detalhe esperado
+### Tabela de escopo (sempre presente)
 
-- Nomear métodos específicos que serão alterados
-- Mostrar a assinatura antes e depois quando mudar
-- Explicar o mecanismo do bug (race condition, null ref, state compartilhado, etc.)
-- Explicar o mecanismo da correção (semáforo, header por request, OnAppearing, etc.)
+```
+| Arquivo | Método | O que muda |
+|---------|--------|------------|
+| Foo.cs  | Bar()  | descrição  |
+```
 
-## O que NÃO fazer
+### Detalhe por arquivo
 
-- Listar arquivos sem explicar o que muda em cada um
-- Usar termos vagos como "melhora a robustez" sem explicar como
-- Omitir o "por quê" — toda decisão precisa de razão
+Usar o formato abaixo para cada arquivo. Separar com `---`.
+
+```
+### 📄 NomeDoArquivo.cs — NomeDoMétodo()
+
+**🐛 Problema**
+O que acontece hoje, com trecho de código se ajudar:
+\`\`\`csharp
+// código problemático (máx 5 linhas)
+\`\`\`
+
+**💥 Consequência**
+O que o usuário experimenta de forma concreta (ex: "widget mostra check-in não feito mesmo após registrar").
+
+**✅ Correção**
+O que muda — antes vs. depois:
+\`\`\`csharp
+// antes
+foo();
+
+// depois
+var ok = await foo();
+if (!ok) retentar();
+\`\`\`
+
+**💡 Decisão**
+Por que essa abordagem em 1 frase.
+```
+
+### Rodapé
+
+```
+### ⛔ Fora do escopo
+- Item que não será feito e por quê
+```
+
+---
+
+## Regras de apresentação
+
+- Máximo 5 linhas de código por bloco — resumir se maior
+- Consequência sempre do ponto de vista do usuário, não do sistema
+- Nunca usar termos vagos como "melhora robustez" sem explicar como
+- Toda decisão de design precisa de razão em 1 frase
+- Se forem mais de 4 arquivos, agrupar os que têm a mesma correção
