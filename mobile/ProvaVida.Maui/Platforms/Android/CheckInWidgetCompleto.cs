@@ -113,11 +113,6 @@ public class CheckInWidgetCompleto : AppWidgetProvider
 
     private static bool VerificarAutenticado()
     {
-        try
-        {
-            var token = SecureStorage.Default.GetAsync("auth_token").GetAwaiter().GetResult();
-            return !string.IsNullOrWhiteSpace(token);
-        }
-        catch { return false; }
+        return CheckInLocalHelper.VerificarAutenticado();
     }
 }

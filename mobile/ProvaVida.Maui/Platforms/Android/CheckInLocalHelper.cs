@@ -4,15 +4,37 @@ using SQLite;
 namespace ProvaVida.Maui;
 
 /// <summary>
-/// Helpers síncronos para leitura do SQLite local em BroadcastReceivers e AppWidgetProviders.
-/// Esses componentes Android não têm contexto async — usam SQLiteConnection síncrono.
-/// DataHora é DateTimeOffset serializado como texto com sufixo Z — comparação usa janela UTC.
+/// Helpers síncronos para leitura do SQLite local e SecureStorage em BroadcastReceivers e AppWidgetProviders.
+/// Esses componentes Android não têm contexto async completo — usam APIs síncronas.
 /// </summary>
 internal static class CheckInLocalHelper
 {
     private static readonly string DbPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "provavida.db3");
+
+    /// <summary>
+    /// Verifica se o usuário está autenticado com token não expirado.
+    /// Apenas leitura local do SecureStorage — sem chamada à API.
+    /// </summary>
+    public static bool VerificarAutenticado()
+    {
+        try
+        {
+            var token = SecureStorage.Default.GetAsync("auth_token").GetAwaiter().GetResult();
+            if (string.IsNullOrWhiteSpace(token)) return false;
+
+            var expiraEmStr = SecureStorage.Default.GetAsync("auth_token_expira_em").GetAwaiter().GetResult();
+            if (string.IsNullOrEmpty(expiraEmStr)) return false;
+
+            if (!DateTime.TryParse(expiraEmStr, null,
+                    System.Globalization.DateTimeStyles.RoundtripKind, out var expiraEm))
+                return false;
+
+            return expiraEm > DateTime.UtcNow;
+        }
+        catch { return false; }
+    }
 
     /// <summary>
     /// Verifica se o usuário fez check-in hoje, comparando em UTC com o dia local do dispositivo.
