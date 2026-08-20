@@ -86,12 +86,12 @@ public sealed class BruteForceService : IBruteForceService
     {
         const string sql = """
             SELECT
-                b.id            AS "Id",
-                b.ip            AS "Ip",
-                b.motivo        AS "Motivo",
-                b.bloqueado_em  AS "BloqueadoEm",
-                b.expira_em     AS "ExpiraEm",
-                COUNT(t.id)     AS "TotalTentativas"
+                b.id            AS Id,
+                b.ip            AS Ip,
+                b.motivo        AS Motivo,
+                b.bloqueado_em  AS BloqueadoEm,
+                b.expira_em     AS ExpiraEm,
+                COUNT(t.id)     AS TotalTentativas
             FROM ips_bloqueados b
             LEFT JOIN tentativas_login t ON t.ip = b.ip
                 AND t.criado_em >= NOW() - INTERVAL '24 hours'

@@ -15,10 +15,12 @@ public interface IBruteForceService
     Task LiberarAsync(string ip, string liberadoPor, CancellationToken ct = default);
 }
 
-public record IpBloqueadoDto(
-    Guid Id,
-    string Ip,
-    string Motivo,
-    DateTime BloqueadoEm,
-    DateTime ExpiraEm,
-    int TotalTentativas);
+public class IpBloqueadoDto
+{
+    public Guid Id { get; init; }
+    public string Ip { get; init; } = string.Empty;
+    public string Motivo { get; init; } = string.Empty;
+    public DateTime BloqueadoEm { get; init; }
+    public DateTime ExpiraEm { get; init; }
+    public long TotalTentativas { get; init; }
+}
