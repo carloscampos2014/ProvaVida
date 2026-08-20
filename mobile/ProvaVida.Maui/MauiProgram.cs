@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification;
 using ProvaVida.Maui.Pages;
 using ProvaVida.Maui.Services;
 using ProvaVida.Maui.Storage;
@@ -20,6 +21,7 @@ public static class MauiProgram
 
         builder
             .UseMauiApp<App>()
+            .UseLocalNotification()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

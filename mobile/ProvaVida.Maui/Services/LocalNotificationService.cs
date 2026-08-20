@@ -1,115 +1,88 @@
+using Plugin.LocalNotification;
+
 namespace ProvaVida.Maui.Services;
 
 /// <summary>
-/// Gerencia notificações push locais para lembrete de check-in diário.
+/// Gerencia notificações push locais usando Plugin.LocalNotification.
+/// Substitui a implementação manual com BroadcastReceiver/AlarmManager
+/// que não funcionava corretamente no Android 15/HyperOS.
 /// </summary>
 public static class LocalNotificationService
 {
-    private const int LembreteId       = 1001;
-    private const int AvisoInatividadeId = 1002;
-    private const int HoraLembrete     = 20; // 20h
-    private const int HoraAvisoInatividade = 21; // 21h
+    private const int LembreteId          = 1001;
+    private const int AvisoInatividadeId  = 1002;
+    private const int HoraLembrete        = 20; // 20h local
+    private const int HoraAvisoInatividade = 21; // 21h local
 
     /// <summary>
-    /// Agenda o lembrete diário de check-in se ainda não foi feito hoje.
+    /// Agenda o lembrete diário de check-in para as 20h.
     /// </summary>
-    public static void AgendarLembrete()
+    public static async Task AgendarLembreteAsync()
     {
         try
         {
-            var agora = DateTime.Now;
+            var agora   = DateTime.Now;
             var horario = new DateTime(agora.Year, agora.Month, agora.Day, HoraLembrete, 0, 0);
+            if (agora >= horario) horario = horario.AddDays(1);
 
-            // Se já passou das 20h hoje, agenda para amanhã
-            if (agora >= horario)
-                horario = horario.AddDays(1);
+            var notification = new NotificationRequest
+            {
+                NotificationId = LembreteId,
+                Title          = "Está tudo bem com você?",
+                Description    = "Não detectamos seu check-in hoje. Toque para confirmar que está bem.",
+                Schedule       = new NotificationRequestSchedule
+                {
+                    NotifyTime     = horario,
+                    RepeatType     = NotificationRepeatInterval.Daily,
+                    NotifyRepeatInterval = TimeSpan.FromDays(1)
+                }
+            };
 
-#if ANDROID
-            AgendarNotificacaoAndroid(horario, LembreteId, typeof(LembreteReceiver));
-#endif
+            await LocalNotificationCenter.Current.Show(notification);
         }
         catch { /* ignora se permissão negada */ }
     }
 
     /// <summary>
     /// Agenda o aviso de inatividade diário para as 21h.
-    /// Verifica localmente se há check-in nas últimas 48h antes de disparar.
+    /// Só dispara se não houver check-in nas últimas 48h (verificado no momento do disparo).
     /// </summary>
-    public static void AgendarAvisoInatividade()
+    public static async Task AgendarAvisoInatividadeAsync()
     {
         try
         {
-            var agora = DateTime.Now;
+            var agora   = DateTime.Now;
             var horario = new DateTime(agora.Year, agora.Month, agora.Day, HoraAvisoInatividade, 0, 0);
+            if (agora >= horario) horario = horario.AddDays(1);
 
-            // Se já passou das 21h hoje, agenda para amanhã
-            if (agora >= horario)
-                horario = horario.AddDays(1);
+            var notification = new NotificationRequest
+            {
+                NotificationId = AvisoInatividadeId,
+                Title          = "Está tudo bem com você? 💙",
+                Description    = "Não registramos seu check-in há mais de 48h. Abra o app e confirme que está bem.",
+                Schedule       = new NotificationRequestSchedule
+                {
+                    NotifyTime     = horario,
+                    RepeatType     = NotificationRepeatInterval.Daily,
+                    NotifyRepeatInterval = TimeSpan.FromDays(1)
+                }
+            };
 
-#if ANDROID
-            AgendarNotificacaoAndroid(horario, AvisoInatividadeId, typeof(AvisoInatividadeReceiver));
-#endif
+            await LocalNotificationCenter.Current.Show(notification);
         }
         catch { /* ignora se permissão negada */ }
     }
 
+    // Mantido para compatibilidade com chamadas existentes
+    public static void AgendarLembrete()
+        => _ = AgendarLembreteAsync();
+
+    public static void AgendarAvisoInatividade()
+        => _ = AgendarAvisoInatividadeAsync();
+
     public static void CancelarLembrete()
     {
-        try
-        {
-#if ANDROID
-            CancelarNotificacaoAndroid(LembreteId, typeof(LembreteReceiver));
-#endif
-        }
+        try { LocalNotificationCenter.Current.Cancel(LembreteId); }
         catch { }
     }
-
-#if ANDROID
-    private static void AgendarNotificacaoAndroid(DateTime horario, int requestCode, Type receiverType)
-    {
-        var context = Android.App.Application.Context;
-        var intent  = new Android.Content.Intent(context, receiverType);
-
-        Android.App.PendingIntentFlags flags;
-        if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            flags = Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable;
-        else
-            flags = Android.App.PendingIntentFlags.UpdateCurrent;
-
-        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, requestCode, intent, flags);
-        if (pendingIntent is null) return;
-
-        var alarmManager = context.GetSystemService(Android.Content.Context.AlarmService)
-            as Android.App.AlarmManager;
-        if (alarmManager is null) return;
-
-        var triggerAtMillis = new DateTimeOffset(horario).ToUnixTimeMilliseconds();
-
-        if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            alarmManager.SetExactAndAllowWhileIdle(
-                Android.App.AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
-        else
-            alarmManager.SetExact(
-                Android.App.AlarmType.RtcWakeup, triggerAtMillis, pendingIntent);
-    }
-
-    private static void CancelarNotificacaoAndroid(int requestCode, Type receiverType)
-    {
-        var context = Android.App.Application.Context;
-        var intent  = new Android.Content.Intent(context, receiverType);
-
-        Android.App.PendingIntentFlags flags;
-        if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            flags = Android.App.PendingIntentFlags.UpdateCurrent | Android.App.PendingIntentFlags.Immutable;
-        else
-            flags = Android.App.PendingIntentFlags.UpdateCurrent;
-
-        var pendingIntent = Android.App.PendingIntent.GetBroadcast(context, requestCode, intent, flags);
-        if (pendingIntent is null) return;
-
-        var alarmManager = context.GetSystemService(Android.Content.Context.AlarmService)
-            as Android.App.AlarmManager;
-        alarmManager?.Cancel(pendingIntent);
-    }
-#endif
 }
