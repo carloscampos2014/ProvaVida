@@ -87,12 +87,11 @@ public partial class CheckInPage : ContentPage
             {
                 Preferences.Set(PrefUltimaLocalizacao, hoje);
 
-                var permitir = await MainThread.InvokeOnMainThreadAsync(() =>
-                    Application.Current!.Windows[0].Page!.DisplayAlert(
+                var permitir = await DisplayAlertAsync(
                         "📍 Localização desativada",
                         "A localização é registrada junto com o check-in para confirmar sua presença. O check-in funciona mesmo sem ela.",
                         "Permitir agora",
-                        "Mais tarde"));
+                        "Mais tarde");
 
                 if (permitir)
                     await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
@@ -101,7 +100,7 @@ public partial class CheckInPage : ContentPage
 
         // ── Notificações (Android 13+) ───────────────────────────────────────
 #if ANDROID
-        if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Tiramisu)
+        if (OperatingSystem.IsAndroidVersionAtLeast(33))
         {
             var statusNotif = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
             if (statusNotif != PermissionStatus.Granted)
@@ -111,12 +110,11 @@ public partial class CheckInPage : ContentPage
                 {
                     Preferences.Set(PrefUltimaNotificacao, hoje);
 
-                    var permitir = await MainThread.InvokeOnMainThreadAsync(() =>
-                        Application.Current!.Windows[0].Page!.DisplayAlert(
+                    var permitir = await DisplayAlertAsync(
                             "🔔 Notificações desativadas",
                             "O ProvaVida precisa enviar lembretes diários de check-in. Sem isso, você pode esquecer e acionar o alerta de emergência sem querer.",
                             "Permitir agora",
-                            "Mais tarde"));
+                            "Mais tarde");
 
                     if (permitir)
                         await Permissions.RequestAsync<Permissions.PostNotifications>();

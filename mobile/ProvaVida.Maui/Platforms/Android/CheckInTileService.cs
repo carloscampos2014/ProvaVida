@@ -13,6 +13,10 @@ namespace ProvaVida.Maui;
 /// Exibido na área de configurações rápidas do Android (onde ficam Wi-Fi, Bluetooth, etc.).
 /// Requer Android 7.0+ (API 24).
 /// </summary>
+[Service(
+    Exported = true,
+    Permission = "android.permission.BIND_QUICK_SETTINGS_TILE")]
+[IntentFilter(new[] { "android.service.quicksettings.action.QS_TILE" })]
 [SupportedOSPlatform("android24.0")]
 public class CheckInTileService : TileService
 {
@@ -40,7 +44,16 @@ public class CheckInTileService : TileService
             .SetPackage(PackageName)
             .SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
-        StartActivityAndCollapse(intent);
+        if (OperatingSystem.IsAndroidVersionAtLeast(34))
+        {
+            var flags = PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable;
+            var pending = PendingIntent.GetActivity(this, 0, intent, flags);
+            if (pending is not null) StartActivityAndCollapse(pending);
+        }
+        else
+        {
+            StartActivityAndCollapse(intent);
+        }
     }
 
     private void AtualizarTile()
