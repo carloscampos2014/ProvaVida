@@ -11,19 +11,22 @@ public class LoginUseCase
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtService _jwtService;
     private readonly IUnitOfWork _uow;
+    private readonly IRefreshTokenHasher _hasher;
 
     public LoginUseCase(
         IUsuarioRepository usuarioRepository,
         ISessaoLoginRepository sessaoRepository,
         IPasswordHasher passwordHasher,
         IJwtService jwtService,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        IRefreshTokenHasher hasher)
     {
         _usuarioRepository = usuarioRepository;
         _sessaoRepository = sessaoRepository;
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _uow = uow;
+        _hasher = hasher;
     }
 
     public async Task<LoginOutput> ExecutarAsync(LoginInput input, CancellationToken ct = default)
@@ -40,8 +43,9 @@ public class LoginUseCase
         var token = _jwtService.GerarToken(usuario, out var expiraEm);
         var refreshToken = _jwtService.GerarRefreshToken();
         var refreshTokenExpiraEm = DateTime.UtcNow.AddDays(365);
+        var refreshTokenHash = _hasher.Hash(refreshToken);
 
-        var sessao = SessaoLogin.Criar(usuario.Id, token, expiraEm, refreshToken, refreshTokenExpiraEm);
+        var sessao = SessaoLogin.Criar(usuario.Id, token, expiraEm, refreshTokenHash, refreshTokenExpiraEm);
 
         await _uow.BeginAsync(cancellationToken: ct);
         try

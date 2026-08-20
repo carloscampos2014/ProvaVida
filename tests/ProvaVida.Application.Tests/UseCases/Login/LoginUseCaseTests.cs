@@ -14,6 +14,7 @@ public class LoginUseCaseTests
     private readonly Mock<IPasswordHasher> _hasherMock = new();
     private readonly Mock<IJwtService> _jwtMock = new();
     private readonly Mock<IUnitOfWork> _uowMock = new();
+    private readonly Mock<IRefreshTokenHasher> _refreshHasherMock = new();
     private readonly LoginUseCase _useCase;
 
     public LoginUseCaseTests()
@@ -21,10 +22,11 @@ public class LoginUseCaseTests
         _uowMock.Setup(x => x.BeginAsync(default, default)).Returns(Task.CompletedTask);
         _uowMock.Setup(x => x.CommitAsync(default)).Returns(Task.CompletedTask);
         _uowMock.Setup(x => x.RollbackAsync(default)).Returns(Task.CompletedTask);
+        _refreshHasherMock.Setup(h => h.Hash(It.IsAny<string>())).Returns("hash-fake");
 
         _useCase = new LoginUseCase(
             _repoMock.Object, _sessaoMock.Object,
-            _hasherMock.Object, _jwtMock.Object, _uowMock.Object);
+            _hasherMock.Object, _jwtMock.Object, _uowMock.Object, _refreshHasherMock.Object);
     }
 
     private static Usuario CriarUsuario() => Usuario.Criar(

@@ -13,6 +13,7 @@ public class RefreshTokenUseCaseTests
     private readonly Mock<IUsuarioRepository> _usuarioMock = new();
     private readonly Mock<IJwtService> _jwtMock = new();
     private readonly Mock<IUnitOfWork> _uowMock = new();
+    private readonly Mock<IRefreshTokenHasher> _refreshHasherMock = new();
     private readonly RefreshTokenUseCase _useCase;
 
     public RefreshTokenUseCaseTests()
@@ -22,12 +23,14 @@ public class RefreshTokenUseCaseTests
         _uowMock.Setup(x => x.RollbackAsync(default)).Returns(Task.CompletedTask);
         _sessaoMock.Setup(s => s.SalvarAlteracoesAsync(default)).Returns(Task.CompletedTask);
         _sessaoMock.Setup(s => s.AdicionarAsync(It.IsAny<SessaoLogin>(), default)).Returns(Task.CompletedTask);
+        _refreshHasherMock.Setup(h => h.Hash(It.IsAny<string>())).Returns("hash-fake");
 
         _useCase = new RefreshTokenUseCase(
             _sessaoMock.Object,
             _usuarioMock.Object,
             _jwtMock.Object,
-            _uowMock.Object);
+            _uowMock.Object,
+            _refreshHasherMock.Object);
     }
 
     private static Usuario CriarUsuario()
