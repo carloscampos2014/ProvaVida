@@ -1,3 +1,4 @@
+using Plugin.LocalNotification;
 using ProvaVida.Maui.Services;
 using ProvaVida.Maui.ViewModels;
 
@@ -27,11 +28,11 @@ public partial class CheckInPage : ContentPage
         await _vm.InicializarAsync();
         AtualizarSemanaVisual();
 
+        // Solicita permissão de notificação via Plugin.LocalNotification
+        await LocalNotificationCenter.Current.RequestNotificationPermission();
+
         // Solicita permissões proativamente na primeira abertura do dia
-        _ = Task.Run(async () =>
-        {
-            await SolicitarPermissoesAsync();
-        });
+        await SolicitarPermissoesAsync();
 
         // Heartbeat ao abrir a tela — best effort
         _ = Task.Run(() => _heartbeatService.EnviarAsync());
@@ -64,6 +65,22 @@ public partial class CheckInPage : ContentPage
 
     private async void OnHamburgerTapped(object? sender, TappedEventArgs e)
         => Shell.Current.FlyoutIsPresented = true;
+
+    private async void OnTestarNotificacaoTapped(object? sender, EventArgs e)
+    {
+        var notification = new NotificationRequest
+        {
+            NotificationId = 9999,
+            Title          = "Teste de Notificação",
+            Description    = "Se você recebeu isso, as notificações estão funcionando! ✅",
+            Schedule       = new NotificationRequestSchedule
+            {
+                NotifyTime = DateTime.Now.AddSeconds(5)
+            }
+        };
+        await LocalNotificationCenter.Current.Show(notification);
+        await DisplayAlertAsync("Agendado", "Notificação agendada para daqui 5 segundos. Minimize o app.", "OK");
+    }
 
     private async void OnPerfilTapped(object? sender, TappedEventArgs e)
         => await Shell.Current.GoToAsync("//perfil");

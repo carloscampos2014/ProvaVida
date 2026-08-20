@@ -137,6 +137,16 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Botão de teste de notificação — remover após confirmar funcionamento -->
+            <Button x:Name="BtnTestarNotificacao"
+                    Text="🔔 Testar Notificação (5s)"
+                    Margin="0,8,0,0"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    CornerRadius="10"
+                    FontSize="13"
+                    Clicked="OnTestarNotificacaoTapped"/>
+
         </VerticalStackLayout>
 
     </Grid>
