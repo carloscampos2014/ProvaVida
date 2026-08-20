@@ -8,6 +8,7 @@ namespace ProvaVida.Maui.ViewModels;
 public class LoginViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
+    private readonly IContaService _contaService;
     private readonly ITokenStorage _tokenStorage;
     private readonly IUsuarioStorage _usuarioStorage;
 
@@ -39,10 +40,12 @@ public class LoginViewModel : BaseViewModel
 
     public LoginViewModel(
         IAuthService authService,
+        IContaService contaService,
         ITokenStorage tokenStorage,
         IUsuarioStorage usuarioStorage)
     {
         _authService = authService;
+        _contaService = contaService;
         _tokenStorage = tokenStorage;
         _usuarioStorage = usuarioStorage;
 
@@ -63,7 +66,6 @@ public class LoginViewModel : BaseViewModel
             var parts = token.Split('.');
             if (parts.Length < 2) return null;
 
-            // Padding Base64
             var payload = parts[1];
             payload = payload.Replace('-', '+').Replace('_', '/');
             while (payload.Length % 4 != 0) payload += '=';
@@ -93,17 +95,37 @@ public class LoginViewModel : BaseViewModel
             await _tokenStorage.SalvarExpiraEmAsync(result.ExpiraEm);
             await _tokenStorage.SalvarRefreshTokenAsync(result.RefreshToken);
 
-            // Salva nome e email localmente extraindo do JWT para exibir na tela de check-in
-            var nome = ExtrairClaimDoToken(result.Token, "nome");
+            // Salva nome e email do JWT imediatamente (disponível offline)
+            var nome  = ExtrairClaimDoToken(result.Token, "nome");
             var email = ExtrairClaimDoToken(result.Token, "email");
-            if (!string.IsNullOrEmpty(nome))
+            _usuarioStorage.Salvar(new UsuarioLocal
             {
-                _usuarioStorage.Salvar(new Models.UsuarioLocal
+                Nome  = nome  ?? string.Empty,
+                Email = email ?? Email.Trim()
+            });
+
+            // Busca perfil completo da API em background para popular WhatsApp e contatos
+            _ = Task.Run(async () =>
+            {
+                try
                 {
-                    Nome  = nome,
-                    Email = email ?? Email.Trim()
-                });
-            }
+                    var perfil = await _contaService.ObterPerfilAsync();
+                    if (perfil is null) return;
+                    _usuarioStorage.Salvar(new UsuarioLocal
+                    {
+                        Nome                      = perfil.Nome,
+                        Email                     = perfil.Email,
+                        WhatsApp                  = perfil.WhatsApp,
+                        ContatoEmergenciaNome     = perfil.ContatoEmergenciaNome,
+                        ContatoEmergenciaEmail    = perfil.ContatoEmergenciaEmail,
+                        ContatoEmergenciaWhatsApp = perfil.ContatoEmergenciaWhatsApp
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LoginViewModel] Falha ao buscar perfil completo: {ex.Message}");
+                }
+            });
 
             await Shell.Current.GoToAsync("//checkin");
         }

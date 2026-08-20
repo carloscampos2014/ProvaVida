@@ -59,6 +59,15 @@ public class PerfilViewModel : BaseViewModel
         LogoffCommand = new Command(async () => await LogoffAsync());
         ExcluirContaCommand = new Command(async () => await ExcluirContaAsync());
 
+        // Não carrega no construtor — OnAppearing da PerfilPage garante o carregamento
+        // correto em toda visita, inclusive após logoff/login (Shell reutiliza a instância).
+    }
+
+    /// <summary>
+    /// Chamado pelo OnAppearing da PerfilPage. Garante recarga em toda visita à página.
+    /// </summary>
+    public void AoExibir()
+    {
         CarregarDadosLocais();
         _ = Task.Run(CarregarDadosDaApiAsync);
     }
@@ -84,24 +93,28 @@ public class PerfilViewModel : BaseViewModel
             if (perfil is null) return;
 
             // Atualiza UI e cache local com dados completos da API
-            Nome           = perfil.Nome;
-            Email          = perfil.Email;
-            WhatsApp       = perfil.WhatsApp;
-            ContatoNome    = perfil.ContatoEmergenciaNome;
-            ContatoEmail   = perfil.ContatoEmergenciaEmail;
+            Nome            = perfil.Nome;
+            Email           = perfil.Email;
+            WhatsApp        = perfil.WhatsApp;
+            ContatoNome     = perfil.ContatoEmergenciaNome;
+            ContatoEmail    = perfil.ContatoEmergenciaEmail;
             ContatoWhatsApp = perfil.ContatoEmergenciaWhatsApp;
 
             _usuarioStorage.Salvar(new UsuarioLocal
             {
-                Nome                    = perfil.Nome,
-                Email                   = perfil.Email,
-                WhatsApp                = perfil.WhatsApp,
-                ContatoEmergenciaNome   = perfil.ContatoEmergenciaNome,
-                ContatoEmergenciaEmail  = perfil.ContatoEmergenciaEmail,
+                Nome                      = perfil.Nome,
+                Email                     = perfil.Email,
+                WhatsApp                  = perfil.WhatsApp,
+                ContatoEmergenciaNome     = perfil.ContatoEmergenciaNome,
+                ContatoEmergenciaEmail    = perfil.ContatoEmergenciaEmail,
                 ContatoEmergenciaWhatsApp = perfil.ContatoEmergenciaWhatsApp
             });
         }
-        catch { /* falha silenciosa — dados locais continuam visíveis */ }
+        catch (Exception ex)
+        {
+            // Dados locais continuam visíveis; loga para diagnóstico
+            System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] Falha ao carregar perfil da API: {ex.Message}");
+        }
     }    private async Task SalvarAsync()
     {
         LimparErro();
@@ -195,7 +208,16 @@ public class PerfilViewModel : BaseViewModel
         }
     }
 
-    private async Task LogoffAsync()    {
+    private async Task LogoffAsync()
+    {
+        // Reseta campos em memória antes de navegar — Shell reutiliza esta instância
+        Nome            = string.Empty;
+        Email           = string.Empty;
+        WhatsApp        = string.Empty;
+        ContatoNome     = string.Empty;
+        ContatoEmail    = string.Empty;
+        ContatoWhatsApp = string.Empty;
+
         await _authService.LogoffAsync();
         await _tokenStorage.RemoverAsync();
         _usuarioStorage.Remover();
