@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProvaVida.Application.Interfaces;
 using ProvaVida.Application.UseCases.ObterMetricasAdmin;
 using ProvaVida.Application.UseCases.TestarNotificacao;
 
@@ -54,6 +55,32 @@ public class AdminController : ControllerBase
         return Ok(resultado);
     }
 
+    [HttpGet("ips-bloqueados")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> IpsBloqueados(
+        [FromServices] IBruteForceService bruteForce,
+        CancellationToken ct)
+    {
+        var lista = await bruteForce.ListarBloqueadosAsync(ct);
+        return Ok(lista);
+    }
+
+    [HttpPost("ips-bloqueados/{ip}/liberar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> LiberarIp(
+        string ip,
+        [FromServices] IBruteForceService bruteForce,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(ip))
+            return BadRequest(new { error = "IP inválido." });
+
+        var liberadoPor = User.Identity?.Name ?? "admin";
+        await bruteForce.LiberarAsync(ip, liberadoPor, ct);
+        return NoContent();
+    }
+
     [HttpGet("metricas")]
     [ProducesResponseType(typeof(MetricasAdminOutput), StatusCodes.Status200OK)]
     public async Task<IActionResult> Metricas(
@@ -70,9 +97,11 @@ public class AdminController : ControllerBase
     public async Task<ContentResult> Painel(
         [FromQuery] int pagina = 1,
         [FromServices] ObterMetricasAdminUseCase useCase = null!,
+        [FromServices] IBruteForceService bruteForce = null!,
         CancellationToken ct = default)
     {
         var m = await useCase.ExecutarAsync(pagina, ct);
+        var ipsBloqueados = await bruteForce.ListarBloqueadosAsync(ct);
         var geradoEm       = m.GeradoEm.ToString("dd/MM/yyyy HH:mm:ss") + " UTC";
         var paginaAnterior = m.PaginaAtual > 1 ? m.PaginaAtual - 1 : 1;
         var paginaProxima  = m.PaginaAtual < m.TotalPaginas ? m.PaginaAtual + 1 : m.TotalPaginas;
@@ -107,6 +136,25 @@ public class AdminController : ControllerBase
                         <td>{(e.JanelaExpiraEm.HasValue ? e.JanelaExpiraEm.Value.ToString("dd/MM HH:mm") : "—")}</td>
                     </tr>
             """));
+
+        var linhasIpsBloqueados = string.Join("\n", ipsBloqueados.Select(b =>
+            $"""
+                    <tr>
+                        <td><code>{System.Net.WebUtility.HtmlEncode(b.Ip)}</code></td>
+                        <td>{System.Net.WebUtility.HtmlEncode(b.Motivo)}</td>
+                        <td>{b.TotalTentativas}</td>
+                        <td>{b.BloqueadoEm:dd/MM HH:mm} UTC</td>
+                        <td>{b.ExpiraEm:dd/MM HH:mm} UTC</td>
+                        <td>
+                            <button class="btn" style="background:#E73C3C;font-size:11px;padding:4px 10px"
+                                onclick="liberarIp('{System.Net.WebUtility.HtmlEncode(b.Ip)}', this)">
+                                🔓 Liberar
+                            </button>
+                        </td>
+                    </tr>
+            """));
+
+        var ipsBloqueadosCount = ipsBloqueados.Count();
 
         var html = $$"""
             <!DOCTYPE html>
@@ -324,6 +372,25 @@ public class AdminController : ControllerBase
                     </div>
                 </div>
 
+                <h2>IPs Bloqueados — {{ipsBloqueadosCount}} ativo(s)</h2>
+                <div class="tabela-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Motivo</th>
+                                <th>Tentativas (24h)</th>
+                                <th>Bloqueado em</th>
+                                <th>Expira em</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-ips">
+                            {{(string.IsNullOrEmpty(linhasIpsBloqueados) ? "<tr><td colspan=\"6\" style=\"text-align:center;color:#6E648B;padding:14px\">✅ Nenhum IP bloqueado no momento</td></tr>" : linhasIpsBloqueados)}}
+                        </tbody>
+                    </table>
+                </div>
+
                 <h2>Eventos de Notificação — {{m.TotalEventos}} registros</h2>
                 <div class="tabela-wrap">
                     <table>
@@ -371,6 +438,25 @@ public class AdminController : ControllerBase
                                 : '<span style="color:#E73C3C">❌ ' + d.mensagem + ' (' + d.duracaoMs + 'ms)</span>';
                         })
                         .catch(e => { res.innerHTML = '<span style="color:#E73C3C">❌ ' + e.message + '</span>'; });
+                    }
+
+                    function liberarIp(ip, btn) {
+                        if (!confirm('Liberar o IP ' + ip + '?')) return;
+                        btn.disabled = true;
+                        btn.textContent = '⏳';
+                        fetch('/admin/ips-bloqueados/' + encodeURIComponent(ip) + '/liberar', { method: 'POST' })
+                            .then(r => {
+                                if (r.ok || r.status === 204) {
+                                    var row = btn.closest('tr');
+                                    row.style.opacity = '0.4';
+                                    btn.textContent = '✅ Liberado';
+                                } else {
+                                    btn.disabled = false;
+                                    btn.textContent = '🔓 Liberar';
+                                    alert('Falha ao liberar IP. Status: ' + r.status);
+                                }
+                            })
+                            .catch(e => { btn.disabled = false; btn.textContent = '🔓 Liberar'; alert(e.message); });
                     }
 
                     (function () {

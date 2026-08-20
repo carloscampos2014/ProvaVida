@@ -106,6 +106,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddSingleton<IJwtService, JwtService>();
         services.AddSingleton<IRefreshTokenHasher, RefreshTokenHasher>();
+        services.AddScoped<IBruteForceService, BruteForceService>();
 
         // Notificações
         services.AddHttpClient<IWhatsAppService, WhatsAppService>();

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Scalar.AspNetCore;
 using ProvaVida.Api.Extensions;
 using ProvaVida.Api.Filters;
+using ProvaVida.Api.Middleware;
 using ProvaVida.Infrastructure.Jobs;
 using Serilog;
 
@@ -43,6 +44,7 @@ if (!app.Environment.IsEnvironment("IntegrationTests"))
 }
 
 app.UseGlobalExceptionHandler();
+app.UseMiddleware<BruteForceMiddleware>();
 
 // Scalar — disponível em /scalar
 app.MapOpenApi();
