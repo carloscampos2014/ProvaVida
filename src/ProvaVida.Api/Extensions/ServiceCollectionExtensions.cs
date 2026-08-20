@@ -138,6 +138,7 @@ public static class ServiceCollectionExtensions
         // Admin
         services.AddScoped<ObterMetricasAdminUseCase>();
         services.AddScoped<TestarNotificacaoUseCase>();
+        services.AddScoped<ProvaVida.Api.Filters.AdminApiKeyFilter>();
 
         return services;
     }

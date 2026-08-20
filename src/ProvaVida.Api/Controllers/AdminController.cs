@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using ProvaVida.Application.UseCases.ObterMetricasAdmin;
 using ProvaVida.Application.UseCases.TestarNotificacao;
+using ProvaVida.Api.Filters;
 
 namespace ProvaVida.Api.Controllers;
 
 [ApiController]
 [Route("admin")]
+[ServiceFilter(typeof(AdminApiKeyFilter))]
 public class AdminController : ControllerBase
 {
     [HttpPost("testar-email")]
@@ -67,13 +69,20 @@ public class AdminController : ControllerBase
     [Produces("text/html")]
     public async Task<ContentResult> Painel(
         [FromQuery] int pagina = 1,
+        [FromQuery] string key = "",
         [FromServices] ObterMetricasAdminUseCase useCase = null!,
         CancellationToken ct = default)
     {
+        // Valida a key diretamente aqui para o painel HTML
+        var configKey = HttpContext.RequestServices
+            .GetRequiredService<IConfiguration>()["Admin:ApiKey"] ?? "";
+        if (string.IsNullOrWhiteSpace(key) || key != configKey)
+            return Content("<h2>401 — Não autorizado. Acesse /admin?key=SUA_CHAVE</h2>", "text/html");
         var m = await useCase.ExecutarAsync(pagina, ct);
         var geradoEm       = m.GeradoEm.ToString("dd/MM/yyyy HH:mm:ss") + " UTC";
         var paginaAnterior = m.PaginaAtual > 1 ? m.PaginaAtual - 1 : 1;
         var paginaProxima  = m.PaginaAtual < m.TotalPaginas ? m.PaginaAtual + 1 : m.TotalPaginas;
+        var urlBase        = $"/admin?key={key}&pagina=";
 
         static string IconeStatus(string status) => status switch
         {
@@ -340,10 +349,10 @@ public class AdminController : ControllerBase
                     <div class="paginacao">
                         <span>Página <strong>{{m.PaginaAtual}}</strong> de <strong>{{m.TotalPaginas}}</strong></span>
                         <div class="paginacao-nav">
-                            <a href="/admin?pagina=1" class="btn sec" {{(m.PaginaAtual <= 1 ? "style=\"opacity:0.4\"" : "")}}>«</a>
-                            <a href="/admin?pagina={{paginaAnterior}}" class="btn sec" {{(m.PaginaAtual <= 1 ? "style=\"opacity:0.4\"" : "")}}>‹ Anterior</a>
-                            <a href="/admin?pagina={{paginaProxima}}" class="btn sec" {{(m.PaginaAtual >= m.TotalPaginas ? "style=\"opacity:0.4\"" : "")}}>Próxima ›</a>
-                            <a href="/admin?pagina={{m.TotalPaginas}}" class="btn sec" {{(m.PaginaAtual >= m.TotalPaginas ? "style=\"opacity:0.4\"" : "")}}>»</a>
+                            <a href="{{urlBase}}1" class="btn sec" {{(m.PaginaAtual <= 1 ? "style=\"opacity:0.4\"" : "")}}>«</a>
+                            <a href="{{urlBase}}{{paginaAnterior}}" class="btn sec" {{(m.PaginaAtual <= 1 ? "style=\"opacity:0.4\"" : "")}}>‹ Anterior</a>
+                            <a href="{{urlBase}}{{paginaProxima}}" class="btn sec" {{(m.PaginaAtual >= m.TotalPaginas ? "style=\"opacity:0.4\"" : "")}}>Próxima ›</a>
+                            <a href="{{urlBase}}{{m.TotalPaginas}}" class="btn sec" {{(m.PaginaAtual >= m.TotalPaginas ? "style=\"opacity:0.4\"" : "")}}>»</a>
                         </div>
                     </div>
                 </div>
@@ -358,7 +367,10 @@ public class AdminController : ControllerBase
                         res.innerHTML = '<span style="color:#6E648B">⏳ Enviando...</span>';
                         fetch('/admin/testar-' + tipo, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Admin-Key': '{{key}}'
+                            },
                             body: JSON.stringify({ destinatario: dest })
                         })
                         .then(r => r.json())
@@ -376,7 +388,7 @@ public class AdminController : ControllerBase
                         function tick() {
                             el.textContent = 'Atualizando em ' + restante + 's';
                             restante <= 10 ? el.classList.add('urgente') : el.classList.remove('urgente');
-                            if (restante-- <= 0) { window.location.href = '/admin?pagina=' + pagina; return; }
+                            if (restante-- <= 0) { window.location.href = '{{urlBase}}' + pagina; return; }
                             setTimeout(tick, 1000);
                         }
                         tick();
