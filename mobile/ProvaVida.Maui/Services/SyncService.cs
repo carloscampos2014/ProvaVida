@@ -50,8 +50,13 @@ public class SyncService
                     checkIn.Longitude,
                     checkIn.DeviceId);
 
-                await _checkInService.RegistrarAsync(request);
-                await _db.MarcarCheckInSincronizadoAsync(checkIn.IdLocal);
+                var sucesso = await _checkInService.RegistrarAsync(request);
+
+                if (sucesso)
+                    await _db.MarcarCheckInSincronizadoAsync(checkIn.IdLocal);
+                else
+                    // API rejeitou (ex: 400, 409) — incrementa tentativas para retentar depois
+                    await _db.IncrementarTentativaCheckInAsync(checkIn.IdLocal);
             }
             catch
             {
