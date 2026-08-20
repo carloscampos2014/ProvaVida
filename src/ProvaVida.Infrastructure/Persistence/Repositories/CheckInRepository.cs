@@ -20,7 +20,7 @@ public sealed class CheckInRepository : ICheckInRepository
         const string sql = """
             INSERT INTO checkins (id, usuario_id, id_local, data_hora, latitude, longitude, device_id)
             VALUES (@Id, @UsuarioId, @IdLocal, @DataHora, @Latitude, @Longitude, @DeviceId)
-            ON CONFLICT (id_local) DO NOTHING
+            ON CONFLICT (usuario_id, id_local) DO NOTHING
             """;
 
         var linhasAfetadas = await _uow.Connection.ExecuteAsync(
