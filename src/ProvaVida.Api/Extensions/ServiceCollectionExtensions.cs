@@ -5,8 +5,7 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ProvaVida.Application.Interfaces;
-using ProvaVida.Application.UseCases.AlterarConta;
-using ProvaVida.Application.UseCases.AlterarSenha;
+using ProvaVida.Application.UseCases.AlterarConta;using ProvaVida.Application.UseCases.AlterarSenha;
 using ProvaVida.Application.UseCases.CadastrarUsuario;
 using ProvaVida.Application.UseCases.ExcluirConta;
 using ProvaVida.Application.UseCases.Login;
@@ -106,6 +105,7 @@ public static class ServiceCollectionExtensions
         // Segurança
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddSingleton<IJwtService, JwtService>();
+        services.AddSingleton<IRefreshTokenHasher, RefreshTokenHasher>();
 
         // Notificações
         services.AddHttpClient<IWhatsAppService, WhatsAppService>();

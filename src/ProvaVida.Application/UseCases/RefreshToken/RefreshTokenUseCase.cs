@@ -10,17 +10,20 @@ public class RefreshTokenUseCase
     private readonly IUsuarioRepository _usuarioRepository;
     private readonly IJwtService _jwtService;
     private readonly IUnitOfWork _uow;
+    private readonly IRefreshTokenHasher _hasher;
 
     public RefreshTokenUseCase(
         ISessaoLoginRepository sessaoRepository,
         IUsuarioRepository usuarioRepository,
         IJwtService jwtService,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        IRefreshTokenHasher hasher)
     {
         _sessaoRepository = sessaoRepository;
         _usuarioRepository = usuarioRepository;
         _jwtService = jwtService;
         _uow = uow;
+        _hasher = hasher;
     }
 
     public async Task<RefreshTokenOutput> ExecutarAsync(RefreshTokenInput input, CancellationToken ct = default)
@@ -42,12 +45,13 @@ public class RefreshTokenUseCase
         var novoToken = _jwtService.GerarToken(usuario, out var expiraEm);
         var novoRefreshToken = _jwtService.GerarRefreshToken();
         var refreshTokenExpiraEm = DateTime.UtcNow.AddDays(365);
+        var novoRefreshTokenHash = _hasher.Hash(novoRefreshToken);
 
         var novaSessao = SessaoLogin.Criar(
             usuario.Id,
             novoToken,
             expiraEm,
-            novoRefreshToken,
+            novoRefreshTokenHash,
             refreshTokenExpiraEm);
 
         await _uow.BeginAsync(cancellationToken: ct);

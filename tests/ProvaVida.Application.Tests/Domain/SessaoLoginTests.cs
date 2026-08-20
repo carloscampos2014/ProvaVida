@@ -25,7 +25,7 @@ public class SessaoLoginTests
         sessao.Token.Should().Be("token-jwt");
         sessao.Ativo.Should().BeTrue();
         sessao.Id.Should().NotBeEmpty();
-        sessao.RefreshToken.Should().Be("refresh");
+        sessao.RefreshTokenHash.Should().Be("refresh");
     }
 
     [Fact]

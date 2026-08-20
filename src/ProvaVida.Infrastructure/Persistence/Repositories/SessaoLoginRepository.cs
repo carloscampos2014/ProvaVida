@@ -2,6 +2,7 @@ using Dapper;
 using ProvaVida.Application.Interfaces;
 using ProvaVida.Domain.Entities;
 using ProvaVida.Infrastructure.Persistence;
+using ProvaVida.Infrastructure.Security;
 
 namespace ProvaVida.Infrastructure.Persistence.Repositories;
 
@@ -9,24 +10,26 @@ public sealed class SessaoLoginRepository : ISessaoLoginRepository
 {
     private readonly IUnitOfWork _uow;
     private readonly DbConnectionFactory _factory;
+    private readonly IRefreshTokenHasher _hasher;
 
-    public SessaoLoginRepository(IUnitOfWork uow, DbConnectionFactory factory)
+    public SessaoLoginRepository(IUnitOfWork uow, DbConnectionFactory factory, IRefreshTokenHasher hasher)
     {
         _uow = uow;
         _factory = factory;
+        _hasher = hasher;
     }
 
     public async Task<SessaoLogin?> ObterPorTokenAsync(string token, CancellationToken ct = default)
     {
         const string sql = """
-            SELECT id                        AS "Id",
-                   usuario_id                AS "UsuarioId",
-                   token                     AS "Token",
-                   criado_em                 AS "CriadoEm",
-                   expira_em                 AS "ExpiraEm",
-                   ativo                     AS "Ativo",
-                   refresh_token             AS "RefreshToken",
-                   refresh_token_expira_em   AS "RefreshTokenExpiraEm"
+            SELECT id                          AS "Id",
+                   usuario_id                  AS "UsuarioId",
+                   token                       AS "Token",
+                   criado_em                   AS "CriadoEm",
+                   expira_em                   AS "ExpiraEm",
+                   ativo                       AS "Ativo",
+                   refresh_token_hash          AS "RefreshTokenHash",
+                   refresh_token_expira_em     AS "RefreshTokenExpiraEm"
             FROM sessoes_login
             WHERE token = @Token
             LIMIT 1
@@ -41,23 +44,29 @@ public sealed class SessaoLoginRepository : ISessaoLoginRepository
 
     public async Task<SessaoLogin?> ObterPorRefreshTokenAsync(string refreshToken, CancellationToken ct = default)
     {
+        // Busca pelo hash SHA-256 do token, não pelo valor original
+        var hash = _hasher.Hash(refreshToken);
+
+        // SELECT FOR UPDATE garante exclusividade — evita corrida em rotações simultâneas
         const string sql = """
-            SELECT id                        AS "Id",
-                   usuario_id                AS "UsuarioId",
-                   token                     AS "Token",
-                   criado_em                 AS "CriadoEm",
-                   expira_em                 AS "ExpiraEm",
-                   ativo                     AS "Ativo",
-                   refresh_token             AS "RefreshToken",
-                   refresh_token_expira_em   AS "RefreshTokenExpiraEm"
+            SELECT id                          AS "Id",
+                   usuario_id                  AS "UsuarioId",
+                   token                       AS "Token",
+                   criado_em                   AS "CriadoEm",
+                   expira_em                   AS "ExpiraEm",
+                   ativo                       AS "Ativo",
+                   refresh_token_hash          AS "RefreshTokenHash",
+                   refresh_token_expira_em     AS "RefreshTokenExpiraEm"
             FROM sessoes_login
-            WHERE refresh_token = @RefreshToken
+            WHERE refresh_token_hash = @Hash
+              AND ativo = TRUE
             LIMIT 1
+            FOR UPDATE
             """;
 
-        using var conn = _factory.CreateConnection();
-        var row = await conn.QueryFirstOrDefaultAsync<SessaoRow>(
-            new CommandDefinition(sql, new { RefreshToken = refreshToken }, cancellationToken: ct));
+        var row = await _uow.Connection.QueryFirstOrDefaultAsync<SessaoRow>(
+            new CommandDefinition(sql, new { Hash = hash },
+                transaction: _uow.Transaction, cancellationToken: ct));
 
         return row is null ? null : Mapear(row);
     }
@@ -66,14 +75,14 @@ public sealed class SessaoLoginRepository : ISessaoLoginRepository
         Guid usuarioId, CancellationToken ct = default)
     {
         const string sql = """
-            SELECT id                        AS "Id",
-                   usuario_id                AS "UsuarioId",
-                   token                     AS "Token",
-                   criado_em                 AS "CriadoEm",
-                   expira_em                 AS "ExpiraEm",
-                   ativo                     AS "Ativo",
-                   refresh_token             AS "RefreshToken",
-                   refresh_token_expira_em   AS "RefreshTokenExpiraEm"
+            SELECT id                          AS "Id",
+                   usuario_id                  AS "UsuarioId",
+                   token                       AS "Token",
+                   criado_em                   AS "CriadoEm",
+                   expira_em                   AS "ExpiraEm",
+                   ativo                       AS "Ativo",
+                   refresh_token_hash          AS "RefreshTokenHash",
+                   refresh_token_expira_em     AS "RefreshTokenExpiraEm"
             FROM sessoes_login
             WHERE usuario_id = @UsuarioId AND ativo = TRUE
             """;
@@ -89,9 +98,9 @@ public sealed class SessaoLoginRepository : ISessaoLoginRepository
     {
         const string sql = """
             INSERT INTO sessoes_login
-                (id, usuario_id, token, criado_em, expira_em, ativo, refresh_token, refresh_token_expira_em)
+                (id, usuario_id, token, criado_em, expira_em, ativo, refresh_token_hash, refresh_token_expira_em)
             VALUES
-                (@Id, @UsuarioId, @Token, @CriadoEm, @ExpiraEm, @Ativo, @RefreshToken, @RefreshTokenExpiraEm)
+                (@Id, @UsuarioId, @Token, @CriadoEm, @ExpiraEm, @Ativo, @RefreshTokenHash, @RefreshTokenExpiraEm)
             """;
 
         await _uow.Connection.ExecuteAsync(
@@ -103,7 +112,7 @@ public sealed class SessaoLoginRepository : ISessaoLoginRepository
                 sessao.CriadoEm,
                 sessao.ExpiraEm,
                 sessao.Ativo,
-                sessao.RefreshToken,
+                sessao.RefreshTokenHash,
                 sessao.RefreshTokenExpiraEm
             }, transaction: _uow.Transaction, cancellationToken: ct));
     }
@@ -144,7 +153,7 @@ public sealed class SessaoLoginRepository : ISessaoLoginRepository
         public DateTime CriadoEm { get; set; }
         public DateTime ExpiraEm { get; set; }
         public bool Ativo { get; set; }
-        public string? RefreshToken { get; set; }
+        public string? RefreshTokenHash { get; set; }
         public DateTime? RefreshTokenExpiraEm { get; set; }
     }
 #pragma warning restore CA1812
@@ -160,7 +169,7 @@ public sealed class SessaoLoginRepository : ISessaoLoginRepository
         Set(s, nameof(SessaoLogin.CriadoEm), row.CriadoEm);
         Set(s, nameof(SessaoLogin.ExpiraEm), row.ExpiraEm);
         Set(s, nameof(SessaoLogin.Ativo), row.Ativo);
-        Set(s, nameof(SessaoLogin.RefreshToken), row.RefreshToken);
+        Set(s, nameof(SessaoLogin.RefreshTokenHash), row.RefreshTokenHash);
         Set(s, nameof(SessaoLogin.RefreshTokenExpiraEm), row.RefreshTokenExpiraEm);
 
         _sessoesModificadas.Add(s);
