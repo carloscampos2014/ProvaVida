@@ -71,8 +71,8 @@ public class CheckInViewModel : BaseViewModel
         for (int i = 6; i >= 0; i--)
         {
             var dia = hoje.AddDays(-i);
-            // Converte DataHora (UTC) para local antes de comparar
-            semana.Add(checkInsSemana.Any(c => c.DataHora.ToLocalTime().Date == dia));
+            // DataHora é DateTimeOffset — .LocalDateTime converte corretamente para o fuso do dispositivo
+            semana.Add(checkInsSemana.Any(c => c.DataHora.LocalDateTime.Date == dia));
         }
         Semana = semana;
 
@@ -108,12 +108,12 @@ public class CheckInViewModel : BaseViewModel
             var idLocal = Guid.NewGuid().ToString();
             var checkIn = new CheckInLocal
             {
-                IdLocal = idLocal,
+                IdLocal   = idLocal,
                 UsuarioId = usuario.Email,
-                DataHora = DateTime.UtcNow,
-                Latitude = loc.Latitude,
+                DataHora  = DateTimeOffset.UtcNow,
+                Latitude  = loc.Latitude,
                 Longitude = loc.Longitude,
-                DeviceId = deviceId,
+                DeviceId  = deviceId,
                 Sincronizado = false
             };
 

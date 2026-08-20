@@ -1,8 +1,5 @@
 using Android.Content;
 using Android.Content.PM;
-using ProvaVida.Maui.Models;
-using ProvaVida.Maui.Storage;
-using SQLite;
 using System.Runtime.Versioning;
 
 namespace ProvaVida.Maui;
@@ -102,21 +99,6 @@ public static class AppShortcutsService
 
     private static bool VerificarCheckInHoje()
     {
-        try
-        {
-            var dbPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "provavida.db3");
-
-            if (!File.Exists(dbPath)) return false;
-
-            using var db = new SQLiteConnection(dbPath);
-            var hoje = DateTime.Today;
-            var amanha = hoje.AddDays(1);
-
-            return db.Table<CheckInLocal>()
-                     .Any(c => c.DataHora >= hoje && c.DataHora < amanha);
-        }
-        catch { return false; }
+        return CheckInLocalHelper.FezCheckInHoje();
     }
 }
