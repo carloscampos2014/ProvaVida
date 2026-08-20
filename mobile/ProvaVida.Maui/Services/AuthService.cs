@@ -8,6 +8,11 @@ public class AuthService : IAuthService
     private readonly HttpClient _http;
     private readonly ITokenStorage _tokenStorage;
 
+    // Garante que apenas uma renovação de token ocorre por vez.
+    // Chamadas simultâneas aguardam a primeira terminar e reutilizam o token já renovado.
+    private readonly SemaphoreSlim _refreshLock = new(1, 1);
+    private bool _renovacaoEmAndamento = false;
+
     public AuthService(HttpClient http, ITokenStorage tokenStorage)
     {
         _http = http;
@@ -36,25 +41,38 @@ public class AuthService : IAuthService
         var token = await _tokenStorage.ObterAsync();
         if (!string.IsNullOrEmpty(token))
         {
-            _http.DefaultRequestHeaders.Authorization =
+            // Header por request — não polui o estado global do HttpClient
+            using var request = new HttpRequestMessage(HttpMethod.Post, "auth/logoff");
+            request.Headers.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            // Melhor esforço — se falhar, limpa localmente mesmo assim
-            try { await _http.PostAsync("auth/logoff", null, ct); }
+            try { await _http.SendAsync(request, ct); }
             catch { /* ignora falha de rede no logoff */ }
         }
 
-        // Sempre limpa o storage local
         await _tokenStorage.LimparTudoAsync();
     }
 
     public async Task<bool> TentarRenovarTokenAsync(CancellationToken ct = default)
     {
-        var refreshToken = await _tokenStorage.ObterRefreshTokenAsync();
-        if (string.IsNullOrEmpty(refreshToken)) return false;
+        // Se uma renovação já está em andamento, aguarda e retorna — o token já foi renovado
+        if (_renovacaoEmAndamento)
+        {
+            await _refreshLock.WaitAsync(ct);
+            _refreshLock.Release();
+            return true;
+        }
 
+        await _refreshLock.WaitAsync(ct);
         try
         {
+            // Verifica novamente após adquirir o lock — outra thread pode ter renovado antes
+            if (_renovacaoEmAndamento) return true;
+            _renovacaoEmAndamento = true;
+
+            var refreshToken = await _tokenStorage.ObterRefreshTokenAsync();
+            if (string.IsNullOrEmpty(refreshToken)) return false;
+
             var response = await _http.PostAsJsonAsync(
                 "auth/refresh",
                 new RefreshTokenRequest(refreshToken),
@@ -73,8 +91,12 @@ public class AuthService : IAuthService
         }
         catch
         {
-            // Sem internet ou erro inesperado — não renova, mas não limpa o storage
             return false;
+        }
+        finally
+        {
+            _renovacaoEmAndamento = false;
+            _refreshLock.Release();
         }
     }
 

@@ -15,31 +15,40 @@ public class CheckInService : ICheckInService
     }
 
     public async Task<bool> RegistrarAsync(
-        RegistrarCheckInRequest request, CancellationToken ct = default)
+        RegistrarCheckInRequest body, CancellationToken ct = default)
     {
-        await SetAuthHeaderAsync();
-        var response = await _http.PostAsJsonAsync("checkin", request, ct);
+        using var request = await CriarRequestAsync(HttpMethod.Post, "checkin");
+        request.Content = JsonContent.Create(body);
+        var response = await _http.SendAsync(request, ct);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<List<CheckInHistoricoItem>> ObterHistoricoAsync(
         DateTime? dataInicio = null, DateTime? dataFim = null, CancellationToken ct = default)
     {
-        await SetAuthHeaderAsync();
         var query = string.Empty;
         if (dataInicio.HasValue) query += $"?dataInicio={dataInicio:O}";
         if (dataFim.HasValue) query += (query.Contains('?') ? "&" : "?") + $"dataFim={dataFim:O}";
 
-        var result = await _http.GetFromJsonAsync<List<CheckInHistoricoItem>>(
-            $"checkin/historico{query}", ct);
+        using var request = await CriarRequestAsync(HttpMethod.Get, $"checkin/historico{query}");
+        var response = await _http.SendAsync(request, ct);
+        if (!response.IsSuccessStatusCode) return [];
+
+        var result = await response.Content.ReadFromJsonAsync<List<CheckInHistoricoItem>>(ct);
         return result ?? [];
     }
 
-    private async Task SetAuthHeaderAsync()
+    /// <summary>
+    /// Cria um HttpRequestMessage com o header Authorization já embutido.
+    /// Cada request carrega seu próprio header — sem tocar em DefaultRequestHeaders.
+    /// </summary>
+    private async Task<HttpRequestMessage> CriarRequestAsync(HttpMethod method, string url)
     {
+        var req = new HttpRequestMessage(method, url);
         var token = await _tokenStorage.ObterAsync();
         if (!string.IsNullOrEmpty(token))
-            _http.DefaultRequestHeaders.Authorization =
+            req.Headers.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        return req;
     }
 }

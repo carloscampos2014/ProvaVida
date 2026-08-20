@@ -16,10 +16,12 @@ public class ContaService : IContaService
 
     public async Task<ContaResponse?> ObterPerfilAsync(CancellationToken ct = default)
     {
-        await SetAuthHeaderAsync();
+        using var request = await CriarRequestAsync(HttpMethod.Get, "conta");
         try
         {
-            return await _http.GetFromJsonAsync<ContaResponse>("conta", ct);
+            var response = await _http.SendAsync(request, ct);
+            if (!response.IsSuccessStatusCode) return null;
+            return await response.Content.ReadFromJsonAsync<ContaResponse>(ct);
         }
         catch
         {
@@ -27,37 +29,42 @@ public class ContaService : IContaService
         }
     }
 
-    public async Task AlterarAsync(AlterarContaRequest request, CancellationToken ct = default)
+    public async Task AlterarAsync(AlterarContaRequest body, CancellationToken ct = default)
     {
-        await SetAuthHeaderAsync();
-        var response = await _http.PutAsJsonAsync("conta", request, ct);
+        using var request = await CriarRequestAsync(HttpMethod.Put, "conta");
+        request.Content = JsonContent.Create(body);
+        var response = await _http.SendAsync(request, ct);
         await EnsureSuccessAsync(response);
     }
 
-    public async Task AlterarSenhaAsync(AlterarSenhaRequest request, CancellationToken ct = default)
+    public async Task AlterarSenhaAsync(AlterarSenhaRequest body, CancellationToken ct = default)
     {
-        await SetAuthHeaderAsync();
-        var response = await _http.PutAsJsonAsync("conta/senha", request, ct);
+        using var request = await CriarRequestAsync(HttpMethod.Put, "conta/senha");
+        request.Content = JsonContent.Create(body);
+        var response = await _http.SendAsync(request, ct);
         await EnsureSuccessAsync(response);
     }
 
-    public async Task ExcluirAsync(ExcluirContaRequest request, CancellationToken ct = default)
+    public async Task ExcluirAsync(ExcluirContaRequest body, CancellationToken ct = default)
     {
-        await SetAuthHeaderAsync();
-        var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "conta")
-        {
-            Content = JsonContent.Create(request)
-        };
-        var response = await _http.SendAsync(httpRequest, ct);
+        using var request = await CriarRequestAsync(HttpMethod.Delete, "conta");
+        request.Content = JsonContent.Create(body);
+        var response = await _http.SendAsync(request, ct);
         await EnsureSuccessAsync(response);
     }
 
-    private async Task SetAuthHeaderAsync()
+    /// <summary>
+    /// Cria um HttpRequestMessage com o header Authorization já embutido.
+    /// Cada request carrega seu próprio header — sem tocar em DefaultRequestHeaders.
+    /// </summary>
+    private async Task<HttpRequestMessage> CriarRequestAsync(HttpMethod method, string url)
     {
+        var req = new HttpRequestMessage(method, url);
         var token = await _tokenStorage.ObterAsync();
         if (!string.IsNullOrEmpty(token))
-            _http.DefaultRequestHeaders.Authorization =
+            req.Headers.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        return req;
     }
 
     private static async Task EnsureSuccessAsync(HttpResponseMessage response)
@@ -77,7 +84,7 @@ public class ContaService : IContaService
             if (doc.RootElement.TryGetProperty("error", out var err))
                 mensagem = err.GetString() ?? mensagem;
         }
-        catch { /* ignora */ }
+        catch { /* ignora JSON inválido */ }
 
         throw new ApiException(mensagem, (int)response.StatusCode);
     }
