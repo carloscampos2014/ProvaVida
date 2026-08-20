@@ -9,6 +9,6 @@ public class HeartbeatLocal
     public string IdLocal { get; set; } = Guid.NewGuid().ToString();
 
     public string UsuarioId { get; set; } = string.Empty;
-    public DateTime DataHora { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset DataHora { get; set; } = DateTimeOffset.UtcNow;
     public bool Sincronizado { get; set; } = false;
 }

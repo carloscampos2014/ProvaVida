@@ -5,6 +5,7 @@ namespace ProvaVida.Maui.Storage;
 
 /// <summary>
 /// Banco SQLite local — singleton, thread-safe via Async APIs.
+/// Migrations versionadas aplicadas automaticamente via LocalDatabaseMigrator.
 /// </summary>
 public class LocalDatabase
 {
@@ -24,6 +25,11 @@ public class LocalDatabase
             _db = new SQLiteAsyncConnection(dbPath,
                 SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
 
+            // Aplica migrations pendentes (idempotente — PRAGMA user_version controla versão)
+            var migrator = new LocalDatabaseMigrator(_db);
+            await migrator.MigrateAsync();
+
+            // CreateTableAsync após migration garante que colunas novas são mapeadas pelo ORM
             await _db.CreateTableAsync<CheckInLocal>();
             await _db.CreateTableAsync<HeartbeatLocal>();
 
@@ -72,7 +78,9 @@ public class LocalDatabase
     public async Task<List<CheckInLocal>> ObterCheckInsDaSemanaAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        var inicio = DateTime.UtcNow.AddDays(-6).Date;
+        // Início do dia local de 6 dias atrás, convertido para UTC — evita cortar check-ins noturnos
+        var inicioLocal = DateTime.Now.AddDays(-6).Date;
+        var inicio = new DateTimeOffset(inicioLocal, TimeZoneInfo.Local.GetUtcOffset(inicioLocal));
         return await db.Table<CheckInLocal>()
             .Where(c => c.UsuarioId == usuarioId && c.DataHora >= inicio)
             .OrderByDescending(c => c.DataHora)
@@ -86,16 +94,18 @@ public class LocalDatabase
             .CountAsync(c => c.IdLocal == idLocal) > 0;
     }
 
-    public async Task<bool> FezCheckInHojeAsync(string usuarioId)    {
+    public async Task<bool> FezCheckInHojeAsync(string usuarioId)
+    {
         var db = await GetDbAsync();
-        // Usa horário local para evitar problemas de fuso — início e fim do dia local em UTC
+        // Janela do dia atual em horário local, convertida para UTC
         var hojeLocal = DateTime.Now.Date;
-        var inicioUtc = hojeLocal.ToUniversalTime();
-        var fimUtc = hojeLocal.AddDays(1).ToUniversalTime();
+        var offset    = TimeZoneInfo.Local.GetUtcOffset(hojeLocal);
+        var inicio    = new DateTimeOffset(hojeLocal, offset);
+        var fim       = new DateTimeOffset(hojeLocal.AddDays(1), offset);
         var count = await db.Table<CheckInLocal>()
             .CountAsync(c => c.UsuarioId == usuarioId
-                          && c.DataHora >= inicioUtc
-                          && c.DataHora < fimUtc);
+                          && c.DataHora >= inicio
+                          && c.DataHora < fim);
         return count > 0;
     }
 

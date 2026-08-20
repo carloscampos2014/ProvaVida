@@ -1,8 +1,6 @@
 using Android.App;
 using Android.Content;
 using AndroidX.Core.App;
-using ProvaVida.Maui.Models;
-using SQLite;
 using System.Runtime.Versioning;
 
 namespace ProvaVida.Maui;
@@ -65,20 +63,11 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
     {
         try
         {
-            var dbPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "provavida.db3");
-
-            if (!File.Exists(dbPath)) return true;
-
-            using var db = new SQLiteConnection(dbPath);
-            var ultimo = db.Table<CheckInLocal>()
-                           .OrderByDescending(c => c.DataHora)
-                           .FirstOrDefault();
-
+            var ultimo = CheckInLocalHelper.ObterUltimoCheckIn();
             if (ultimo is null) return true;
 
-            return (DateTime.UtcNow - ultimo.DataHora.ToUniversalTime()).TotalHours >= HorasLimite;
+            // Subtração direta entre DateTimeOffset é sempre em UTC — sem ambiguidade de fuso
+            return (DateTimeOffset.UtcNow - ultimo.Value).TotalHours >= HorasLimite;
         }
         catch
         {

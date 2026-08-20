@@ -78,14 +78,13 @@ public class SyncService
             if (usuario is null) return;
 
             var historico = await _checkInService.ObterHistoricoAsync(
-                dataInicio: DateTime.UtcNow.AddDays(-30));
+                dataInicio: DateTimeOffset.UtcNow.AddDays(-30));
 
             foreach (var item in historico)
             {
                 var idLocal = item.IdLocal.ToString();
                 if (await _db.ExisteCheckInAsync(idLocal)) continue;
 
-                // Check-in existe na API mas não no SQLite local — importa
                 await _db.SalvarCheckInAsync(new CheckInLocal
                 {
                     IdLocal      = idLocal,

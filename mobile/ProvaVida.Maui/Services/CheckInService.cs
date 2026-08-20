@@ -24,7 +24,7 @@ public class CheckInService : ICheckInService
     }
 
     public async Task<List<CheckInHistoricoItem>> ObterHistoricoAsync(
-        DateTime? dataInicio = null, DateTime? dataFim = null, CancellationToken ct = default)
+        DateTimeOffset? dataInicio = null, DateTimeOffset? dataFim = null, CancellationToken ct = default)
     {
         var query = string.Empty;
         if (dataInicio.HasValue) query += $"?dataInicio={dataInicio:O}";

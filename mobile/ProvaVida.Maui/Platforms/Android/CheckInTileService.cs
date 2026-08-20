@@ -2,8 +2,6 @@ using Android.App;
 using Android.Content;
 using Android.Graphics.Drawables;
 using Android.Service.QuickSettings;
-using ProvaVida.Maui.Models;
-using SQLite;
 using System.Runtime.Versioning;
 
 namespace ProvaVida.Maui;
@@ -102,21 +100,6 @@ public class CheckInTileService : TileService
 
     private static bool VerificarCheckInHoje()
     {
-        try
-        {
-            var dbPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "provavida.db3");
-
-            if (!File.Exists(dbPath)) return false;
-
-            using var db   = new SQLiteConnection(dbPath);
-            var hoje       = DateTime.Today;
-            var amanha     = hoje.AddDays(1);
-
-            return db.Table<CheckInLocal>()
-                     .Any(c => c.DataHora >= hoje && c.DataHora < amanha);
-        }
-        catch { return false; }
+        return CheckInLocalHelper.FezCheckInHoje();
     }
 }

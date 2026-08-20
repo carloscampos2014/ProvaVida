@@ -2,8 +2,6 @@ using Android.App;
 using Android.Appwidget;
 using Android.Content;
 using Android.Widget;
-using ProvaVida.Maui.Models;
-using SQLite;
 
 namespace ProvaVida.Maui;
 
@@ -110,26 +108,7 @@ public class CheckInWidgetCompleto : AppWidgetProvider
 
     private static bool[] ObterCheckInsSemana()
     {
-        var resultado = new bool[7];
-        try
-        {
-            var dbPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "provavida.db3");
-            if (!File.Exists(dbPath)) return resultado;
-
-            using var db = new SQLiteConnection(dbPath);
-            var hoje     = DateTime.Today;
-
-            for (int i = 0; i < 7; i++)
-            {
-                var dia   = hoje.AddDays(-(6 - i));
-                var prox  = dia.AddDays(1);
-                resultado[i] = db.Table<CheckInLocal>().Any(c => c.DataHora >= dia && c.DataHora < prox);
-            }
-        }
-        catch { }
-        return resultado;
+        return CheckInLocalHelper.ObterCheckInsSemana();
     }
 
     private static bool VerificarAutenticado()

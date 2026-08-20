@@ -9,7 +9,7 @@ public class CheckInLocal
     public string IdLocal { get; set; } = Guid.NewGuid().ToString();
 
     public string UsuarioId { get; set; } = string.Empty;
-    public DateTime DataHora { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset DataHora { get; set; } = DateTimeOffset.UtcNow;
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string DeviceId { get; set; } = string.Empty;
