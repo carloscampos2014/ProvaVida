@@ -1,13 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProvaVida.Application.UseCases.ObterMetricasAdmin;
 using ProvaVida.Application.UseCases.TestarNotificacao;
-using ProvaVida.Api.Filters;
 
 namespace ProvaVida.Api.Controllers;
 
 [ApiController]
 [Route("admin")]
-[ServiceFilter(typeof(AdminApiKeyFilter))]
+[Authorize(AuthenticationSchemes = "BasicAuth")]
 public class AdminController : ControllerBase
 {
     [HttpPost("testar-email")]
@@ -69,20 +69,14 @@ public class AdminController : ControllerBase
     [Produces("text/html")]
     public async Task<ContentResult> Painel(
         [FromQuery] int pagina = 1,
-        [FromQuery] string key = "",
         [FromServices] ObterMetricasAdminUseCase useCase = null!,
         CancellationToken ct = default)
     {
-        // Valida a key diretamente aqui para o painel HTML
-        var configKey = HttpContext.RequestServices
-            .GetRequiredService<IConfiguration>()["Admin:ApiKey"] ?? "";
-        if (string.IsNullOrWhiteSpace(key) || key != configKey)
-            return Content("<h2>401 — Não autorizado. Acesse /admin?key=SUA_CHAVE</h2>", "text/html");
         var m = await useCase.ExecutarAsync(pagina, ct);
         var geradoEm       = m.GeradoEm.ToString("dd/MM/yyyy HH:mm:ss") + " UTC";
         var paginaAnterior = m.PaginaAtual > 1 ? m.PaginaAtual - 1 : 1;
         var paginaProxima  = m.PaginaAtual < m.TotalPaginas ? m.PaginaAtual + 1 : m.TotalPaginas;
-        var urlBase        = $"/admin?key={key}&pagina=";
+        var urlBase        = "/admin?pagina=";
 
         static string IconeStatus(string status) => status switch
         {
@@ -367,10 +361,7 @@ public class AdminController : ControllerBase
                         res.innerHTML = '<span style="color:#6E648B">⏳ Enviando...</span>';
                         fetch('/admin/testar-' + tipo, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Admin-Key': '{{key}}'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ destinatario: dest })
                         })
                         .then(r => r.json())

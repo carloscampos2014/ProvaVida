@@ -1,6 +1,8 @@
 using Hangfire;
+using Microsoft.AspNetCore.Authentication;
 using Scalar.AspNetCore;
 using ProvaVida.Api.Extensions;
+using ProvaVida.Api.Filters;
 using ProvaVida.Infrastructure.Jobs;
 using Serilog;
 
@@ -26,6 +28,11 @@ if (!builder.Environment.IsEnvironment("IntegrationTests"))
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices();
+
+// Basic Auth para o painel Admin
+builder.Services.AddAuthentication("BasicAuth")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>("BasicAuth", null);
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

@@ -104,7 +104,8 @@ jobs:
           Twilio__FromWhatsApp=${{ secrets.TWILIO_WHATSAPP_FROM }}
           Twilio__FromSms=${{ secrets.TWILIO_SMS_FROM }}
           Twilio__FromVoice=${{ secrets.TWILIO_VOICE_FROM }}
-          Admin__ApiKey=${{ secrets.ADMIN_API_KEY }}
+          Admin__Usuario=${{ secrets.ADMIN_USUARIO }}
+          Admin__Senha=${{ secrets.ADMIN_SENHA }}
           ENVEOF
           sudo chmod 600 /etc/provavida/env
           sudo chown root:root /etc/provavida/env
