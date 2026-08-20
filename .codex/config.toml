@@ -1,0 +1,36 @@
+﻿# Codex — MCP Configuration
+# Escopo: projeto (equivale ao ~/.codex/config.toml mas scoped para este repo)
+# Apenas projetos "trusted" carregam este arquivo automaticamente.
+#
+# Documentação: https://developers.openai.com/codex/mcp/
+
+# ── GitHub ────────────────────────────────────────────────────────────────────
+[mcp_servers.github]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github"]
+env_vars = ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+
+# ── Filesystem ────────────────────────────────────────────────────────────────
+[mcp_servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "C:\Dev\ProvaVida"]
+
+# ── Fetch (busca de URLs externas) ───────────────────────────────────────────
+[mcp_servers.fetch]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-fetch"]
+
+# ── Memory (persistência entre sessões) ──────────────────────────────────────
+[mcp_servers.memory]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-memory"]
+
+# ── PostgreSQL (descomentar e ajustar se o projeto usa Postgres) ──────────────
+# [mcp_servers.postgres]
+# command = "npx"
+# args = ["-y", "@modelcontextprotocol/server-postgres", "postgresql://user:pass@localhost:5432/ProvaVida_dev"]
+
+# ── Figma (descomentar se o projeto usa Figma) ────────────────────────────────
+# [mcp_servers.figma]
+# url = "https://mcp.figma.com/mcp"
+# bearer_token_env_var = "FIGMA_OAUTH_TOKEN"
