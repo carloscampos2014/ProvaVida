@@ -16,7 +16,9 @@ public partial class PerfilPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        // Shell reutiliza a instância da página — recarrega dados em toda visita
         _vm.AoExibir();
     }
+
+    private void OnHamburgerTapped(object? sender, TappedEventArgs e)
+        => Shell.Current.FlyoutIsPresented = true;
 }
