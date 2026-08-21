@@ -69,7 +69,8 @@ public class PerfilViewModel : BaseViewModel
     public void AoExibir()
     {
         CarregarDadosLocais();
-        _ = Task.Run(CarregarDadosDaApiAsync);
+        // CarregarDadosDaApiAsync já é async — Task.Run seria desnecessário
+        _ = CarregarDadosDaApiAsync();
     }
 
     private void CarregarDadosLocais()

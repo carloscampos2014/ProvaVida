@@ -9,6 +9,7 @@ public partial class CheckInPage : ContentPage
     private readonly CheckInViewModel _vm;
     private readonly IHeartbeatService _heartbeatService;
     private readonly SyncService _syncService;
+    private bool _sincronizando = false; // evita sincronizações simultâneas ao reconectar
 
     public CheckInPage(CheckInViewModel vm, IHeartbeatService heartbeatService, SyncService syncService)
     {
@@ -34,8 +35,15 @@ public partial class CheckInPage : ContentPage
         // Solicita permissões proativamente na primeira abertura do dia
         await SolicitarPermissoesAsync();
 
-        // Heartbeat ao abrir a tela — best effort
-        _ = Task.Run(() => _heartbeatService.EnviarAsync());
+        // Heartbeat ao abrir a tela — best effort, falha silenciosa intencional
+        _ = Task.Run(async () =>
+        {
+            try { await _heartbeatService.EnviarAsync(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CheckInPage] Heartbeat falhou: {ex.Message}");
+            }
+        });
 
         // Agenda lembrete se ainda não fez check-in hoje
         if (!_vm.FezCheckInHoje)
@@ -59,8 +67,18 @@ public partial class CheckInPage : ContentPage
 
     private void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
     {
-        if (e.NetworkAccess == NetworkAccess.Internet)
-            _ = Task.Run(() => _syncService.SincronizarAsync());
+        // Flag evita sincronizações simultâneas quando a conexão oscila em sequência
+        if (e.NetworkAccess != NetworkAccess.Internet || _sincronizando) return;
+        _sincronizando = true;
+        _ = Task.Run(async () =>
+        {
+            try   { await _syncService.SincronizarAsync(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CheckInPage] Sync falhou: {ex.Message}");
+            }
+            finally { _sincronizando = false; }
+        });
     }
 
     private async void OnHamburgerTapped(object? sender, TappedEventArgs e)

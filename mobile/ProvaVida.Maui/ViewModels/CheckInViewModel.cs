@@ -137,8 +137,9 @@ public class CheckInViewModel : BaseViewModel
                     await _checkInService.RegistrarAsync(request);
                     await _db.MarcarCheckInSincronizadoAsync(idLocal);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[CheckInViewModel] Sync background falhou: {ex.Message}");
                     await _db.IncrementarTentativaCheckInAsync(idLocal);
                 }
             });
