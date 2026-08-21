@@ -46,3 +46,6 @@ TestResults/
 .DS_Store
 Thumbs.db
 TesteProVidaApi.ps1
+
+# RAG / knowledge base local (gerado pelo Kiro)
+data/
