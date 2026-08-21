@@ -78,7 +78,7 @@ public class CadastroViewModel : BaseViewModel
             Passo = 1;
         });
 
-        CadastrarCommand = new Command(async () => await CadastrarAsync(), () => !IsLoading);
+        CadastrarCommand = new Command(async () => await ExecutarSeOcioso(CadastrarAsync), () => !IsLoading);
 
         IrParaLoginCommand = new Command(async () =>
             await Shell.Current.GoToAsync("//login"));
@@ -103,7 +103,6 @@ public class CadastroViewModel : BaseViewModel
             return;
         }
 
-        IsLoading = true;
         try
         {
             await _authService.CadastrarAsync(new CadastroRequest(
@@ -121,10 +120,6 @@ public class CadastroViewModel : BaseViewModel
         catch
         {
             ErrorMessage = "Sem conexão com o servidor. Verifique sua internet.";
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 }

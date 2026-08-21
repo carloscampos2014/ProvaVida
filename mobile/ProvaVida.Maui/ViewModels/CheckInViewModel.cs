@@ -38,7 +38,7 @@ public class CheckInViewModel : BaseViewModel
         _syncService = syncService;
         _usuarioStorage = usuarioStorage;
 
-        CheckInCommand = new Command(async () => await FazerCheckInAsync(), () => !IsLoading && !FezCheckInHoje);
+        CheckInCommand = new Command(async () => await ExecutarSeOcioso(FazerCheckInAsync), () => !IsLoading && !FezCheckInHoje);
     }
 
     public async Task InicializarAsync()
@@ -91,7 +91,6 @@ public class CheckInViewModel : BaseViewModel
     private async Task FazerCheckInAsync()
     {
         LimparErro();
-        IsLoading = true;
 
         try
         {
@@ -161,10 +160,6 @@ public class CheckInViewModel : BaseViewModel
         catch (Exception ex)
         {
             ErrorMessage = $"Erro ao registrar check-in: {ex.Message}";
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 
