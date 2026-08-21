@@ -37,15 +37,19 @@ jobs:
 
       - name: Cache MAUI workload
         uses: actions/cache@v4
+        id: cache-maui
         with:
           path: |
-            ~/.dotnet/toolResolverCache
-            ${{ runner.tool_cache }}/dotnet
-            C:\Users\runneradmin\.dotnet\toolResolverCache
-          key: maui-workload-${{ runner.os }}-${{ hashFiles('**/global.json') }}
-          restore-keys: maui-workload-${{ runner.os }}-
+            C:\Users\runneradmin\.dotnet\workloads
+            C:\Program Files\dotnet\sdk-manifests
+            C:\Program Files\dotnet\packs
+          key: maui-workload-${{ runner.os }}-net10-${{ hashFiles('mobile/ProvaVida.Maui/ProvaVida.Maui.csproj') }}
+          restore-keys: |
+            maui-workload-${{ runner.os }}-net10-
+            maui-workload-${{ runner.os }}-
 
       - name: Install MAUI workload
+        if: steps.cache-maui.outputs.cache-hit != 'true'
         run: dotnet workload install maui
 
       - name: Cache NuGet packages
