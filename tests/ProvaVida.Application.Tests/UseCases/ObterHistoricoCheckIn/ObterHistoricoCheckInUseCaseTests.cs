@@ -17,7 +17,7 @@ public class ObterHistoricoCheckInUseCaseTests
     }
 
     private static CheckIn CriarCheckIn(Guid usuarioId) =>
-        CheckIn.Criar(usuarioId, Guid.NewGuid(), DateTime.UtcNow, -23.5, -46.6, "device");
+        CheckIn.Criar(usuarioId, Guid.NewGuid(), DateTimeOffset.UtcNow, -23.5, -46.6, "device");
 
     [Fact]
     public async Task ExecutarAsync_SemDatas_UsaUltimos7Dias()
@@ -26,7 +26,7 @@ public class ObterHistoricoCheckInUseCaseTests
         var checkIns = new[] { CriarCheckIn(usuarioId) };
 
         _repoMock.Setup(r => r.ListarPorUsuarioAsync(
-                usuarioId, It.IsAny<DateTime>(), It.IsAny<DateTime>(), default))
+                usuarioId, It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), default))
             .ReturnsAsync(checkIns);
 
         var resultado = await _useCase.ExecutarAsync(new ObterHistoricoCheckInInput(usuarioId));
@@ -34,8 +34,8 @@ public class ObterHistoricoCheckInUseCaseTests
         resultado.Should().HaveCount(1);
         _repoMock.Verify(r => r.ListarPorUsuarioAsync(
             usuarioId,
-            It.Is<DateTime>(d => d < DateTime.UtcNow.AddDays(-6)),
-            It.Is<DateTime>(d => d >= DateTime.UtcNow.AddMinutes(-1)),
+            It.Is<DateTimeOffset>(d => d < DateTimeOffset.UtcNow.AddDays(-6)),
+            It.Is<DateTimeOffset>(d => d >= DateTimeOffset.UtcNow.AddMinutes(-1)),
             default), Times.Once);
     }
 
@@ -43,8 +43,8 @@ public class ObterHistoricoCheckInUseCaseTests
     public async Task ExecutarAsync_ComDatasEspecificas_PassaDatasCorretas()
     {
         var usuarioId = Guid.NewGuid();
-        var inicio = new DateTime(2026, 8, 1, 0, 0, 0, DateTimeKind.Utc);
-        var fim = new DateTime(2026, 8, 7, 0, 0, 0, DateTimeKind.Utc);
+        var inicio = new DateTimeOffset(2026, 8, 1, 0, 0, 0, TimeSpan.Zero);
+        var fim    = new DateTimeOffset(2026, 8, 7, 0, 0, 0, TimeSpan.Zero);
 
         _repoMock.Setup(r => r.ListarPorUsuarioAsync(usuarioId, inicio, fim, default))
             .ReturnsAsync([]);
@@ -63,7 +63,7 @@ public class ObterHistoricoCheckInUseCaseTests
         var checkIn = CriarCheckIn(usuarioId);
 
         _repoMock.Setup(r => r.ListarPorUsuarioAsync(
-                usuarioId, It.IsAny<DateTime>(), It.IsAny<DateTime>(), default))
+                usuarioId, It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), default))
             .ReturnsAsync([checkIn]);
 
         var resultado = (await _useCase.ExecutarAsync(

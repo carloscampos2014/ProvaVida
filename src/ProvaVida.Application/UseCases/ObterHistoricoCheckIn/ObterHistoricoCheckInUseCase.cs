@@ -14,7 +14,7 @@ public class ObterHistoricoCheckInUseCase
     public async Task<IEnumerable<CheckInDto>> ExecutarAsync(
         ObterHistoricoCheckInInput input, CancellationToken ct = default)
     {
-        var fim = input.DataFim ?? DateTime.UtcNow;
+        var fim    = input.DataFim    ?? DateTimeOffset.UtcNow;
         var inicio = input.DataInicio ?? fim.AddDays(-7);
 
         var checkIns = await _checkInRepository.ListarPorUsuarioAsync(

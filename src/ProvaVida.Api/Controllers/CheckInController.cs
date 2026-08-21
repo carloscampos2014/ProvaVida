@@ -41,8 +41,8 @@ public class CheckInController : ControllerBase
     [HttpGet("historico")]
     [ProducesResponseType(typeof(IEnumerable<CheckInDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Historico(
-        [FromQuery] DateTime? dataInicio,
-        [FromQuery] DateTime? dataFim,
+        [FromQuery] DateTimeOffset? dataInicio,
+        [FromQuery] DateTimeOffset? dataFim,
         [FromServices] ObterHistoricoCheckInUseCase useCase,
         CancellationToken ct)
     {
@@ -54,7 +54,7 @@ public class CheckInController : ControllerBase
 
 public record RegistrarCheckInRequest(
     Guid IdLocal,
-    DateTime DataHora,
+    DateTimeOffset DataHora,
     double? Latitude,
     double? Longitude,
     string? DeviceId

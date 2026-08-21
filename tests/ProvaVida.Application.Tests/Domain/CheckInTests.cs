@@ -10,7 +10,7 @@ public class CheckInTests
     {
         var usuarioId = Guid.NewGuid();
         var idLocal = Guid.NewGuid();
-        var dataHora = DateTime.UtcNow;
+        var dataHora = DateTimeOffset.UtcNow;
 
         var checkIn = CheckIn.Criar(usuarioId, idLocal, dataHora, -23.5, -46.6, "device-123");
 
@@ -26,7 +26,7 @@ public class CheckInTests
     [Fact]
     public void Criar_SemLocalizacao_RetornaCheckInComNullLatLong()
     {
-        var checkIn = CheckIn.Criar(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, null, null, "device");
+        var checkIn = CheckIn.Criar(Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UtcNow, null, null, "device");
 
         checkIn.Latitude.Should().BeNull();
         checkIn.Longitude.Should().BeNull();
@@ -35,7 +35,7 @@ public class CheckInTests
     [Fact]
     public void Criar_DeviceIdComEspacos_TrimaEspacos()
     {
-        var checkIn = CheckIn.Criar(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, null, null, "  device-abc  ");
+        var checkIn = CheckIn.Criar(Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UtcNow, null, null, "  device-abc  ");
 
         checkIn.DeviceId.Should().Be("device-abc");
     }

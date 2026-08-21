@@ -57,7 +57,7 @@ public class VerificarInatividadeUseCase
     /// </summary>
     public async Task ExecutarDeteccaoAsync(CancellationToken ct = default)
     {
-        var dataCorte = DateTime.UtcNow.AddHours(-HorasInatividade);
+        var dataCorte = DateTimeOffset.UtcNow.AddHours(-HorasInatividade);
         var inativos = await _checkInRepository.ListarUsuariosInativosDesdeAsync(dataCorte, ct);
 
         foreach (var usuarioId in inativos)

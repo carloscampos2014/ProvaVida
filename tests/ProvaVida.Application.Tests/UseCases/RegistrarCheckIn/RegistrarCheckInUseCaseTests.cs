@@ -21,7 +21,7 @@ public class RegistrarCheckInUseCaseTests
     }
 
     private static RegistrarCheckInInput InputValido() => new(
-        Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, -23.5, -46.6, "device-123");
+        Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UtcNow, -23.5, -46.6, "device-123");
 
     [Fact]
     public async Task ExecutarAsync_CheckInNovo_RetornaTrueECommita()

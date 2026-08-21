@@ -39,7 +39,7 @@ public class VerificarInatividadeUseCaseTests
     [Fact]
     public async Task ExecutarDeteccaoAsync_SemInativos_NaoGravaNotificacao()
     {
-        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTime>(), default))
+        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTimeOffset>(), default))
             .ReturnsAsync([]);
 
         await _useCase.ExecutarDeteccaoAsync();
@@ -51,7 +51,7 @@ public class VerificarInatividadeUseCaseTests
     public async Task ExecutarDeteccaoAsync_ComHeartbeat_GravaHeartbeatAtivo()
     {
         var usuarioId = Guid.NewGuid();
-        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTime>(), default))
+        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTimeOffset>(), default))
             .ReturnsAsync([usuarioId]);
         _notifRepo.Setup(r => r.ExisteNotificacaoAtivaNasUltimasHorasAsync(usuarioId, It.IsAny<int>(), default))
             .ReturnsAsync(false);
@@ -69,7 +69,7 @@ public class VerificarInatividadeUseCaseTests
     public async Task ExecutarDeteccaoAsync_SemHeartbeat_GravaAguardandoResposta()
     {
         var usuario = CriarUsuario();
-        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTime>(), default))
+        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTimeOffset>(), default))
             .ReturnsAsync([usuario.Id]);
         _notifRepo.Setup(r => r.ExisteNotificacaoAtivaNasUltimasHorasAsync(usuario.Id, It.IsAny<int>(), default))
             .ReturnsAsync(false);
@@ -89,7 +89,7 @@ public class VerificarInatividadeUseCaseTests
     public async Task ExecutarDeteccaoAsync_UsuarioJaEmCiclo_NaoReprocessa()
     {
         var usuarioId = Guid.NewGuid();
-        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTime>(), default))
+        _checkInRepo.Setup(r => r.ListarUsuariosInativosDesdeAsync(It.IsAny<DateTimeOffset>(), default))
             .ReturnsAsync([usuarioId]);
         _notifRepo.Setup(r => r.ExisteNotificacaoAtivaNasUltimasHorasAsync(usuarioId, It.IsAny<int>(), default))
             .ReturnsAsync(true);
