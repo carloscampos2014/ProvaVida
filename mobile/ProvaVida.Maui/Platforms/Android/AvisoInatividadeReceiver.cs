@@ -21,6 +21,19 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
     {
         if (context is null) return;
 
+        // GoAsync libera a main thread — operações de I/O (SQLite) rodam em background.
+        // Finish() avisa o Android que o trabalho terminou, evitando ANR.
+        var pendingResult = GoAsync();
+        Task.Run(async () =>
+        {
+            try { await ProcessarAsync(context); }
+            catch { /* ignora — best effort */ }
+            finally { pendingResult.Finish(); }
+        });
+    }
+
+    private static async Task ProcessarAsync(Context context)
+    {
         try
         {
             if (!DeveDispararNotificacao()) return;
@@ -57,6 +70,8 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
             manager.Notify(NotifId, notification);
         }
         catch { /* ignora — best effort */ }
+
+        await Task.CompletedTask;
     }
 
     private static bool DeveDispararNotificacao()
