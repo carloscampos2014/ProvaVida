@@ -26,12 +26,10 @@ public class LocalDatabase
                 SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
 
             // Aplica migrations pendentes (idempotente — PRAGMA user_version controla versão)
+            // V001 cria as tabelas com schema completo — CreateTableAsync não é necessário
+            // e conflita com tabelas já existentes ao tentar re-adicionar a PK.
             var migrator = new LocalDatabaseMigrator(_db);
             await migrator.MigrateAsync();
-
-            // CreateTableAsync após migration garante que colunas novas são mapeadas pelo ORM
-            await _db.CreateTableAsync<CheckInLocal>();
-            await _db.CreateTableAsync<HeartbeatLocal>();
 
             return _db;
         }
