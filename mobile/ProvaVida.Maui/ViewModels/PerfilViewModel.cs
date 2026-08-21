@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using ProvaVida.Maui.Helpers;
 using ProvaVida.Maui.Models;
 using ProvaVida.Maui.Services;
 using ProvaVida.Maui.Storage;
@@ -125,6 +126,24 @@ public class PerfilViewModel : BaseViewModel
             string.IsNullOrWhiteSpace(ContatoWhatsApp))
         {
             ErrorMessage = "Preencha todos os campos.";
+            return;
+        }
+
+        if (!ValidacaoHelper.WhatsAppValido(WhatsApp))
+        {
+            ErrorMessage = ValidacaoHelper.MsgWhatsAppInvalido;
+            return;
+        }
+
+        if (!ValidacaoHelper.EmailValido(ContatoEmail))
+        {
+            ErrorMessage = $"E-mail do contato: {ValidacaoHelper.MsgEmailInvalido}";
+            return;
+        }
+
+        if (!ValidacaoHelper.WhatsAppValido(ContatoWhatsApp))
+        {
+            ErrorMessage = $"WhatsApp do contato: {ValidacaoHelper.MsgWhatsAppInvalido}";
             return;
         }
 

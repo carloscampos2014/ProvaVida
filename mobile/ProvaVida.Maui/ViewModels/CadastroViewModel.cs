@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using ProvaVida.Maui.Helpers;
 using ProvaVida.Maui.Services;
 
 namespace ProvaVida.Maui.ViewModels;
@@ -65,6 +66,16 @@ public class CadastroViewModel : BaseViewModel
                 ErrorMessage = "Preencha todos os campos.";
                 return;
             }
+            if (!ValidacaoHelper.EmailValido(Email))
+            {
+                ErrorMessage = ValidacaoHelper.MsgEmailInvalido;
+                return;
+            }
+            if (!ValidacaoHelper.WhatsAppValido(WhatsApp))
+            {
+                ErrorMessage = ValidacaoHelper.MsgWhatsAppInvalido;
+                return;
+            }
             if (Senha.Length < 8)
             {
                 ErrorMessage = "Senha deve ter no mínimo 8 caracteres.";
@@ -94,6 +105,18 @@ public class CadastroViewModel : BaseViewModel
             string.IsNullOrWhiteSpace(ContatoWhatsApp))
         {
             ErrorMessage = "Preencha todos os dados do contato de emergência.";
+            return;
+        }
+
+        if (!ValidacaoHelper.EmailValido(ContatoEmail))
+        {
+            ErrorMessage = $"E-mail do contato: {ValidacaoHelper.MsgEmailInvalido}";
+            return;
+        }
+
+        if (!ValidacaoHelper.WhatsAppValido(ContatoWhatsApp))
+        {
+            ErrorMessage = $"WhatsApp do contato: {ValidacaoHelper.MsgWhatsAppInvalido}";
             return;
         }
 
