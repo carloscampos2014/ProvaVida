@@ -2,10 +2,10 @@
   "version": "v1",
   "hooks": [
     {
-      "name": "Build ao salvar arquivo C#",
+      "name": "Build ao salvar arquivo C# do backend",
       "trigger": "PostFileSave",
       "description": "Roda dotnet build silencioso ao salvar qualquer arquivo .cs do backend para detectar erros de compilação imediatamente",
-      "matcher": "\\.cs$",
+      "matcher": "src.*\\.cs$",
       "action": {
         "type": "command",
         "command": "dotnet build \"c:\\Dev\\ProvaVida\\src\\ProvaVida.Api\\ProvaVida.Api.csproj\" --no-restore -v quiet 2>&1 | Select-Object -Last 5",
