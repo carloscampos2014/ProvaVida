@@ -8,6 +8,28 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
+            <!-- Top bar com hamburger — mesmo padrão da CheckInPage -->
+            <Border BackgroundColor="White" StrokeThickness="0" Padding="16,12,20,12">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Label Grid.Column="0"
+                           Text="☰"
+                           FontSize="22"
+                           TextColor="{StaticResource Primary}"
+                           VerticalOptions="Center"
+                           Margin="0,0,12,0">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnHamburgerTapped"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <Label Grid.Column="1"
+                           Text="Meu Perfil"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"
+                           VerticalOptions="Center"/>
+                </Grid>
+            </Border>
+
             <!-- Header -->
             <Border BackgroundColor="{StaticResource Primary}" StrokeThickness="0"
                     Padding="20,48,20,28">
