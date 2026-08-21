@@ -19,7 +19,8 @@
 			android:name="com.enzojb.provavida.AvisoInatividadeReceiver"
 			android:exported="false" />
 
-		<!-- Quick Settings Tile -->
+		<!-- Quick Settings Tile — mantido no manifesto manual para preservar android:icon
+		     (o atributo [Service] no C# não suporta android:icon diretamente) -->
 		<service
 			android:name="com.enzojb.provavida.CheckInTileService"
 			android:exported="true"
@@ -31,31 +32,9 @@
 			</intent-filter>
 		</service>
 
-		<!-- Widget Simples (2x1) -->
-		<receiver
-			android:name="com.enzojb.provavida.CheckInWidgetSimples"
-			android:exported="true"
-			android:label="ProvaVida — Simples">
-			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-			</intent-filter>
-			<meta-data
-				android:name="android.appwidget.provider"
-				android:resource="@xml/widget_simples_info" />
-		</receiver>
-
-		<!-- Widget Completo (4x2) -->
-		<receiver
-			android:name="com.enzojb.provavida.CheckInWidgetCompleto"
-			android:exported="true"
-			android:label="ProvaVida — Semana">
-			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-			</intent-filter>
-			<meta-data
-				android:name="android.appwidget.provider"
-				android:resource="@xml/widget_completo_info" />
-		</receiver>
+		<!-- Widgets: CheckInWidgetSimples e CheckInWidgetCompleto são registrados
+		     via atributos C# [BroadcastReceiver] + [MetaData] nas classes correspondentes.
+		     Declarações manuais removidas para evitar conflito no merge do build MAUI. -->
 
 	</application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

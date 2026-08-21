@@ -7,7 +7,14 @@ namespace ProvaVida.Maui;
 
 /// <summary>
 /// Widget completo (4x2) — mostra os 7 dias da semana e status do check-in.
+/// Atributos C# registram o receiver no manifesto gerado pelo build do MAUI.
 /// </summary>
+[BroadcastReceiver(
+    Name = "com.enzojb.provavida.CheckInWidgetCompleto",
+    Label = "Enzojb Prova de Vida — Semana",
+    Exported = true)]
+[IntentFilter(new[] { "android.appwidget.action.APPWIDGET_UPDATE" })]
+[MetaData("android.appwidget.provider", Resource = "@xml/widget_completo_info")]
 public class CheckInWidgetCompleto : AppWidgetProvider
 {
     private static readonly int[] DiaIds =

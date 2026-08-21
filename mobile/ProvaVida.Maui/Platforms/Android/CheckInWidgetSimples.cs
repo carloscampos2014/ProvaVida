@@ -7,7 +7,14 @@ namespace ProvaVida.Maui;
 
 /// <summary>
 /// Widget simples (2x1) — mostra status e permite acesso rápido ao app.
+/// Atributos C# registram o receiver no manifesto gerado pelo build do MAUI.
 /// </summary>
+[BroadcastReceiver(
+    Name = "com.enzojb.provavida.CheckInWidgetSimples",
+    Label = "Enzojb Prova de Vida — Simples",
+    Exported = true)]
+[IntentFilter(new[] { "android.appwidget.action.APPWIDGET_UPDATE" })]
+[MetaData("android.appwidget.provider", Resource = "@xml/widget_simples_info")]
 public class CheckInWidgetSimples : AppWidgetProvider
 {
     public override void OnUpdate(Context? context, AppWidgetManager? appWidgetManager, int[]? appWidgetIds)
