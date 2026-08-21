@@ -1,11 +1,11 @@
 using Plugin.LocalNotification;
-
+using Plugin.LocalNotification.AndroidOption;
 namespace ProvaVida.Maui.Services;
 
 /// <summary>
 /// Gerencia notificações push locais usando Plugin.LocalNotification.
-/// Substitui a implementação manual com BroadcastReceiver/AlarmManager
-/// que não funcionava corretamente no Android 15/HyperOS.
+/// Os alarmes são agendados uma vez no login e se repetem diariamente via AlarmManager.
+/// O BootReceiver reagenda após reinicialização do dispositivo.
 /// </summary>
 public static class LocalNotificationService
 {
@@ -16,11 +16,15 @@ public static class LocalNotificationService
 
     /// <summary>
     /// Agenda o lembrete diário de check-in para as 20h.
+    /// Deve ser chamado no login — RepeatType.Daily mantém ativo indefinidamente.
     /// </summary>
     public static async Task AgendarLembreteAsync()
     {
         try
         {
+            var temPermissao = await LocalNotificationCenter.Current.AreNotificationsEnabled();
+            if (!temPermissao) return;
+
             var agora   = DateTime.Now;
             var horario = new DateTime(agora.Year, agora.Month, agora.Day, HoraLembrete, 0, 0);
             if (agora >= horario) horario = horario.AddDays(1);
@@ -33,22 +37,34 @@ public static class LocalNotificationService
                 Schedule       = new NotificationRequestSchedule
                 {
                     NotifyTime = horario,
-                    RepeatType = NotificationRepeat.Daily
+                    RepeatType = NotificationRepeat.Daily,
+                    Android    = new AndroidScheduleOptions
+                    {
+                        AlarmType = AndroidAlarmType.RtcWakeup
+                    }
                 }
             };
 
             await LocalNotificationCenter.Current.Show(notification);
+            System.Diagnostics.Debug.WriteLine($"[Notif] Lembrete agendado para {horario:HH:mm} (diário)");
         }
-        catch { /* ignora se permissão negada */ }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Notif] Falha ao agendar lembrete: {ex.Message}");
+        }
     }
 
     /// <summary>
     /// Agenda o aviso de inatividade diário para as 21h.
+    /// Deve ser chamado no login — RepeatType.Daily mantém ativo indefinidamente.
     /// </summary>
     public static async Task AgendarAvisoInatividadeAsync()
     {
         try
         {
+            var temPermissao = await LocalNotificationCenter.Current.AreNotificationsEnabled();
+            if (!temPermissao) return;
+
             var agora   = DateTime.Now;
             var horario = new DateTime(agora.Year, agora.Month, agora.Day, HoraAvisoInatividade, 0, 0);
             if (agora >= horario) horario = horario.AddDays(1);
@@ -61,16 +77,24 @@ public static class LocalNotificationService
                 Schedule       = new NotificationRequestSchedule
                 {
                     NotifyTime = horario,
-                    RepeatType = NotificationRepeat.Daily
+                    RepeatType = NotificationRepeat.Daily,
+                    Android    = new AndroidScheduleOptions
+                    {
+                        AlarmType = AndroidAlarmType.RtcWakeup
+                    }
                 }
             };
 
             await LocalNotificationCenter.Current.Show(notification);
+            System.Diagnostics.Debug.WriteLine($"[Notif] Aviso inatividade agendado para {horario:HH:mm} (diário)");
         }
-        catch { /* ignora se permissão negada */ }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Notif] Falha ao agendar aviso inatividade: {ex.Message}");
+        }
     }
 
-    // Compatibilidade com chamadas existentes (síncronas)
+    // Compatibilidade com chamadas existentes síncronas (BootReceiver)
     public static void AgendarLembrete()
         => _ = AgendarLembreteAsync();
 
