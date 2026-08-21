@@ -60,7 +60,7 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
             var notification = new NotificationCompat.Builder(context, ChannelId)
                 .SetContentTitle("Está tudo bem com você? 💙")
                 .SetContentText($"Não registramos seu check-in há mais de {HorasLimite}h. Abra o app e confirme que está bem.")
-                .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)
+                .SetSmallIcon(Resource.Drawable.ic_notificacao)
                 .SetContentIntent(pendingIntent)
                 .SetAutoCancel(true)
                 .SetPriority(NotificationCompat.PriorityMax)

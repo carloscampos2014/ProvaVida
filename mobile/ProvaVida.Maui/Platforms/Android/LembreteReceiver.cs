@@ -38,7 +38,7 @@ public class LembreteReceiver : BroadcastReceiver
         var notification = new NotificationCompat.Builder(context, ChannelId)
             .SetContentTitle("Está tudo bem com você?")
             .SetContentText("Não detectamos seu check-in hoje. Toque para confirmar que está bem.")
-            .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)
+            .SetSmallIcon(Resource.Drawable.ic_notificacao)
             .SetContentIntent(pendingIntent)
             .SetAutoCancel(true)
             .SetPriority(NotificationCompat.PriorityHigh)

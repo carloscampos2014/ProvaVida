@@ -1,14 +1,13 @@
-﻿{
+{
   "version": "v1",
   "hooks": [
     {
       "name": "Alerta de Teste Ausente",
-      "description": "Alerta quando um arquivo de implementação é criado sem um arquivo de teste correspondente",
       "trigger": "PostFileCreate",
-      "matcher": "src\\\\.*\\.(cs|ts|tsx|py|java|go|rb)$",
+      "matcher": "src.*\\.cs$",
       "action": {
         "type": "agent",
-        "prompt": "Um novo arquivo de implementação foi criado em src/. Verifique se existe um arquivo de teste correspondente em tests/ (ou __tests__/, spec/, etc. conforme a convenção do projeto).\n\nSe não existir, avise o usuário de forma objetiva:\n- Informe o nome do arquivo criado\n- Sugira o caminho esperado do teste seguindo a convenção do projeto\n- Não crie o arquivo de teste automaticamente — apenas alerte\n\nNão alertar para:\n- Interfaces, DTOs, enums, tipos\n- Arquivos de configuração (Program.cs, MauiProgram.cs, AppShell.xaml.cs)\n- Arquivos de recursos, estilos, assets\n- Arquivos de migração de banco de dados\n- index.ts / index.cs e outros barrel files"
+        "prompt": "Um novo arquivo de implementação foi criado em src/. Verifique se existe um arquivo de teste correspondente em tests/ seguindo a convenção do projeto. Se não existir, avise o usuário informando o nome do arquivo criado e o caminho esperado do teste. Não crie o arquivo automaticamente — apenas alerte. Não alertar para: interfaces, DTOs, records, enums, arquivos de configuração (Program.cs, MauiProgram.cs, ServiceCollectionExtensions.cs), arquivos de migração, middleware, extensions, filters, entidades de domínio simples sem lógica."
       }
     }
   ]
