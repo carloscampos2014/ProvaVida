@@ -66,7 +66,7 @@ public class CheckInTileService : TileService
 
             if (!autenticado)
             {
-                tile.Label       = "ProvaVida — Login";
+                tile.Label       = "Enzojb Prova de Vida";
                 tile.ContentDescription = "Toque para fazer login";
                 tile.State       = TileState.Inactive;
             }
