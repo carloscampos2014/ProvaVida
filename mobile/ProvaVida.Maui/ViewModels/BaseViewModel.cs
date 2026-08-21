@@ -7,6 +7,7 @@ public abstract class BaseViewModel : INotifyPropertyChanged
 {
     private bool _isLoading;
     private string _errorMessage = string.Empty;
+    private int _executando = 0; // 0 = livre, 1 = ocupado — usado pelo ExecutarSeOcioso
 
     public bool IsLoading
     {
@@ -27,6 +28,27 @@ public abstract class BaseViewModel : INotifyPropertyChanged
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Executa a ação apenas se o ViewModel estiver ocioso.
+    /// Usa Interlocked.CompareExchange para garantir atomicidade — dois toques simultâneos
+    /// não conseguem ambos avançar, mesmo antes de IsLoading propagar para a UI.
+    /// </summary>
+    protected async Task ExecutarSeOcioso(Func<Task> acao)
+    {
+        if (Interlocked.CompareExchange(ref _executando, 1, 0) != 0) return;
+        IsLoading = true;
+        try
+        {
+            await acao();
+        }
+        finally
+        {
+            IsLoading = false;
+            Interlocked.Exchange(ref _executando, 0);
+            OnPropertyChanged(nameof(IsLoading));
+        }
+    }
 
     protected void SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {

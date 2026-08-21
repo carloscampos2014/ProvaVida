@@ -54,10 +54,10 @@ public class PerfilViewModel : BaseViewModel
         _usuarioStorage = usuarioStorage;
         _localDatabase = localDatabase;
 
-        SalvarCommand = new Command(async () => await SalvarAsync(), () => !IsLoading);
+        SalvarCommand = new Command(async () => await ExecutarSeOcioso(SalvarAsync), () => !IsLoading);
         AlterarSenhaCommand = new Command(async () => await AlterarSenhaAsync());
         LogoffCommand = new Command(async () => await LogoffAsync());
-        ExcluirContaCommand = new Command(async () => await ExcluirContaAsync());
+        ExcluirContaCommand = new Command(async () => await ExecutarSeOcioso(ExcluirContaAsync));
 
         // Não carrega no construtor — OnAppearing da PerfilPage garante o carregamento
         // correto em toda visita, inclusive após logoff/login (Shell reutiliza a instância).
@@ -127,7 +127,6 @@ public class PerfilViewModel : BaseViewModel
             return;
         }
 
-        IsLoading = true;
         try
         {
             await _contaService.AlterarAsync(new AlterarContaRequest(
@@ -155,10 +154,6 @@ public class PerfilViewModel : BaseViewModel
         catch
         {
             ErrorMessage = "Sem conexão. Tente novamente.";
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 
@@ -191,8 +186,7 @@ public class PerfilViewModel : BaseViewModel
         IsLoading = true;
         try
         {
-            await _contaService.AlterarSenhaAsync(new AlterarSenhaRequest(senhaAtual, novaSenha));
-            await page.DisplayAlertAsync("Sucesso", "Senha alterada com sucesso.", "OK");
+            await _contaService.AlterarSenhaAsync(new AlterarSenhaRequest(senhaAtual, novaSenha));            await page.DisplayAlertAsync("Sucesso", "Senha alterada com sucesso.", "OK");
         }
         catch (ApiException ex)
         {
@@ -241,7 +235,6 @@ public class PerfilViewModel : BaseViewModel
 
         if (string.IsNullOrWhiteSpace(senha)) return;
 
-        IsLoading = true;
         try
         {
             await _contaService.ExcluirAsync(new ExcluirContaRequest(senha));
@@ -260,10 +253,6 @@ public class PerfilViewModel : BaseViewModel
         catch
         {
             ErrorMessage = "Sem conexão. Tente novamente.";
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 }

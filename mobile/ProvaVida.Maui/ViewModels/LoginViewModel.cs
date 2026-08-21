@@ -49,7 +49,7 @@ public class LoginViewModel : BaseViewModel
         _tokenStorage = tokenStorage;
         _usuarioStorage = usuarioStorage;
 
-        EntrarCommand = new Command(async () => await EntrarAsync(), () => !IsLoading);
+        EntrarCommand = new Command(async () => await ExecutarSeOcioso(EntrarAsync), () => !IsLoading);
         IrParaCadastroCommand = new Command(async () =>
             await Shell.Current.GoToAsync("//cadastro"));
         AlternarSenhaCommand = new Command(() => SenhaOculta = !SenhaOculta);
@@ -87,7 +87,6 @@ public class LoginViewModel : BaseViewModel
             return;
         }
 
-        IsLoading = true;
         try
         {
             var result = await _authService.LoginAsync(new LoginRequest(Email.Trim(), Senha));
@@ -136,10 +135,6 @@ public class LoginViewModel : BaseViewModel
         catch
         {
             ErrorMessage = "Sem conexão com o servidor. Verifique sua internet.";
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 }
