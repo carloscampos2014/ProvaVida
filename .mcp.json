@@ -24,9 +24,19 @@
       "command": "uvx",
       "args": ["--with", "mcp==1.1.2", "mcp-server-fetch"]
     },
+    "knowledge-rag": {
+      "command": "uvx",
+      "args": ["knowledge-rag@latest"],
+      "env": {
+        "KNOWLEDGE_BASE_PATH": "C:\\Dev\\ProvaVida\\.kiro\\knowledge"
+      }
+    },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"]
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_FILE_PATH": "C:\\Dev\\ProvaVida\\.kiro\\knowledge\\memory.jsonl"
+      }
     },
     "sequential-thinking": {
       "command": "npx",
