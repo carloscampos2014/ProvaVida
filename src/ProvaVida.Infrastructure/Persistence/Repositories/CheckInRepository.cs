@@ -39,7 +39,7 @@ public sealed class CheckInRepository : ICheckInRepository
     }
 
     public async Task<IEnumerable<CheckIn>> ListarPorUsuarioAsync(
-        Guid usuarioId, DateTime dataInicio, DateTime dataFim, CancellationToken ct = default)
+        Guid usuarioId, DateTimeOffset dataInicio, DateTimeOffset dataFim, CancellationToken ct = default)
     {
         const string sql = """
             SELECT id          AS "Id",
@@ -65,7 +65,7 @@ public sealed class CheckInRepository : ICheckInRepository
     }
 
     public async Task<IEnumerable<Guid>> ListarUsuariosInativosDesdeAsync(
-        DateTime dataCorte, CancellationToken ct = default)
+        DateTimeOffset dataCorte, CancellationToken ct = default)
     {
         // Retorna usuario_id de todos usuários ativos cujo ÚLTIMO check-in foi antes de dataCorte
         // ou que nunca fizeram check-in
@@ -108,7 +108,7 @@ public sealed class CheckInRepository : ICheckInRepository
         public Guid Id { get; set; }
         public Guid UsuarioId { get; set; }
         public Guid IdLocal { get; set; }
-        public DateTime DataHora { get; set; }
+        public DateTimeOffset DataHora { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public string DeviceId { get; set; } = string.Empty;

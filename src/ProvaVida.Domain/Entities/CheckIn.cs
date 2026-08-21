@@ -5,7 +5,7 @@ public class CheckIn
     public Guid Id { get; private set; }
     public Guid UsuarioId { get; private set; }
     public Guid IdLocal { get; private set; }   // UUID gerado no app — garante idempotência
-    public DateTime DataHora { get; private set; }
+    public DateTimeOffset DataHora { get; private set; }
     public double? Latitude { get; private set; }
     public double? Longitude { get; private set; }
     public string DeviceId { get; private set; } = string.Empty;
@@ -16,7 +16,7 @@ public class CheckIn
     public static CheckIn Criar(
         Guid usuarioId,
         Guid idLocal,
-        DateTime dataHora,
+        DateTimeOffset dataHora,
         double? latitude,
         double? longitude,
         string deviceId)

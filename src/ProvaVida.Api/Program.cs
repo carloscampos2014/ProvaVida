@@ -1,3 +1,4 @@
+using Dapper;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Scalar.AspNetCore;
@@ -5,6 +6,7 @@ using ProvaVida.Api.Extensions;
 using ProvaVida.Api.Filters;
 using ProvaVida.Api.Middleware;
 using ProvaVida.Infrastructure.Jobs;
+using ProvaVida.Infrastructure.Persistence;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,9 +69,24 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Health check — usado pelo GitHub Actions para verificar o deploy
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
-   .AllowAnonymous();
+// Health check — verifica conectividade real com o banco PostgreSQL
+// Retorna 503 se o banco estiver fora — garante que CI/CD detecta deploys quebrados
+app.MapGet("/health", async (DbConnectionFactory db) =>
+{
+    try
+    {
+        using var conn = db.CreateConnection();
+        await conn.ExecuteScalarAsync<int>("SELECT 1");
+        return Results.Ok(new { status = "healthy", timestamp = DateTimeOffset.UtcNow });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(
+            new { status = "unhealthy", error = ex.Message, timestamp = DateTimeOffset.UtcNow },
+            statusCode: 503);
+    }
+})
+.AllowAnonymous();
 
 if (!app.Environment.IsEnvironment("IntegrationTests"))
 {
