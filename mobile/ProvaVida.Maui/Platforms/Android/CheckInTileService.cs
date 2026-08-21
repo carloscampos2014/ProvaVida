@@ -12,6 +12,9 @@ namespace ProvaVida.Maui;
 /// Requer Android 7.0+ (API 24).
 /// </summary>
 [Service(
+    Name = "com.enzojb.provavida.CheckInTileService",
+    Label = "Enzojb Prova de Vida",
+    Icon = "@mipmap/appicon",
     Exported = true,
     Permission = "android.permission.BIND_QUICK_SETTINGS_TILE")]
 [IntentFilter(new[] { "android.service.quicksettings.action.QS_TILE" })]
