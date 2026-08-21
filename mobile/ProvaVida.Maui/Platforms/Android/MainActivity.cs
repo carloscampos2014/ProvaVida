@@ -37,20 +37,19 @@ public class MainActivity : MauiAppCompatActivity
     {
         if (intent?.Action is null) return;
 
-        _ = Task.Run(async () =>
+        // MainThread.BeginInvokeOnMainThread agenda direto na UI thread —
+        // Task.Run externo era desnecessário pois GoToAsync precisa da UI thread mesmo.
+        MainThread.BeginInvokeOnMainThread(async () =>
         {
-            await Task.Delay(800);
-            await MainThread.InvokeOnMainThreadAsync(async () =>
+            try
             {
-                try
-                {
-                    if (intent.Action == ActionCheckIn)
-                        await Shell.Current.GoToAsync("//checkin");
-                    else if (intent.Action == ActionLogin)
-                        await Shell.Current.GoToAsync("//login");
-                }
-                catch { }
-            });
+                await Task.Delay(800); // aguarda Shell inicializar
+                if (intent.Action == ActionCheckIn)
+                    await Shell.Current.GoToAsync("//checkin");
+                else if (intent.Action == ActionLogin)
+                    await Shell.Current.GoToAsync("//login");
+            }
+            catch { }
         });
     }
 }
