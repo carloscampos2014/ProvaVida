@@ -122,7 +122,23 @@ public partial class CheckInPage : ContentPage
                         "Mais tarde");
 
                 if (permitir)
-                    await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                {
+                    var resultado = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+
+                    // Android não mostra mais o dialog se a permissão foi negada permanentemente.
+                    // Nesse caso, a única opção é direcionar para as configurações do app.
+                    if (resultado == PermissionStatus.Denied)
+                    {
+                        var irConfiguracoes = await DisplayAlertAsync(
+                            "📍 Permissão necessária",
+                            "A permissão de localização foi negada. Para ativar, vá em Configurações > Permissões > Localização.",
+                            "Abrir configurações",
+                            "Agora não");
+
+                        if (irConfiguracoes)
+                            AppInfo.Current.ShowSettingsUI();
+                    }
+                }
             }
         }
 
@@ -145,7 +161,20 @@ public partial class CheckInPage : ContentPage
                             "Mais tarde");
 
                     if (permitir)
-                        await Permissions.RequestAsync<Permissions.PostNotifications>();
+                    {
+                        var resultado = await Permissions.RequestAsync<Permissions.PostNotifications>();
+                        if (resultado == PermissionStatus.Denied)
+                        {
+                            var irConfiguracoes = await DisplayAlertAsync(
+                                "🔔 Permissão necessária",
+                                "A permissão de notificações foi negada. Para ativar, vá em Configurações > Permissões > Notificações.",
+                                "Abrir configurações",
+                                "Agora não");
+
+                            if (irConfiguracoes)
+                                AppInfo.Current.ShowSettingsUI();
+                        }
+                    }
                 }
             }
         }
