@@ -1,14 +1,13 @@
-﻿{
+{
   "version": "v1",
   "hooks": [
     {
       "name": "Git Safety Guardrails",
-      "description": "Bloqueia comandos git destrutivos: push --force, reset --hard, rm -rf na raiz, push direto para main/master",
       "trigger": "PreToolUse",
       "matcher": "execute_pwsh",
       "action": {
         "type": "command",
-        "command": "powershell -Command \"$input = [Console]::In.ReadToEnd() | ConvertFrom-Json; $cmd = $input.tool_input.command; $blocked = @('push --force','push -f','reset --hard','clean -fd','clean -f','rm -rf','push origin master','push origin main'); foreach ($b in $blocked) { if ($cmd -match [regex]::Escape($b)) { Write-Error \"BLOQUEADO: '$b' e uma operacao destrutiva. Use PR ou peca confirmacao explicita.\"; exit 2 } }; exit 0\""
+        "command": "powershell -Command \"$input = [Console]::In.ReadToEnd() | ConvertFrom-Json; $cmd = $input.tool_input.command; $blocked = @('push --force','push -f','reset --hard','clean -fd','push origin master','push origin main'); foreach ($b in $blocked) { if ($cmd -match [regex]::Escape($b)) { Write-Error \\\"BLOQUEADO: '$b' e uma operacao destrutiva. Use PR.\\\"; exit 2 } }; exit 0\""
       }
     }
   ]

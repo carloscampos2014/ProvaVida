@@ -1,13 +1,12 @@
-﻿{
+{
   "version": "v1",
   "hooks": [
     {
       "name": "Build e Testes ao Parar",
-      "description": "Roda build e testes ao finalizar uma sessão para garantir que nada quebrou",
       "trigger": "Stop",
       "action": {
         "type": "command",
-        "command": "powershell -Command \"$result = dotnet build 'c:\\Dev\\ProvaVida\\src\\ProvaVida.Api\\ProvaVida.Api.csproj' --no-restore -v quiet 2>&1 | Select-Object -Last 3; Write-Output '=== Build ==='; Write-Output $result; $test = dotnet test 'c:\\Dev\\ProvaVida\\tests\\ProvaVida.Application.Tests' --no-restore --logger console;verbosity=minimal 2>&1 | Select-Object -Last 3; Write-Output '=== Testes ==='; Write-Output $test\"",
+        "command": "powershell -Command \"$b = dotnet build 'c:\\Dev\\ProvaVida\\src\\ProvaVida.Api\\ProvaVida.Api.csproj' --no-restore -v quiet 2>&1 | Select-Object -Last 3; Write-Output '=== Build ==='; $b; $t = dotnet test 'c:\\Dev\\ProvaVida\\tests\\ProvaVida.Application.Tests' --no-restore --logger 'console;verbosity=minimal' 2>&1 | Select-Object -Last 3; Write-Output '=== Testes ==='; $t\"",
         "timeout": 120
       }
     }

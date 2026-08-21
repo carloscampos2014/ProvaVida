@@ -2,9 +2,8 @@
   "version": "v1",
   "hooks": [
     {
-      "name": "Build ao salvar arquivo C# do backend",
+      "name": "Build ao Salvar C# Backend",
       "trigger": "PostFileSave",
-      "description": "Roda dotnet build silencioso ao salvar qualquer arquivo .cs do backend para detectar erros de compilação imediatamente",
       "matcher": "src.*\\.cs$",
       "action": {
         "type": "command",

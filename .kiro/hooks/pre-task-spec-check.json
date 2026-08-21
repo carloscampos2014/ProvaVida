@@ -1,13 +1,12 @@
-﻿{
+{
   "version": "v1",
   "hooks": [
     {
       "name": "Verificação de Spec antes da Task",
-      "description": "Lê o spec da feature antes de iniciar uma task para garantir alinhamento com requisitos e critérios de aceite",
       "trigger": "PreTaskExec",
       "action": {
         "type": "agent",
-        "prompt": "Uma task de spec está prestes a ser iniciada. Antes de começar a implementação:\n\n1. Localize o arquivo requirements.md e design.md da spec atual em .kiro/specs/\n2. Leia os critérios de aceite da task que será executada\n3. Confirme que entendeu o escopo exato da task — o que deve ser implementado E o que está fora do escopo\n4. Verifique se há dependências com tasks anteriores não concluídas\n\nReporte em 3-5 linhas:\n- O que esta task deve entregar\n- Critérios de aceite que serão verificados\n- Qualquer dependência ou bloqueador identificado\n\nSe não houver spec para a task atual, informe e prossiga normalmente."
+        "prompt": "Antes de iniciar uma task de spec, leia o arquivo de spec ativo em .kiro/specs/ e verifique os requisitos e critérios de aceite relacionados à task que está prestes a iniciar. Confirme que você entende o escopo completo antes de implementar. Se encontrar ambiguidade ou conflito com o que foi implementado anteriormente, alerte o usuário antes de prosseguir."
       }
     }
   ]

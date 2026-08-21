@@ -2,9 +2,8 @@
   "version": "v1",
   "hooks": [
     {
-      "name": "Guarda de arquitetura",
+      "name": "Guarda de Arquitetura",
       "trigger": "PostFileSave",
-      "description": "Verifica se arquivo salvo em Domain ou Application referencia camadas externas, violando a separação de responsabilidades",
       "matcher": "ProvaVida\\.(Application|Domain).*\\.cs$",
       "action": {
         "type": "agent",

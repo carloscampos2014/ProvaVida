@@ -3,11 +3,10 @@
   "hooks": [
     {
       "name": "Harness Retrospectiva de Spec",
-      "description": "Ao concluir a última task de um spec, gera retrospectiva comparando planejado vs real e alimenta a quality base",
       "trigger": "PostTaskExec",
       "action": {
         "type": "agent",
-        "prompt": "Verifique se TODAS as tasks do spec atual estão concluídas. Se NÃO, ignore. Se SIM (esta é a última task):\n1. Leia .kiro/harness-config.json — se retrospective=false, ignore.\n2. Compare tasks.md original (git diff ou contagem) vs tasks realmente executadas.\n3. Identifique scope creep (tasks adicionadas / originais).\n4. Compare critérios de aceite originais vs alterados.\n5. Calcule índice de precisão de planejamento.\n6. Se scope creep > 30%, sinalize alerta.\n7. Gere relatório em .kiro/quality/retrospectives/[spec-name].md.\n8. Alimente a Knowledge Base com lições aprendidas.\n9. Se precisão < 60% em 3 specs consecutivos, sugira revisão do processo."
+        "prompt": "Ao concluir a última task de um spec, gera retrospectiva comparando planejado vs real e alimenta a quality base. Verifique se todas as tasks do spec ativo foram concluídas. Se sim, gere um resumo conciso: o que foi planejado, o que foi implementado, desvios encontrados e lições aprendidas. Salve em .kiro/knowledge/sessions/ se houver conteúdo substancial."
       }
     }
   ]
