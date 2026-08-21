@@ -2,7 +2,6 @@ using System.Windows.Input;
 using ProvaVida.Maui.Models;
 using ProvaVida.Maui.Services;
 using ProvaVida.Maui.Storage;
-
 namespace ProvaVida.Maui.ViewModels;
 
 public class LoginViewModel : BaseViewModel
@@ -102,6 +101,12 @@ public class LoginViewModel : BaseViewModel
                 Nome  = nome  ?? string.Empty,
                 Email = email ?? Email.Trim()
             });
+
+            // Agenda alarmes diários — uma vez no login é suficiente.
+            // RepeatType.Daily + AlarmManager garantem disparo mesmo sem o app aberto.
+            // BootReceiver reagenda após reboot.
+            await LocalNotificationService.AgendarLembreteAsync();
+            await LocalNotificationService.AgendarAvisoInatividadeAsync();
 
             // Busca perfil completo da API em background para popular WhatsApp e contatos
             _ = Task.Run(async () =>

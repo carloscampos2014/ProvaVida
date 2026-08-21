@@ -45,13 +45,6 @@ public partial class CheckInPage : ContentPage
             }
         });
 
-        // Agenda lembrete se ainda não fez check-in hoje
-        if (!_vm.FezCheckInHoje)
-            LocalNotificationService.AgendarLembrete();
-
-        // Agenda aviso de inatividade diário às 21h (verifica SQLite local)
-        LocalNotificationService.AgendarAvisoInatividade();
-
         // Atualiza App Shortcuts conforme estado atual (Android 7.1+)
 #if ANDROID
         if (OperatingSystem.IsAndroidVersionAtLeast(25))
@@ -153,6 +146,36 @@ public partial class CheckInPage : ContentPage
 
                     if (permitir)
                         await Permissions.RequestAsync<Permissions.PostNotifications>();
+                }
+            }
+        }
+
+        // ── Alarmes exatos (Android 12+) — necessário para notificações no horário certo ─
+        if (OperatingSystem.IsAndroidVersionAtLeast(31))
+        {
+            var alarmManager = Android.App.Application.Context
+                .GetSystemService(Android.Content.Context.AlarmService) as Android.App.AlarmManager;
+
+            if (alarmManager != null && !alarmManager.CanScheduleExactAlarms())
+            {
+                var ultimaAlarme = Preferences.Get("perm_alarme_ultima_solicitacao", string.Empty);
+                if (ultimaAlarme != hoje)
+                {
+                    Preferences.Set("perm_alarme_ultima_solicitacao", hoje);
+
+                    var ir = await DisplayAlertAsync(
+                        "⏰ Permissão de alarme necessária",
+                        "Para receber o lembrete exatamente às 20h, o ProvaVida precisa de permissão para alarmes precisos. Toque em Ir para ativar nas configurações.",
+                        "Ir para configurações",
+                        "Agora não");
+
+                    if (ir)
+                    {
+                        var intent = new Android.Content.Intent(
+                            Android.Provider.Settings.ActionRequestScheduleExactAlarm);
+                        intent.AddFlags(Android.Content.ActivityFlags.NewTask);
+                        Android.App.Application.Context.StartActivity(intent);
+                    }
                 }
             }
         }
