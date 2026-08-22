@@ -36,7 +36,17 @@ public sealed class LocalDatabaseMigrator
         for (var i = versaoAtual; i < Scripts.Count; i++)
         {
             var sql = CarregarScript(Scripts[i]);
-            await _db.RunInTransactionAsync(conn => conn.Execute(sql));
+
+            // sqlite-net-pcl não executa múltiplos statements em uma única chamada.
+            // Dividimos por ';' e executamos cada statement individualmente.
+            var statements = sql
+                .Split(';')
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s) && !s.StartsWith("--"));
+
+            foreach (var stmt in statements)
+                await _db.ExecuteAsync(stmt);
+
             await AtualizarVersaoAsync(i + 1);
         }
     }
