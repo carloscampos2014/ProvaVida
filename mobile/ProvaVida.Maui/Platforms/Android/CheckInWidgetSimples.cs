@@ -52,7 +52,7 @@ public class CheckInWidgetSimples : AppWidgetProvider
 
             if (!autenticado)
             {
-                status     = "🔒 Enzojb Prova de Vida";
+                status     = "🔒 Prova de Vida";
                 label      = "Toque para fazer login";
                 statusColor = unchecked((int)0xFF774CCC);
             }
@@ -64,7 +64,7 @@ public class CheckInWidgetSimples : AppWidgetProvider
             }
             else
             {
-                status     = "💙 Enzojb Prova de Vida";
+                status     = "💙 Prova de Vida";
                 label      = "Toque para fazer check-in";
                 statusColor = unchecked((int)0xFF774CCC);
             }

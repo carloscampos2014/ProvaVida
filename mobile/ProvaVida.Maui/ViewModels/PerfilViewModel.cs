@@ -69,21 +69,22 @@ public class PerfilViewModel : BaseViewModel
     /// </summary>
     public void AoExibir()
     {
+        // Tenta carregar do cache local primeiro (resposta imediata)
         CarregarDadosLocais();
-        // CarregarDadosDaApiAsync já é async — Task.Run seria desnecessário
+        // Sempre busca da API — garante dados atualizados mesmo com cache vazio
         _ = CarregarDadosDaApiAsync();
     }
 
     private void CarregarDadosLocais()
     {
         var usuario = _usuarioStorage.Obter();
-        if (usuario is null) return;
+        if (usuario is null || string.IsNullOrEmpty(usuario.Nome)) return;
 
-        Nome = usuario.Nome;
-        Email = usuario.Email;
-        WhatsApp = usuario.WhatsApp;
-        ContatoNome = usuario.ContatoEmergenciaNome;
-        ContatoEmail = usuario.ContatoEmergenciaEmail;
+        Nome            = usuario.Nome;
+        Email           = usuario.Email;
+        WhatsApp        = usuario.WhatsApp;
+        ContatoNome     = usuario.ContatoEmergenciaNome;
+        ContatoEmail    = usuario.ContatoEmergenciaEmail;
         ContatoWhatsApp = usuario.ContatoEmergenciaWhatsApp;
     }
 
@@ -235,6 +236,20 @@ public class PerfilViewModel : BaseViewModel
         await _authService.LogoffAsync();
         await _tokenStorage.RemoverAsync();
         _usuarioStorage.Remover();
+
+        // Atualiza widgets e shortcuts para refletir estado deslogado
+#if ANDROID
+        try
+        {
+            var ctx = Android.App.Application.Context;
+            CheckInWidgetSimples.AtualizarTodos(ctx);
+            CheckInWidgetCompleto.AtualizarTodos(ctx);
+            if (OperatingSystem.IsAndroidVersionAtLeast(25))
+                AppShortcutsService.Atualizar();
+        }
+        catch { }
+#endif
+
         await Shell.Current.GoToAsync("//login");
     }
 

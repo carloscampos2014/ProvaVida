@@ -21,7 +21,7 @@
                         <Label Text="♥" FontSize="36" TextColor="{StaticResource Primary}"
                                HorizontalOptions="Center" VerticalOptions="Center"/>
                     </Border>
-                    <Label Text="ProvaVida" FontSize="22" FontAttributes="Bold"
+                    <Label Text="Enzojb Prova de Vida" FontSize="22" FontAttributes="Bold"
                            TextColor="White" HorizontalOptions="Center"/>
                     <Label Text="Seu check-in diário de bem-estar" FontSize="14"
                            TextColor="White" Opacity="0.85" HorizontalOptions="Center"/>
