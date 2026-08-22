@@ -1,5 +1,6 @@
+using Dapper;
+using Microsoft.Data.Sqlite;
 using ProvaVida.Maui.Models;
-using SQLite;
 
 namespace ProvaVida.Maui;
 
@@ -45,14 +46,16 @@ internal static class CheckInLocalHelper
         {
             if (!File.Exists(DbPath)) return false;
 
-            using var db  = new SQLiteConnection(DbPath);
+            using var db  = new SqliteConnection($"Data Source={DbPath}");
+            db.Open();
             var hojeLocal = DateTime.Now.Date;
             var offset    = TimeZoneInfo.Local.GetUtcOffset(hojeLocal);
-            var inicio    = new DateTimeOffset(hojeLocal, offset);
-            var fim       = new DateTimeOffset(hojeLocal.AddDays(1), offset);
+            var inicio    = new DateTimeOffset(hojeLocal, offset).ToString("o");
+            var fim       = new DateTimeOffset(hojeLocal.AddDays(1), offset).ToString("o");
 
-            return db.Table<CheckInLocal>()
-                     .Any(c => c.DataHora >= inicio && c.DataHora < fim);
+            return db.ExecuteScalar<int>(
+                "SELECT COUNT(1) FROM checkins_local WHERE data_hora >= @Inicio AND data_hora < @Fim",
+                new { Inicio = inicio, Fim = fim }) > 0;
         }
         catch { return false; }
     }
@@ -68,17 +71,18 @@ internal static class CheckInLocalHelper
         {
             if (!File.Exists(DbPath)) return resultado;
 
-            using var db      = new SQLiteConnection(DbPath);
+            using var db      = new SqliteConnection($"Data Source={DbPath}");
+            db.Open();
             var hojeLocal     = DateTime.Now.Date;
-            var offset        = TimeZoneInfo.Local.GetUtcOffset(hojeLocal);
 
             for (int i = 0; i < 7; i++)
             {
-                var dia   = hojeLocal.AddDays(-(6 - i));
-                var inicio = new DateTimeOffset(dia, TimeZoneInfo.Local.GetUtcOffset(dia));
-                var fim    = new DateTimeOffset(dia.AddDays(1), TimeZoneInfo.Local.GetUtcOffset(dia.AddDays(1)));
-                resultado[i] = db.Table<CheckInLocal>()
-                                  .Any(c => c.DataHora >= inicio && c.DataHora < fim);
+                var dia    = hojeLocal.AddDays(-(6 - i));
+                var inicio = new DateTimeOffset(dia, TimeZoneInfo.Local.GetUtcOffset(dia)).ToString("o");
+                var fim    = new DateTimeOffset(dia.AddDays(1), TimeZoneInfo.Local.GetUtcOffset(dia.AddDays(1))).ToString("o");
+                resultado[i] = db.ExecuteScalar<int>(
+                    "SELECT COUNT(1) FROM checkins_local WHERE data_hora >= @Inicio AND data_hora < @Fim",
+                    new { Inicio = inicio, Fim = fim }) > 0;
             }
         }
         catch { }
@@ -94,11 +98,12 @@ internal static class CheckInLocalHelper
         {
             if (!File.Exists(DbPath)) return null;
 
-            using var db = new SQLiteConnection(DbPath);
-            var ultimo = db.Table<CheckInLocal>()
-                           .OrderByDescending(c => c.DataHora)
-                           .FirstOrDefault();
-            return ultimo?.DataHora;
+            using var db = new SqliteConnection($"Data Source={DbPath}");
+            db.Open();
+            var valor = db.ExecuteScalar<string?>(
+                "SELECT data_hora FROM checkins_local ORDER BY data_hora DESC LIMIT 1");
+            if (valor is null) return null;
+            return DateTimeOffset.TryParse(valor, out var dt) ? dt : null;
         }
         catch { return null; }
     }

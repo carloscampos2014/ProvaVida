@@ -1,18 +1,30 @@
+using System.Data;
+using Dapper;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using ProvaVida.Maui.Models;
-using SQLite;
 
 namespace ProvaVida.Maui.Storage;
 
 /// <summary>
-/// Banco SQLite local — singleton, thread-safe via Async APIs.
+/// Banco SQLite local — singleton, thread-safe via SemaphoreSlim.
+/// Usa Microsoft.Data.Sqlite + Dapper para acesso confiável ao banco.
 /// Migrations versionadas aplicadas automaticamente via LocalDatabaseMigrator.
 /// </summary>
 public class LocalDatabase
 {
-    private SQLiteAsyncConnection? _db;
+    private IDbConnection? _db;
     private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly ILogger<LocalDatabase> _logger;
+    private readonly ILogger<LocalDatabaseMigrator> _migratorLogger;
 
-    private async Task<SQLiteAsyncConnection> GetDbAsync()
+    public LocalDatabase(ILogger<LocalDatabase> logger, ILogger<LocalDatabaseMigrator> migratorLogger)
+    {
+        _logger = logger;
+        _migratorLogger = migratorLogger;
+    }
+
+    private async Task<IDbConnection> GetDbAsync()
     {
         if (_db is not null) return _db;
 
@@ -22,16 +34,21 @@ public class LocalDatabase
             if (_db is not null) return _db;
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "provavida.db3");
-            _db = new SQLiteAsyncConnection(dbPath,
-                SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
+            _logger.LogInformation("[DB] Abrindo banco em {Path}", dbPath);
 
-            // Aplica migrations pendentes (idempotente — PRAGMA user_version controla versão)
-            // V001 cria as tabelas com schema completo — CreateTableAsync não é necessário
-            // e conflita com tabelas já existentes ao tentar re-adicionar a PK.
-            var migrator = new LocalDatabaseMigrator(_db);
+            var conn = new SqliteConnection($"Data Source={dbPath}");
+            conn.Open();
+            _db = conn;
+
+            var migrator = new LocalDatabaseMigrator(_db, _migratorLogger);
             await migrator.MigrateAsync();
 
             return _db;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "[DB] Falha ao inicializar banco SQLite");
+            throw;
         }
         finally
         {
@@ -44,77 +61,73 @@ public class LocalDatabase
     public async Task SalvarCheckInAsync(CheckInLocal item)
     {
         var db = await GetDbAsync();
-        await db.InsertOrReplaceAsync(item);
+        await db.ExecuteAsync("""
+            INSERT OR REPLACE INTO checkins_local
+                (id_local, usuario_id, data_hora, latitude, longitude, device_id, sincronizado, tentativas_sincronizacao)
+            VALUES
+                (@IdLocal, @UsuarioId, @DataHora, @Latitude, @Longitude, @DeviceId, @Sincronizado, @TentativasSincronizacao)
+            """, item);
     }
 
     public async Task<List<CheckInLocal>> ObterCheckInsPendentesAsync()
     {
         var db = await GetDbAsync();
-        return await db.Table<CheckInLocal>()
-            .Where(c => !c.Sincronizado)
-            .ToListAsync();
+        return (await db.QueryAsync<CheckInLocal>(
+            "SELECT * FROM checkins_local WHERE sincronizado = 0")).ToList();
     }
 
     public async Task MarcarCheckInSincronizadoAsync(string idLocal)
     {
         var db = await GetDbAsync();
-        var item = await db.Table<CheckInLocal>().FirstOrDefaultAsync(c => c.IdLocal == idLocal);
-        if (item is null) return;
-        item.Sincronizado = true;
-        await db.UpdateAsync(item);
+        await db.ExecuteAsync(
+            "UPDATE checkins_local SET sincronizado = 1 WHERE id_local = @IdLocal",
+            new { IdLocal = idLocal });
     }
 
     public async Task IncrementarTentativaCheckInAsync(string idLocal)
     {
         var db = await GetDbAsync();
-        var item = await db.Table<CheckInLocal>().FirstOrDefaultAsync(c => c.IdLocal == idLocal);
-        if (item is null) return;
-        item.TentativasSincronizacao++;
-        await db.UpdateAsync(item);
+        await db.ExecuteAsync(
+            "UPDATE checkins_local SET tentativas_sincronizacao = tentativas_sincronizacao + 1 WHERE id_local = @IdLocal",
+            new { IdLocal = idLocal });
     }
 
     public async Task<List<CheckInLocal>> ObterCheckInsDaSemanaAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        // Início do dia local de 6 dias atrás, convertido para UTC — evita cortar check-ins noturnos
         var inicioLocal = DateTime.Now.AddDays(-6).Date;
         var inicio = new DateTimeOffset(inicioLocal, TimeZoneInfo.Local.GetUtcOffset(inicioLocal));
-        return await db.Table<CheckInLocal>()
-            .Where(c => c.UsuarioId == usuarioId && c.DataHora >= inicio)
-            .OrderByDescending(c => c.DataHora)
-            .ToListAsync();
+        return (await db.QueryAsync<CheckInLocal>(
+            "SELECT * FROM checkins_local WHERE usuario_id = @UsuarioId AND data_hora >= @Inicio ORDER BY data_hora DESC",
+            new { UsuarioId = usuarioId, Inicio = inicio.ToString("o") })).ToList();
     }
 
     public async Task<bool> ExisteCheckInAsync(string idLocal)
     {
         var db = await GetDbAsync();
-        return await db.Table<CheckInLocal>()
-            .CountAsync(c => c.IdLocal == idLocal) > 0;
+        return await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(1) FROM checkins_local WHERE id_local = @IdLocal",
+            new { IdLocal = idLocal }) > 0;
     }
 
     public async Task<bool> FezCheckInHojeAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        // Janela do dia atual em horário local, convertida para UTC
         var hojeLocal = DateTime.Now.Date;
-        var offset    = TimeZoneInfo.Local.GetUtcOffset(hojeLocal);
-        var inicio    = new DateTimeOffset(hojeLocal, offset);
-        var fim       = new DateTimeOffset(hojeLocal.AddDays(1), offset);
-        var count = await db.Table<CheckInLocal>()
-            .CountAsync(c => c.UsuarioId == usuarioId
-                          && c.DataHora >= inicio
-                          && c.DataHora < fim);
+        var offset = TimeZoneInfo.Local.GetUtcOffset(hojeLocal);
+        var inicio = new DateTimeOffset(hojeLocal, offset).ToString("o");
+        var fim    = new DateTimeOffset(hojeLocal.AddDays(1), offset).ToString("o");
+        var count = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(1) FROM checkins_local WHERE usuario_id = @UsuarioId AND data_hora >= @Inicio AND data_hora < @Fim",
+            new { UsuarioId = usuarioId, Inicio = inicio, Fim = fim });
         return count > 0;
     }
 
-    /// <summary>
-    /// Remove todos os dados locais do usuário (chamado ao excluir conta — LGPD).
-    /// </summary>
     public async Task LimparDadosLocaisAsync()
     {
         var db = await GetDbAsync();
-        await db.DeleteAllAsync<CheckInLocal>();
-        await db.DeleteAllAsync<HeartbeatLocal>();
+        await db.ExecuteAsync("DELETE FROM checkins_local");
+        await db.ExecuteAsync("DELETE FROM heartbeats_local");
     }
 
     // --- Heartbeat ---
@@ -122,23 +135,26 @@ public class LocalDatabase
     public async Task SalvarHeartbeatAsync(HeartbeatLocal item)
     {
         var db = await GetDbAsync();
-        await db.InsertOrReplaceAsync(item);
+        await db.ExecuteAsync("""
+            INSERT OR REPLACE INTO heartbeats_local
+                (id_local, usuario_id, data_hora, sincronizado)
+            VALUES
+                (@IdLocal, @UsuarioId, @DataHora, @Sincronizado)
+            """, item);
     }
 
     public async Task<List<HeartbeatLocal>> ObterHeartbeatsPendentesAsync()
     {
         var db = await GetDbAsync();
-        return await db.Table<HeartbeatLocal>()
-            .Where(h => !h.Sincronizado)
-            .ToListAsync();
+        return (await db.QueryAsync<HeartbeatLocal>(
+            "SELECT * FROM heartbeats_local WHERE sincronizado = 0")).ToList();
     }
 
     public async Task MarcarHeartbeatSincronizadoAsync(string idLocal)
     {
         var db = await GetDbAsync();
-        var item = await db.Table<HeartbeatLocal>().FirstOrDefaultAsync(h => h.IdLocal == idLocal);
-        if (item is null) return;
-        item.Sincronizado = true;
-        await db.UpdateAsync(item);
+        await db.ExecuteAsync(
+            "UPDATE heartbeats_local SET sincronizado = 1 WHERE id_local = @IdLocal",
+            new { IdLocal = idLocal });
     }
 }
