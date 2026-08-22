@@ -35,6 +35,7 @@ public class LembreteReceiver : BroadcastReceiver
         var pendingIntent = PendingIntent.GetActivity(context, 0, notificationIntent, flags);
         if (pendingIntent is null) return;
 
+#pragma warning disable CS8602
         var notification = new NotificationCompat.Builder(context, ChannelId)
             .SetContentTitle("Está tudo bem com você?")
             .SetContentText("Não detectamos seu check-in hoje. Toque para confirmar que está bem.")
@@ -42,10 +43,11 @@ public class LembreteReceiver : BroadcastReceiver
             .SetContentIntent(pendingIntent)
             .SetAutoCancel(true)
             .SetPriority(NotificationCompat.PriorityHigh)
-            .Build();
+            .Build()!;
+#pragma warning restore CS8602
 
         var manager = NotificationManagerCompat.From(context);
-        manager.Notify(1001, notification);
+        manager?.Notify(1001, notification);
     }
 
     [SupportedOSPlatform("android26.0")]
@@ -65,3 +67,4 @@ public class LembreteReceiver : BroadcastReceiver
         manager?.CreateNotificationChannel(channel);
     }
 }
+

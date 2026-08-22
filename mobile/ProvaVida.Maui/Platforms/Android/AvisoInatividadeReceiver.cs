@@ -28,7 +28,7 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
         {
             try { await ProcessarAsync(context); }
             catch { /* ignora — best effort */ }
-            finally { pendingResult.Finish(); }
+            finally { pendingResult?.Finish(); }
         });
     }
 
@@ -57,6 +57,7 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
             var pendingIntent = PendingIntent.GetActivity(context, NotifId, notificationIntent, flags);
             if (pendingIntent is null) return;
 
+#pragma warning disable CS8602
             var notification = new NotificationCompat.Builder(context, ChannelId)
                 .SetContentTitle("Está tudo bem com você? 💙")
                 .SetContentText($"Não registramos seu check-in há mais de {HorasLimite}h. Abra o app e confirme que está bem.")
@@ -64,10 +65,11 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
                 .SetContentIntent(pendingIntent)
                 .SetAutoCancel(true)
                 .SetPriority(NotificationCompat.PriorityMax)
-                .Build();
+                .Build()!;
+#pragma warning restore CS8602
 
             var manager = NotificationManagerCompat.From(context);
-            manager.Notify(NotifId, notification);
+            manager?.Notify(NotifId, notification);
         }
         catch { /* ignora — best effort */ }
 
@@ -81,7 +83,6 @@ public class AvisoInatividadeReceiver : BroadcastReceiver
             var ultimo = CheckInLocalHelper.ObterUltimoCheckIn();
             if (ultimo is null) return true;
 
-            // Subtração direta entre DateTimeOffset é sempre em UTC — sem ambiguidade de fuso
             return (DateTimeOffset.UtcNow - ultimo.Value).TotalHours >= HorasLimite;
         }
         catch
