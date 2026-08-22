@@ -41,6 +41,7 @@ TestResults/
 ## Kiro — não versionar histórico de sessão e quality scores (específicos de cada dev)
 .kiro/quality/
 .kiro/knowledge/sessions/
+.kiro/settings/mcp.json
 
 ## OS
 .DS_Store
@@ -49,3 +50,4 @@ TesteProVidaApi.ps1
 
 # RAG / knowledge base local (gerado pelo Kiro)
 data/
+
