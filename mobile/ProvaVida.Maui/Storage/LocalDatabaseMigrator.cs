@@ -45,8 +45,15 @@ public sealed class LocalDatabaseMigrator
                 // Microsoft.Data.Sqlite não suporta múltiplos statements em uma única chamada
                 var statements = sql
                     .Split(';')
-                    .Select(s => s.Trim())
-                    .Where(s => !string.IsNullOrWhiteSpace(s) && !s.StartsWith("--"));
+                    .Select(s =>
+                    {
+                        // Remove linhas de comentário antes de avaliar se o statement é vazio
+                        var linhas = s.Split('\n')
+                            .Where(l => !l.Trim().StartsWith("--"))
+                            .ToArray();
+                        return string.Join('\n', linhas).Trim();
+                    })
+                    .Where(s => !string.IsNullOrWhiteSpace(s));
 
                 foreach (var stmt in statements)
                     await _db.ExecuteAsync(stmt);
