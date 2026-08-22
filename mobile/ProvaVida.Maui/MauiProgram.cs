@@ -1,6 +1,6 @@
-﻿using Karambolo.Extensions.Logging.File;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+using ProvaVida.Maui.Infrastructure;
 using ProvaVida.Maui.Pages;
 using ProvaVida.Maui.Services;
 using ProvaVida.Maui.Storage;
@@ -63,20 +63,13 @@ public static class MauiProgram
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddSingleton<App>();
 
-        // Logging — Debug em desenvolvimento, arquivo em produção
-        var logPath = Path.Combine(FileSystem.AppDataDirectory, "provavida-.log");
+        // Logging — arquivo em produção para diagnóstico, Debug em desenvolvimento
+        // FileLoggerProvider é implementação própria sem reflection — compatível com AOT Android
+        var logPath = Path.Combine(FileSystem.AppDataDirectory,
+            $"provavida-{DateTime.Now:yyyyMMdd}.log");
         builder.Logging
             .SetMinimumLevel(LogLevel.Information)
-            .AddFile(o =>
-            {
-                o.RootPath         = FileSystem.AppDataDirectory;
-                o.BasePath         = string.Empty;
-                o.FileEncodingName = "utf-8";
-                o.Files            = [new LogFileOptions { Path = "provavida-<date>.log" }];
-                o.DateFormat       = "yyyyMMdd";
-                o.MaxFileSize      = 1_000_000; // 1 MB por arquivo
-                o.MaxQueueSize     = 1000;
-            });
+            .AddProvider(new FileLoggerProvider(logPath, LogLevel.Warning));
 
 #if DEBUG
         builder.Logging.AddDebug();
