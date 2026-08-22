@@ -74,15 +74,18 @@ public class CheckInWidgetSimples : AppWidgetProvider
             views.SetTextColor(Resource.Id.widget_simples_status, new Android.Graphics.Color(statusColor));
 
             // Intent de toque — abre check-in ou login
+            // SetClassName obrigatório para PendingIntent em widgets no Android 12+
             var action = autenticado ? "com.enzojb.provavida.ACTION_CHECKIN"
                                      : "com.enzojb.provavida.ACTION_LOGIN";
-            var intent = new Intent(action).SetPackage(context.PackageName);
+            var intent = new Intent(action)
+                .SetPackage(context.PackageName)
+                .SetClassName(context.PackageName!, $"{context.PackageName}.MainActivity");
             var pendingFlags = Android.App.PendingIntentFlags.UpdateCurrent |
                                (OperatingSystem.IsAndroidVersionAtLeast(23)
                                    ? Android.App.PendingIntentFlags.Immutable
                                    : 0);
             var pendingIntent = Android.App.PendingIntent.GetActivity(context, widgetId, intent, pendingFlags);
-            views.SetOnClickPendingIntent(Resource.Layout.widget_simples, pendingIntent);
+            views.SetOnClickPendingIntent(Resource.Id.widget_simples_root, pendingIntent);
 
             manager.UpdateAppWidget(widgetId, views);
         }
