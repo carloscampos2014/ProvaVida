@@ -48,6 +48,14 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+
+		<!-- Restringe o publish Release do Android a arm64-v8a — cobre Redmi 12, Infinix Hot 50i, Motorola 5G
+		     e praticamente todo device Android real em uso hoje. Condicionado a Release (não Debug) pra não
+		     atrapalhar deploy/debug local em emulador x86_64 ou dispositivo ARMv7 de teste.
+		     Definido aqui (não via -p: na CLI) porque o dotnet publish do .NET for Android tem um bug conhecido
+		     onde RuntimeIdentifiers já setado no csproj sobrescreve override por linha de comando:
+		     https://github.com/dotnet/android/issues/10457 -->
+		<RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(Configuration)' == 'Release'">android-arm64</RuntimeIdentifier>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
