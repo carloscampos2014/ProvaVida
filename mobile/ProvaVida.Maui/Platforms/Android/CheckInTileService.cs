@@ -14,7 +14,7 @@ namespace ProvaVida.Maui;
 [Service(
     Name = "com.enzojb.provavida.CheckInTileService",
     Label = "Enzojb Prova de Vida",
-    Icon = "@mipmap/appicon",
+    Icon = "@drawable/ic_tile",
     Exported = true,
     Permission = "android.permission.BIND_QUICK_SETTINGS_TILE")]
 [IntentFilter(new[] { "android.service.quicksettings.action.QS_TILE" })]
