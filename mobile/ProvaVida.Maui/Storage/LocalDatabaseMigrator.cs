@@ -1,5 +1,7 @@
-using SQLite;
+using System.Data;
 using System.Reflection;
+using Dapper;
+using Microsoft.Extensions.Logging;
 
 namespace ProvaVida.Maui.Storage;
 
@@ -7,66 +9,68 @@ namespace ProvaVida.Maui.Storage;
 /// Aplica migrations SQL versionadas no banco SQLite local.
 /// Usa PRAGMA user_version como controle de versão — nativo do SQLite, sem dependência externa.
 /// Scripts ficam em Storage/Migrations/ embarcados como EmbeddedResource (V001_, V002_, ...).
-/// Cada migration roda dentro de transação — falha é relançada sem atualizar a versão.
 /// </summary>
 public sealed class LocalDatabaseMigrator
 {
-    private readonly SQLiteAsyncConnection _db;
+    private readonly IDbConnection _db;
+    private readonly ILogger<LocalDatabaseMigrator> _logger;
 
-    // Migrations em ordem de aplicação — adicionar novas entradas ao final
     private static readonly IReadOnlyList<string> Scripts =
     [
         "V001_InitialSchema",
         "V002_DateTimeOffset",
     ];
 
-    public LocalDatabaseMigrator(SQLiteAsyncConnection db)
+    public LocalDatabaseMigrator(IDbConnection db, ILogger<LocalDatabaseMigrator> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
-    /// <summary>
-    /// Aplica todas as migrations pendentes.
-    /// Idempotente — versões já aplicadas são ignoradas.
-    /// </summary>
     public async Task MigrateAsync()
     {
         var versaoAtual = await ObterVersaoAsync();
+        _logger.LogInformation("[Migration] Versao atual do banco: {Versao}", versaoAtual);
 
         for (var i = versaoAtual; i < Scripts.Count; i++)
         {
-            var sql = CarregarScript(Scripts[i]);
+            var nomeScript = Scripts[i];
+            _logger.LogInformation("[Migration] Aplicando {Script}...", nomeScript);
 
-            // sqlite-net-pcl não executa múltiplos statements em uma única chamada.
-            // Dividimos por ';' e executamos cada statement individualmente.
-            var statements = sql
-                .Split(';')
-                .Select(s => s.Trim())
-                .Where(s => !string.IsNullOrWhiteSpace(s) && !s.StartsWith("--"));
+            try
+            {
+                var sql = CarregarScript(nomeScript);
 
-            foreach (var stmt in statements)
-                await _db.ExecuteAsync(stmt);
+                // Dividir por ';' e executar cada statement individualmente
+                // Microsoft.Data.Sqlite não suporta múltiplos statements em uma única chamada
+                var statements = sql
+                    .Split(';')
+                    .Select(s => s.Trim())
+                    .Where(s => !string.IsNullOrWhiteSpace(s) && !s.StartsWith("--"));
 
-            await AtualizarVersaoAsync(i + 1);
+                foreach (var stmt in statements)
+                    await _db.ExecuteAsync(stmt);
+
+                await AtualizarVersaoAsync(i + 1);
+                _logger.LogInformation("[Migration] {Script} aplicada com sucesso. Banco na versao {Versao}.", nomeScript, i + 1);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "[Migration] FALHA ao aplicar {Script}. Banco pode estar inconsistente.", nomeScript);
+                throw; // propaga — app não deve abrir com banco incompleto
+            }
         }
     }
 
     private async Task<int> ObterVersaoAsync()
-    {
-        // PRAGMA user_version retorna 0 para bancos novos ou sem versão definida
-        var resultado = await _db.ExecuteScalarAsync<int>("PRAGMA user_version");
-        return resultado;
-    }
+        => await _db.ExecuteScalarAsync<int>("PRAGMA user_version");
 
     private async Task AtualizarVersaoAsync(int versao)
-    {
-        // Pragma não aceita parâmetro bind — interpolação é segura aqui (é um int)
-        await _db.ExecuteAsync($"PRAGMA user_version = {versao}");
-    }
+        => await _db.ExecuteAsync($"PRAGMA user_version = {versao}");
 
     private static string CarregarScript(string nomeScript)
     {
-        var assembly  = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetExecutingAssembly();
         var nomeRecurso = assembly.GetManifestResourceNames()
             .FirstOrDefault(n => n.Contains(nomeScript, StringComparison.OrdinalIgnoreCase))
             ?? throw new InvalidOperationException(
