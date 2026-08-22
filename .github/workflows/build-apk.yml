@@ -92,14 +92,13 @@ jobs:
       - name: Renomear APK
         id: apk
         run: |
-          $version = "${{ github.event.inputs.version }}"
-          if ([string]::IsNullOrWhiteSpace($version)) { $version = "dev-${{ github.run_number }}" }
-          $src = Get-ChildItem "mobile/ProvaVida.Maui/bin/Release/net10.0-android/*-Signed.apk" | Select-Object -First 1
-          $dest = "ProvaVida-$version.apk"
-          Copy-Item $src.FullName $dest
-          echo "apk_path=$dest" >> $env:GITHUB_OUTPUT
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-        shell: pwsh
+          VERSION="${{ github.event.inputs.version }}"
+          if [ -z "$VERSION" ]; then VERSION="dev-${{ github.run_number }}"; fi
+          SRC=$(find mobile/ProvaVida.Maui/bin/Release/net10.0-android -name "*-Signed.apk" | head -1)
+          DEST="ProvaVida-${VERSION}.apk"
+          cp "$SRC" "$DEST"
+          echo "apk_path=$DEST" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Upload APK (artifact)
         uses: actions/upload-artifact@v4

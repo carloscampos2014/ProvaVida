@@ -46,7 +46,7 @@ jobs:
 
   mobile:
     name: Mobile — Build MAUI Android
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -57,6 +57,19 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Cache MAUI workload
+        uses: actions/cache@v4
+        id: cache-maui
+        with:
+          path: |
+            ~/.dotnet/workloads
+            ${{ env.DOTNET_ROOT }}/sdk-manifests
+            ${{ env.DOTNET_ROOT }}/packs
+          key: maui-workload-${{ runner.os }}-net10-${{ hashFiles('mobile/ProvaVida.Maui/ProvaVida.Maui.csproj') }}
+          restore-keys: |
+            maui-workload-${{ runner.os }}-net10-
+            maui-workload-${{ runner.os }}-
+
       - name: Cache NuGet
         uses: actions/cache@v4
         with:
@@ -65,16 +78,16 @@ jobs:
           restore-keys: nuget-maui-
 
       - name: Install MAUI workload
-        run: dotnet workload install maui
+        if: steps.cache-maui.outputs.cache-hit != 'true'
+        run: dotnet workload install maui-android
 
       - name: Restore
         run: dotnet restore mobile/ProvaVida.Maui/ProvaVida.Maui.csproj
 
       - name: Build MAUI (verifica erros e warnings)
         run: |
-          dotnet build mobile/ProvaVida.Maui/ProvaVida.Maui.csproj `
-            -f net10.0-android `
-            -c Release `
-            --no-restore `
+          dotnet build mobile/ProvaVida.Maui/ProvaVida.Maui.csproj \
+            -f net10.0-android \
+            -c Release \
+            --no-restore \
             -p:AndroidBuildApplicationPackage=false
-        shell: pwsh
