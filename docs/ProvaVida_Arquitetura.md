@@ -43,7 +43,7 @@ Arquitetura baseada em aplicativo móvel .NET MAUI (Android) com banco de dados 
 | Camada | Tecnologia | Observação |
 |---|---|---|
 | App Mobile | .NET MAUI (Android) | Stack unificada em C# com o backend; distribuição via APK direto (sem conta de desenvolvedor Google por ora) |
-| Banco Local (Mobile) | SQLite via `sqlite-net-pcl` ou `Microsoft.Data.Sqlite` | Armazena check-ins e dados de sessão localmente, permitindo uso offline-first |
+| Banco Local (Mobile) | SQLite via `Microsoft.Data.Sqlite` + Dapper | Armazena check-ins e dados de sessão localmente, permitindo uso offline-first |
 | Geolocalização | `Microsoft.Maui.Devices.Sensors` (API nativa MAUI) | Captura latitude/longitude no momento do check-in |
 | Backend / API | .NET (ASP.NET Core Web API) | Já instalado na VM Oracle Cloud |
 | DNS / CDN / Proxy | Cloudflare | Gerencia o domínio `enzojb.com.br`; subdomínio `provida-api.enzojb.com.br` com proxy ativo (modo Full Strict); WAF, DDoS protection e rate limiting incluídos |
@@ -63,12 +63,12 @@ Arquitetura baseada em aplicativo móvel .NET MAUI (Android) com banco de dados 
 - **Cloudflare:** atua como DNS, CDN, WAF e terminação TLS pública. O subdomínio `provida-api.enzojb.com.br` deve ter o proxy do Cloudflare ativado (ícone laranja). Usar modo SSL **Full (Strict)** nas configurações do Cloudflare para garantir criptografia até a VM.
 - **Cloudflare Origin Certificate:** certificado gratuito emitido no painel Cloudflare (Validity: 15 anos), instalado no Nginx da VM. Não é reconhecido por browsers diretamente — funciona exclusivamente quando o tráfego passa pelo Cloudflare.
 - **Firewall da OCI:** restringir regras para aceitar conexões nas portas 80/443 **somente dos IPs da Cloudflare** ([lista oficial](https://www.cloudflare.com/ips/)). Isso garante que a VM não seja acessível diretamente, forçando todo tráfego a passar pelo Cloudflare.
-- **Nginx:** reverse proxy do Kestrel (`proxy_pass http://127.0.0.1:5000`), configurado para repassar cabeçalhos reais do cliente (`X-Forwarded-For`, `X-Forwarded-Proto`, `CF-Connecting-IP`). TLS configurado com o Cloudflare Origin Certificate.
+- **Nginx:** reverse proxy do Kestrel (`proxy_pass http://127.0.0.1:5001`), configurado para repassar cabeçalhos reais do cliente (`X-Forwarded-For`, `X-Forwarded-Proto`, `CF-Connecting-IP`). TLS configurado com o Cloudflare Origin Certificate.
 - **Kestrel:** API ASP.NET Core roda em porta interna (`127.0.0.1:5000`), acessível apenas localmente — nunca exposta diretamente.
 - Recomenda-se rodar a API como serviço `systemd` (com `Restart=always`) para garantir resiliência a falhas do processo.
 - **Hangfire** recomendado para o job diário de verificação — painel web embutido útil para monitorar disparos de emergência.
 - Usar `appsettings.json` + variáveis de ambiente (ou `dotnet user-secrets` em dev) para strings de conexão do PostgreSQL e credenciais de e-mail/WhatsApp — nunca hardcoded.
-- Migrations de banco via **Entity Framework Core** (`dotnet ef database update`) garantem versionamento do schema do PostgreSQL já instalado.
+- **Migrations de banco via DbUp** — scripts SQL versionados em `src/ProvaVida.Infrastructure/Persistence/Migrations/`, aplicados automaticamente no startup da API.
 
 ## 3. Modelo de Dados (entidades principais)
 
