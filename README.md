@@ -19,7 +19,7 @@ App mobile de check-in diário de bem-estar. O usuário registra sua presença u
 ## Stack
 
 - **Backend:** .NET 10 (ASP.NET Core Web API), Dapper, DbUp, Hangfire, MailKit, PostgreSQL, BCrypt, JWT
-- **App Mobile:** .NET MAUI Android (a implementar)
+- **App Mobile:** .NET MAUI Android (distribuição via APK direto)
 - **Infraestrutura:** VM Oracle Cloud (OCI) — Nginx + Cloudflare (`provida-api.enzojb.com.br`)
 
 ## Estrutura
@@ -37,7 +37,7 @@ tests/
 ## Como rodar localmente
 
 ### Pré-requisitos
-- .NET 9 SDK
+- .NET 10 SDK
 - PostgreSQL rodando em `localhost:5432`
 - Copiar `appsettings.Development.json.example` → `appsettings.Development.json` e preencher os valores
 
@@ -51,7 +51,7 @@ dotnet run --project src/ProvaVida.Api/ProvaVida.Api.csproj
 dotnet test tests/ProvaVida.Application.Tests/
 ```
 
-A API sobe em `http://localhost:5000`. Swagger disponível em `http://localhost:5000/swagger`.
+A API sobe em `http://localhost:5001`. Scalar (OpenAPI) disponível em `http://localhost:5001/scalar`.
 
 ## Documentação
 
