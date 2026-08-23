@@ -24,13 +24,19 @@ public static class MauiProgram
             });
 
         // Configuração por ambiente via appsettings.json / appsettings.Debug.json
-        using var appsettingsStream  = FileSystem.OpenAppPackageFileAsync("appsettings.json").GetAwaiter().GetResult();
-#if DEBUG
-        using var debugStream = FileSystem.OpenAppPackageFileAsync("appsettings.Debug.json").GetAwaiter().GetResult();
-        builder.Configuration.AddJsonStream(debugStream);
-#else
+        using var appsettingsStream = FileSystem.OpenAppPackageFileAsync("appsettings.json").GetAwaiter().GetResult();
         builder.Configuration.AddJsonStream(appsettingsStream);
+
+#if DEBUG
+        try
+        {
+            // appsettings.Debug.json é opcional — sobrescreve ApiBaseUrl para desenvolvimento local
+            using var debugStream = FileSystem.OpenAppPackageFileAsync("appsettings.Debug.json").GetAwaiter().GetResult();
+            builder.Configuration.AddJsonStream(debugStream);
+        }
+        catch { /* arquivo não incluído no build — usa configuração de appsettings.json */ }
 #endif
+
         var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://provida-api.enzojb.com.br/";
 
         // HttpClient
