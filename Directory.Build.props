@@ -1,0 +1,12 @@
+<Project>
+  <!--
+    Propriedades comuns aplicadas automaticamente a todos os projetos .NET da solução.
+    O projeto MAUI (mobile/) tem seu próprio PropertyGroup com configurações de multiplataforma
+    que sobrescrevem estas quando necessário.
+  -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
