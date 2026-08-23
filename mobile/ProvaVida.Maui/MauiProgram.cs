@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using ProvaVida.Maui.Infrastructure;
 using ProvaVida.Maui.Pages;
@@ -9,13 +10,6 @@ namespace ProvaVida.Maui;
 
 public static class MauiProgram
 {
-    // URL base da API — usar 10.0.2.2 para emulador Android apontar para localhost do Windows
-#if DEBUG
-    private const string ApiBaseUrl = "http://localhost:5182/";
-#else
-    private const string ApiBaseUrl = "https://provida-api.enzojb.com.br/";
-#endif
-
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -29,10 +23,20 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+        // Configuração por ambiente via appsettings.json / appsettings.Debug.json
+        using var appsettingsStream  = FileSystem.OpenAppPackageFileAsync("appsettings.json").GetAwaiter().GetResult();
+#if DEBUG
+        using var debugStream = FileSystem.OpenAppPackageFileAsync("appsettings.Debug.json").GetAwaiter().GetResult();
+        builder.Configuration.AddJsonStream(debugStream);
+#else
+        builder.Configuration.AddJsonStream(appsettingsStream);
+#endif
+        var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://provida-api.enzojb.com.br/";
+
         // HttpClient
         builder.Services.AddSingleton(new HttpClient
         {
-            BaseAddress = new Uri(ApiBaseUrl)
+            BaseAddress = new Uri(apiBaseUrl)
         });
 
         // Storage
