@@ -1,0 +1,35 @@
+root = true
+
+# Todos os arquivos
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# C#
+[*.cs]
+indent_size = 4
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# XML (csproj, xaml)
+[*.{xml,csproj,props,targets,xaml}]
+indent_size = 2
+
+# JSON
+[*.json]
+indent_size = 2
+
+# SQL
+[*.sql]
+indent_size = 4
+
+# YAML
+[*.{yml,yaml}]
+indent_size = 2
