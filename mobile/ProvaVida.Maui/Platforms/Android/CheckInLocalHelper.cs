@@ -89,9 +89,6 @@ internal static class CheckInLocalHelper
         return resultado;
     }
 
-    /// <summary>
-    /// Retorna o DateTimeOffset do último check-in, ou null se não houver registros.
-    /// </summary>
     public static DateTimeOffset? ObterUltimoCheckIn()
     {
         try

@@ -65,14 +65,14 @@ public class CheckInViewModel : BaseViewModel
 
         var checkInsSemana = await _db.ObterCheckInsDaSemanaAsync(usuario.Email);
 
-        // Usa horário local do dispositivo para evitar problemas de fuso horário
-        var hoje = DateTime.Now.Date;
+        // Usa horário local do dispositivo — DataHora é string UTC "yyyy-MM-ddTHH:mm:ssZ"
+        var hoje = DateTime.UtcNow.Date;
         var semana = new List<bool>();
         for (int i = 6; i >= 0; i--)
         {
-            var dia = hoje.AddDays(-i);
-            // DataHora é DateTimeOffset — .LocalDateTime converte corretamente para o fuso do dispositivo
-            semana.Add(checkInsSemana.Any(c => c.DataHora.LocalDateTime.Date == dia));
+            var diaUtc = hoje.AddDays(-i).ToString("yyyy-MM-dd");
+            // Compara prefixo UTC — "2026-08-25T..." começa com "2026-08-25"
+            semana.Add(checkInsSemana.Any(c => c.DataHora.StartsWith(diaUtc)));
         }
         Semana = semana;
 
@@ -109,7 +109,7 @@ public class CheckInViewModel : BaseViewModel
             {
                 IdLocal   = idLocal,
                 UsuarioId = usuario.Email,
-                DataHora  = DateTimeOffset.UtcNow,
+                DataHora  = DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 Latitude  = loc.Latitude,
                 Longitude = loc.Longitude,
                 DeviceId  = deviceId,
@@ -129,7 +129,7 @@ public class CheckInViewModel : BaseViewModel
                 {
                     var request = new RegistrarCheckInRequest(
                         Guid.Parse(idLocal),
-                        checkIn.DataHora,
+                        DateTimeOffset.Parse(checkIn.DataHora),
                         checkIn.Latitude,
                         checkIn.Longitude,
                         checkIn.DeviceId);

@@ -45,7 +45,7 @@ public class SyncService
             {
                 var request = new RegistrarCheckInRequest(
                     Guid.Parse(checkIn.IdLocal),
-                    checkIn.DataHora,
+                    DateTimeOffset.Parse(checkIn.DataHora),
                     checkIn.Latitude,
                     checkIn.Longitude,
                     checkIn.DeviceId);
@@ -89,7 +89,7 @@ public class SyncService
                 {
                     IdLocal      = idLocal,
                     UsuarioId    = usuario.Email,
-                    DataHora     = item.DataHora,
+                    DataHora     = item.DataHora.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                     Latitude     = item.Latitude,
                     Longitude    = item.Longitude,
                     DeviceId     = item.DeviceId,
