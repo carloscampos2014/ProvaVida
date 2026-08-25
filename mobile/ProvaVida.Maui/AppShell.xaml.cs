@@ -1,18 +1,15 @@
-﻿using ProvaVida.Maui.Pages;
-using ProvaVida.Maui.Storage;
+﻿using ProvaVida.Maui.Storage;
 
 namespace ProvaVida.Maui;
 
 public partial class AppShell : Shell
 {
     private readonly IUsuarioStorage _usuarioStorage;
-    private readonly PerfilPage _perfilPage;
 
-    public AppShell(IUsuarioStorage usuarioStorage, PerfilPage perfilPage)
+    public AppShell(IUsuarioStorage usuarioStorage)
     {
         InitializeComponent();
         _usuarioStorage = usuarioStorage;
-        _perfilPage = perfilPage;
     }
 
     public void AtualizarFlyoutHeader()
@@ -37,8 +34,15 @@ public partial class AppShell : Shell
     {
         base.OnNavigated(args);
         // Garante carregamento do perfil ao navegar via flyout
-        // Shell com DataTemplate pode não disparar OnAppearing consistentemente
+        // Obtém PerfilPage do DI apenas quando necessário — evita instanciar antes dos recursos XAML estarem prontos
         if (args.Current?.Location?.ToString()?.Contains("perfil") == true)
-            _perfilPage.AoExibir();
+        {
+            try
+            {
+                var perfilPage = IPlatformApplication.Current?.Services.GetService<Pages.PerfilPage>();
+                perfilPage?.AoExibir();
+            }
+            catch { }
+        }
     }
 }
