@@ -19,6 +19,8 @@ public partial class PerfilPage : ContentPage
         _vm.AoExibir();
     }
 
+    public void AoExibir() => _vm.AoExibir();
+
     private void OnHamburgerTapped(object? sender, TappedEventArgs e)
         => Shell.Current.FlyoutIsPresented = true;
 }
