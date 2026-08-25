@@ -95,11 +95,11 @@ public class LocalDatabase
     public async Task<List<CheckInLocal>> ObterCheckInsDaSemanaAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        var inicioLocal = DateTime.Now.AddDays(-6).Date;
-        var inicio = new DateTimeOffset(inicioLocal, TimeZoneInfo.Local.GetUtcOffset(inicioLocal));
+        // Compara em UTC puro ("Z") — evita ambiguidade de comparação lexicográfica entre offsets
+        var inicioUtc = DateTime.UtcNow.AddDays(-6).Date.ToString("yyyy-MM-ddTHH:mm:ssZ");
         return (await db.QueryAsync<CheckInLocal>(
             "SELECT * FROM checkins_local WHERE usuario_id = @UsuarioId AND data_hora >= @Inicio ORDER BY data_hora DESC",
-            new { UsuarioId = usuarioId, Inicio = inicio.ToString("o") })).ToList();
+            new { UsuarioId = usuarioId, Inicio = inicioUtc })).ToList();
     }
 
     public async Task<bool> ExisteCheckInAsync(string idLocal)
@@ -113,13 +113,12 @@ public class LocalDatabase
     public async Task<bool> FezCheckInHojeAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        var hojeLocal = DateTime.Now.Date;
-        var offset = TimeZoneInfo.Local.GetUtcOffset(hojeLocal);
-        var inicio = new DateTimeOffset(hojeLocal, offset).ToString("o");
-        var fim    = new DateTimeOffset(hojeLocal.AddDays(1), offset).ToString("o");
+        // Janela do dia atual em UTC — evita ambiguidade de comparação lexicográfica entre offsets
+        var inicioUtc = DateTime.UtcNow.Date.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var fimUtc    = DateTime.UtcNow.Date.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ssZ");
         var count = await db.ExecuteScalarAsync<int>(
             "SELECT COUNT(1) FROM checkins_local WHERE usuario_id = @UsuarioId AND data_hora >= @Inicio AND data_hora < @Fim",
-            new { UsuarioId = usuarioId, Inicio = inicio, Fim = fim });
+            new { UsuarioId = usuarioId, Inicio = inicioUtc, Fim = fimUtc });
         return count > 0;
     }
 

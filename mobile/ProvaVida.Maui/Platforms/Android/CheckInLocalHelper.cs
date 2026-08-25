@@ -48,14 +48,13 @@ internal static class CheckInLocalHelper
 
             using var db  = new SqliteConnection($"Data Source={DbPath}");
             db.Open();
-            var hojeLocal = DateTime.Now.Date;
-            var offset    = TimeZoneInfo.Local.GetUtcOffset(hojeLocal);
-            var inicio    = new DateTimeOffset(hojeLocal, offset).ToString("o");
-            var fim       = new DateTimeOffset(hojeLocal.AddDays(1), offset).ToString("o");
+            // UTC puro — evita ambiguidade de comparação lexicográfica entre offsets
+            var inicioUtc = DateTime.UtcNow.Date.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            var fimUtc    = DateTime.UtcNow.Date.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ssZ");
 
             return db.ExecuteScalar<int>(
                 "SELECT COUNT(1) FROM checkins_local WHERE data_hora >= @Inicio AND data_hora < @Fim",
-                new { Inicio = inicio, Fim = fim }) > 0;
+                new { Inicio = inicioUtc, Fim = fimUtc }) > 0;
         }
         catch { return false; }
     }
@@ -77,12 +76,13 @@ internal static class CheckInLocalHelper
 
             for (int i = 0; i < 7; i++)
             {
-                var dia    = hojeLocal.AddDays(-(6 - i));
-                var inicio = new DateTimeOffset(dia, TimeZoneInfo.Local.GetUtcOffset(dia)).ToString("o");
-                var fim    = new DateTimeOffset(dia.AddDays(1), TimeZoneInfo.Local.GetUtcOffset(dia.AddDays(1))).ToString("o");
+                var dia       = hojeLocal.AddDays(-(6 - i));
+                // UTC puro — evita ambiguidade de comparação lexicográfica entre offsets
+                var inicioUtc = dia.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                var fimUtc    = dia.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ssZ");
                 resultado[i] = db.ExecuteScalar<int>(
                     "SELECT COUNT(1) FROM checkins_local WHERE data_hora >= @Inicio AND data_hora < @Fim",
-                    new { Inicio = inicio, Fim = fim }) > 0;
+                    new { Inicio = inicioUtc, Fim = fimUtc }) > 0;
             }
         }
         catch { }
