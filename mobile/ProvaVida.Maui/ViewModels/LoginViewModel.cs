@@ -132,6 +132,19 @@ public class LoginViewModel : BaseViewModel
             });
 
             await Shell.Current.GoToAsync("//checkin");
+
+#if ANDROID
+            // Atualiza widgets e shortcuts para refletir estado logado
+            try
+            {
+                var ctx = Android.App.Application.Context;
+                CheckInWidgetSimples.AtualizarTodos(ctx);
+                CheckInWidgetCompleto.AtualizarTodos(ctx);
+                if (OperatingSystem.IsAndroidVersionAtLeast(25))
+                    AppShortcutsService.Atualizar();
+            }
+            catch { }
+#endif
         }
         catch (ApiException ex)
         {
