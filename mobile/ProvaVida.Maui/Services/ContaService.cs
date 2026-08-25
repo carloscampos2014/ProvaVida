@@ -20,11 +20,16 @@ public class ContaService : IContaService
         try
         {
             var response = await _http.SendAsync(request, ct);
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ContaService] ObterPerfil falhou: {(int)response.StatusCode} {response.StatusCode}");
+                return null;
+            }
             return await response.Content.ReadFromJsonAsync<ContaResponse>(ct);
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"[ContaService] ObterPerfil excecao: {ex.Message}");
             return null;
         }
     }

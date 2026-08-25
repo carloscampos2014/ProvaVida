@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Microsoft.Extensions.Logging;
 using ProvaVida.Maui.Helpers;
 using ProvaVida.Maui.Models;
 using ProvaVida.Maui.Services;
@@ -13,6 +14,7 @@ public class PerfilViewModel : BaseViewModel
     private readonly ITokenStorage _tokenStorage;
     private readonly IUsuarioStorage _usuarioStorage;
     private readonly LocalDatabase _localDatabase;
+    private readonly ILogger<PerfilViewModel> _logger;
 
     private string _nome = string.Empty;
     private string _whatsApp = string.Empty;
@@ -47,13 +49,15 @@ public class PerfilViewModel : BaseViewModel
         IAuthService authService,
         ITokenStorage tokenStorage,
         IUsuarioStorage usuarioStorage,
-        LocalDatabase localDatabase)
+        LocalDatabase localDatabase,
+        ILogger<PerfilViewModel> logger)
     {
         _contaService = contaService;
         _authService = authService;
         _tokenStorage = tokenStorage;
         _usuarioStorage = usuarioStorage;
         _localDatabase = localDatabase;
+        _logger = logger;
 
         SalvarCommand = new Command(async () => await ExecutarSeOcioso(SalvarAsync), () => !IsLoading);
         AlterarSenhaCommand = new Command(async () => await AlterarSenhaAsync());
@@ -116,6 +120,7 @@ public class PerfilViewModel : BaseViewModel
         catch (Exception ex)
         {
             // Dados locais continuam visíveis; loga para diagnóstico
+            _logger.LogError(ex, "[PerfilViewModel] Falha ao carregar perfil da API");
             System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] Falha ao carregar perfil da API: {ex.Message}");
         }
     }    private async Task SalvarAsync()

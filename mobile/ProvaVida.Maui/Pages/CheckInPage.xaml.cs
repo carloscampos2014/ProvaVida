@@ -77,20 +77,29 @@ public partial class CheckInPage : ContentPage
     private async void OnHamburgerTapped(object? sender, TappedEventArgs e)
         => Shell.Current.FlyoutIsPresented = true;
 
-    private async void OnTestarNotificacaoTapped(object? sender, EventArgs e)
+    private async void OnCompartilharLogsTapped(object? sender, EventArgs e)
     {
-        var notification = new NotificationRequest
+        try
         {
-            NotificationId = 9999,
-            Title          = "Teste de Notificação",
-            Description    = "Se você recebeu isso, as notificações estão funcionando! ✅",
-            Schedule       = new NotificationRequestSchedule
+            var logPath = Path.Combine(FileSystem.AppDataDirectory,
+                $"provavida-{DateTime.Now:yyyyMMdd}.log");
+
+            if (!File.Exists(logPath))
             {
-                NotifyTime = DateTime.Now.AddSeconds(5)
+                await DisplayAlertAsync("Logs", "Nenhum log encontrado para hoje.", "OK");
+                return;
             }
-        };
-        await LocalNotificationCenter.Current.Show(notification);
-        await DisplayAlertAsync("Agendado", "Notificação agendada para daqui 5 segundos. Minimize o app.", "OK");
+
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Logs ProvaVida",
+                File  = new ShareFile(logPath)
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Erro", $"Não foi possível compartilhar logs: {ex.Message}", "OK");
+        }
     }
 
     private async void OnPerfilTapped(object? sender, TappedEventArgs e)
