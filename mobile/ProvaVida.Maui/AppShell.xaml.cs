@@ -33,16 +33,5 @@ public partial class AppShell : Shell
     protected override void OnNavigated(ShellNavigatedEventArgs args)
     {
         base.OnNavigated(args);
-        // Garante carregamento do perfil ao navegar via flyout
-        // Obtém PerfilPage do DI apenas quando necessário — evita instanciar antes dos recursos XAML estarem prontos
-        if (args.Current?.Location?.ToString()?.Contains("perfil") == true)
-        {
-            try
-            {
-                var perfilPage = IPlatformApplication.Current?.Services.GetService<Pages.PerfilPage>();
-                perfilPage?.AoExibir();
-            }
-            catch { }
-        }
     }
 }
