@@ -96,6 +96,13 @@ public class PerfilViewModel : BaseViewModel
     {
         try
         {
+            // Diagnóstico: verificar se token existe antes de chamar a API
+            var tokenDiag = await _tokenStorage.ObterAsync();
+            var expiraDiag = await _tokenStorage.ObterExpiraEmAsync();
+            _logger.LogInformation("[PerfilViewModel] Token presente: {Presente}, Expira: {Expira}",
+                !string.IsNullOrEmpty(tokenDiag),
+                expiraDiag?.ToString("dd/MM/yyyy HH:mm:ss") ?? "null");
+
             var perfil = await _contaService.ObterPerfilAsync();
             if (perfil is null)
             {
