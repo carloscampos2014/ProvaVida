@@ -102,6 +102,28 @@ public sealed class CheckInRepository : ICheckInRepository
         return count > 0;
     }
 
+    public async Task<IEnumerable<object>> ListarTodosAsync(int pagina, int tamanhoPagina, CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT
+                c.id,
+                u.email AS usuario_email,
+                u.nome  AS usuario_nome,
+                c.data_hora,
+                c.device_id
+            FROM checkins c
+            JOIN usuarios u ON u.id = c.usuario_id
+            ORDER BY c.data_hora DESC
+            LIMIT @Limite OFFSET @Offset
+            """;
+
+        using var conn = _factory.CreateConnection();
+        return await conn.QueryAsync(
+            new CommandDefinition(sql,
+                new { Limite = tamanhoPagina, Offset = (pagina - 1) * tamanhoPagina },
+                cancellationToken: ct));
+    }
+
 #pragma warning disable CA1812
     private sealed class CheckInRow
     {

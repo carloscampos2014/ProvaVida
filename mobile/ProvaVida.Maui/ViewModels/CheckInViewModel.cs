@@ -134,8 +134,14 @@ public class CheckInViewModel : BaseViewModel
                         checkIn.Longitude,
                         checkIn.DeviceId);
 
-                    await _checkInService.RegistrarAsync(request);
-                    await _db.MarcarCheckInSincronizadoAsync(idLocal);
+                    var sucesso = await _checkInService.RegistrarAsync(request);
+                    if (sucesso)
+                        await _db.MarcarCheckInSincronizadoAsync(idLocal);
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[CheckIn] API rejeitou check-in {idLocal} — mantendo na fila");
+                        await _db.IncrementarTentativaCheckInAsync(idLocal);
+                    }
                 }
                 catch (Exception ex)
                 {

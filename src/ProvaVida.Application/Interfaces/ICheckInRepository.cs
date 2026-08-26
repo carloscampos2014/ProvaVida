@@ -14,6 +14,11 @@ public interface ICheckInRepository
         Guid usuarioId, DateTimeOffset dataInicio, DateTimeOffset dataFim, CancellationToken ct = default);
 
     /// <summary>
+    /// Retorna os check-ins mais recentes de todos os usuários — para o painel admin.
+    /// </summary>
+    Task<IEnumerable<object>> ListarTodosAsync(int pagina, int tamanhoPagina, CancellationToken ct = default);
+
+    /// <summary>
     /// Retorna IDs dos usuários cujo último check-in foi antes de dataCorte.
     /// Usado pelo job de verificação de inatividade.
     /// </summary>
