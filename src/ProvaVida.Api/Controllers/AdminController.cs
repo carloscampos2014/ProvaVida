@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using ProvaVida.Application.Interfaces;
 using ProvaVida.Application.UseCases.ObterMetricasAdmin;
 using ProvaVida.Application.UseCases.TestarNotificacao;
-
 namespace ProvaVida.Api.Controllers;
 
 [ApiController]
@@ -55,6 +54,18 @@ public class AdminController : ControllerBase
         return Ok(resultado);
     }
 
+    [HttpGet("checkins")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListarCheckIns(
+        [FromQuery] int pagina = 1,
+        [FromServices] ICheckInRepository checkInRepo = null!,
+        CancellationToken ct = default)
+    {
+        // Busca os últimos 50 check-ins de todos os usuários
+        var checkIns = await checkInRepo.ListarTodosAsync(pagina, 50, ct);
+        return Ok(checkIns);
+    }
+
     [HttpGet("ips-bloqueados")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> IpsBloqueados(
@@ -98,10 +109,12 @@ public class AdminController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromServices] ObterMetricasAdminUseCase useCase = null!,
         [FromServices] IBruteForceService bruteForce = null!,
+        [FromServices] ICheckInRepository checkInRepo = null!,
         CancellationToken ct = default)
     {
         var m = await useCase.ExecutarAsync(pagina, ct);
         var ipsBloqueados = await bruteForce.ListarBloqueadosAsync(ct);
+        var checkIns = await checkInRepo.ListarTodosAsync(1, 50, ct);
         var geradoEm       = m.GeradoEm.ToString("dd/MM/yyyy HH:mm:ss") + " UTC";
         var paginaAnterior = m.PaginaAtual > 1 ? m.PaginaAtual - 1 : 1;
         var paginaProxima  = m.PaginaAtual < m.TotalPaginas ? m.PaginaAtual + 1 : m.TotalPaginas;
@@ -155,6 +168,27 @@ public class AdminController : ControllerBase
             """));
 
         var ipsBloqueadosCount = ipsBloqueados.Count();
+
+        var checkInsRows = checkIns.ToList();
+        var linhasCheckIns = string.Join("\n", checkInsRows.Select(c =>
+        {
+            var row = (IDictionary<string, object>)c;
+            var email = System.Net.WebUtility.HtmlEncode(row["usuario_email"]?.ToString() ?? "");
+            var nome  = System.Net.WebUtility.HtmlEncode(row["usuario_nome"]?.ToString() ?? "");
+            var dataHora = row["data_hora"]?.ToString() ?? "";
+            if (DateTimeOffset.TryParse(dataHora, out var dt))
+                dataHora = dt.ToString("dd/MM/yyyy HH:mm") + " UTC";
+            var device = System.Net.WebUtility.HtmlEncode(row["device_id"]?.ToString() ?? "");
+            return $"""
+                    <tr>
+                        <td>{nome}</td>
+                        <td>{email}</td>
+                        <td>{dataHora}</td>
+                        <td>{device}</td>
+                    </tr>
+            """;
+        }));
+        var checkInsCount = checkInsRows.Count;
 
         var html = $$"""
             <!DOCTYPE html>
@@ -387,6 +421,23 @@ public class AdminController : ControllerBase
                         </thead>
                         <tbody id="tabela-ips">
                             {{(string.IsNullOrEmpty(linhasIpsBloqueados) ? "<tr><td colspan=\"6\" style=\"text-align:center;color:#6E648B;padding:14px\">✅ Nenhum IP bloqueado no momento</td></tr>" : linhasIpsBloqueados)}}
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>Check-ins Registrados — {{checkInsCount}} mais recentes</h2>
+                <div class="tabela-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>E-mail</th>
+                                <th>Data/Hora</th>
+                                <th>Dispositivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{(string.IsNullOrEmpty(linhasCheckIns) ? "<tr><td colspan=\"4\" style=\"text-align:center;color:#6E648B;padding:14px\">Nenhum check-in registrado</td></tr>" : linhasCheckIns)}}
                         </tbody>
                     </table>
                 </div>
