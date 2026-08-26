@@ -41,10 +41,13 @@ public static class MauiProgram
 
         var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://provida-api.enzojb.com.br/";
 
-        // HttpClient
-        builder.Services.AddSingleton(new HttpClient
+        // HttpClient com logging de requests/responses para diagnóstico
+        builder.Services.AddTransient<HttpLoggingHandler>();
+        builder.Services.AddSingleton(sp =>
         {
-            BaseAddress = new Uri(apiBaseUrl)
+            var handler = sp.GetRequiredService<HttpLoggingHandler>();
+            handler.InnerHandler = new HttpClientHandler();
+            return new HttpClient(handler) { BaseAddress = new Uri(apiBaseUrl) };
         });
 
         // Storage
