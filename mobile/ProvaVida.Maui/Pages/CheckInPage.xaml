@@ -137,15 +137,15 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Botão de teste de notificação — remover após confirmar funcionamento -->
-            <Button x:Name="BtnTestarNotificacao"
-                    Text="🔔 Testar Notificação (5s)"
+            <!-- Botão para compartilhar logs de diagnóstico -->
+            <Button x:Name="BtnCompartilharLogs"
+                    Text="📋 Compartilhar Logs"
                     Margin="0,8,0,0"
-                    BackgroundColor="{StaticResource Primary}"
+                    BackgroundColor="{StaticResource Secondary}"
                     TextColor="White"
                     CornerRadius="10"
                     FontSize="13"
-                    Clicked="OnTestarNotificacaoTapped"/>
+                    Clicked="OnCompartilharLogsTapped"/>
 
         </VerticalStackLayout>
 
