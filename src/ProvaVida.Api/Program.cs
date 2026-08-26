@@ -32,8 +32,8 @@ if (!builder.Environment.IsEnvironment("IntegrationTests"))
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices();
 
-// Basic Auth para o painel Admin
-builder.Services.AddAuthentication("BasicAuth")
+// Basic Auth para o painel Admin — adiciona o scheme sem sobrescrever o esquema padrão (Bearer)
+builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>("BasicAuth", null);
 builder.Services.AddAuthorization();
 
