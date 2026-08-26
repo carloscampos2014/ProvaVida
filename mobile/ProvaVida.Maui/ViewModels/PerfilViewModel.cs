@@ -97,9 +97,13 @@ public class PerfilViewModel : BaseViewModel
         try
         {
             var perfil = await _contaService.ObterPerfilAsync();
-            if (perfil is null) return;
+            if (perfil is null)
+            {
+                ErrorMessage = "[DEBUG] API retornou null — verifique o log";
+                _logger.LogError("[PerfilViewModel] ObterPerfilAsync retornou null");
+                return;
+            }
 
-            // Atualiza UI e cache local com dados completos da API
             Nome            = perfil.Nome;
             Email           = perfil.Email;
             WhatsApp        = perfil.WhatsApp;
@@ -107,6 +111,7 @@ public class PerfilViewModel : BaseViewModel
             ContatoEmail    = perfil.ContatoEmergenciaEmail;
             ContatoWhatsApp = perfil.ContatoEmergenciaWhatsApp;
 
+            // Atualiza cache local
             _usuarioStorage.Salvar(new UsuarioLocal
             {
                 Nome                      = perfil.Nome,
@@ -119,7 +124,7 @@ public class PerfilViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            // Dados locais continuam visíveis; loga para diagnóstico
+            ErrorMessage = $"[DEBUG] Erro ao carregar perfil: {ex.Message}";
             _logger.LogError(ex, "[PerfilViewModel] Falha ao carregar perfil da API");
             System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] Falha ao carregar perfil da API: {ex.Message}");
         }

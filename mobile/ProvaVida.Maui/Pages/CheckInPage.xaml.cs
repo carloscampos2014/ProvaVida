@@ -113,6 +113,7 @@ public partial class CheckInPage : ContentPage
     {
         const string PrefUltimaLocalizacao  = "perm_loc_ultima_solicitacao";
         const string PrefUltimaNotificacao  = "perm_notif_ultima_solicitacao";
+        //const string PrefUltimaNotificacao  = "perm_notif_ultima_solicitacao";
         var hoje = DateTime.Today.ToString("yyyy-MM-dd");
 
         // ── Localização ──────────────────────────────────────────────────────
