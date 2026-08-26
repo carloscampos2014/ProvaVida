@@ -4,13 +4,12 @@ namespace ProvaVida.Maui.Infrastructure;
 
 /// <summary>
 /// Provider de log que grava em arquivo no AppDataDirectory.
-/// Implementação simples sem reflection — compatível com AOT do Android.
+/// Implementação síncrona — garante gravação mesmo em AOT Android.
 /// </summary>
 public sealed class FileLoggerProvider : ILoggerProvider
 {
     private readonly string _logPath;
     private readonly LogLevel _minimumLevel;
-    private readonly SemaphoreSlim _writeLock = new(1, 1);
 
     public FileLoggerProvider(string logPath, LogLevel minimumLevel = LogLevel.Warning)
     {
@@ -19,7 +18,7 @@ public sealed class FileLoggerProvider : ILoggerProvider
     }
 
     public ILogger CreateLogger(string categoryName)
-        => new FileLogger(categoryName, _logPath, _minimumLevel, _writeLock);
+        => new FileLogger(categoryName, _logPath, _minimumLevel);
 
     public void Dispose() { }
 }
@@ -29,14 +28,13 @@ internal sealed class FileLogger : ILogger
     private readonly string _category;
     private readonly string _logPath;
     private readonly LogLevel _minimumLevel;
-    private readonly SemaphoreSlim _writeLock;
+    private static readonly object _writeLock = new();
 
-    public FileLogger(string category, string logPath, LogLevel minimumLevel, SemaphoreSlim writeLock)
+    public FileLogger(string category, string logPath, LogLevel minimumLevel)
     {
         _category     = category;
         _logPath      = logPath;
         _minimumLevel = minimumLevel;
-        _writeLock    = writeLock;
     }
 
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
@@ -53,16 +51,14 @@ internal sealed class FileLogger : ILogger
         if (exception != null)
             mensagem += $"\n{exception}";
 
-        // Fire-and-forget — não bloqueia a thread principal
-        _ = Task.Run(async () =>
+        // Gravação síncrona com lock — garante que o log não é perdido em AOT Android
+        lock (_writeLock)
         {
-            await _writeLock.WaitAsync();
             try
             {
-                await File.AppendAllTextAsync(_logPath, mensagem + "\n");
+                File.AppendAllText(_logPath, mensagem + "\n");
             }
             catch { /* log não pode crashar o app */ }
-            finally { _writeLock.Release(); }
-        });
+        }
     }
 }
