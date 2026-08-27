@@ -17,10 +17,12 @@ public class PerfilViewModel : BaseViewModel
     private readonly ILogger<PerfilViewModel> _logger;
 
     private string _nome = string.Empty;
-    private string _whatsApp = string.Empty;
+    private string _whatsAppNumero = string.Empty;
+    private PaisDdi _paisWhatsApp = PaisDdi.Padrao;
     private string _contatoNome = string.Empty;
     private string _contatoEmail = string.Empty;
-    private string _contatoWhatsApp = string.Empty;
+    private string _contatoWhatsAppNumero = string.Empty;
+    private PaisDdi _paisContatoWhatsApp = PaisDdi.Padrao;
     private string _email = string.Empty;
 
     public string Nome
@@ -34,10 +36,26 @@ public class PerfilViewModel : BaseViewModel
     }
     public string Inicial => string.IsNullOrEmpty(_nome) ? "?" : _nome[0].ToString().ToUpper();
     public string Email { get => _email; set => SetProperty(ref _email, value); }
-    public string WhatsApp { get => _whatsApp; set => SetProperty(ref _whatsApp, value); }
+
+    // Número sem DDI — exibido no Entry
+    public string WhatsAppNumero { get => _whatsAppNumero; set => SetProperty(ref _whatsAppNumero, value); }
+    // País selecionado para WhatsApp do usuário
+    public PaisDdi PaisWhatsApp { get => _paisWhatsApp; set => SetProperty(ref _paisWhatsApp, value); }
+    // Número completo com DDI (sem +) — usado ao salvar
+    public string WhatsApp => $"{PaisWhatsApp.Codigo}{WhatsAppNumero}";
+
     public string ContatoNome { get => _contatoNome; set => SetProperty(ref _contatoNome, value); }
     public string ContatoEmail { get => _contatoEmail; set => SetProperty(ref _contatoEmail, value); }
-    public string ContatoWhatsApp { get => _contatoWhatsApp; set => SetProperty(ref _contatoWhatsApp, value); }
+
+    // Número sem DDI — exibido no Entry
+    public string ContatoWhatsAppNumero { get => _contatoWhatsAppNumero; set => SetProperty(ref _contatoWhatsAppNumero, value); }
+    // País selecionado para WhatsApp do contato
+    public PaisDdi PaisContatoWhatsApp { get => _paisContatoWhatsApp; set => SetProperty(ref _paisContatoWhatsApp, value); }
+    // Número completo com DDI (sem +) — usado ao salvar
+    public string ContatoWhatsApp => $"{PaisContatoWhatsApp.Codigo}{ContatoWhatsAppNumero}";
+
+    // Lista de países disponíveis para o Picker
+    public IReadOnlyList<PaisDdi> PaisesDdi => PaisDdi.Todos;
 
     public ICommand SalvarCommand { get; }
     public ICommand AlterarSenhaCommand { get; }
@@ -84,12 +102,36 @@ public class PerfilViewModel : BaseViewModel
         var usuario = _usuarioStorage.Obter();
         if (usuario is null || string.IsNullOrEmpty(usuario.Nome)) return;
 
-        Nome            = usuario.Nome;
-        Email           = usuario.Email;
-        WhatsApp        = usuario.WhatsApp;
+        Nome        = usuario.Nome;
+        Email       = usuario.Email;
         ContatoNome     = usuario.ContatoEmergenciaNome;
         ContatoEmail    = usuario.ContatoEmergenciaEmail;
-        ContatoWhatsApp = usuario.ContatoEmergenciaWhatsApp;
+
+        // Separa DDI do número ao carregar
+        (PaisWhatsApp, WhatsAppNumero) = SepararDdi(usuario.WhatsApp);
+        (PaisContatoWhatsApp, ContatoWhatsAppNumero) = SepararDdi(usuario.ContatoEmergenciaWhatsApp);
+    }
+
+    /// <summary>
+    /// Tenta identificar o DDI no início do número e retorna (país, número sem DDI).
+    /// Se não encontrar DDI correspondente, usa Brasil como padrão.
+    /// </summary>
+    private static (PaisDdi pais, string numero) SepararDdi(string numeroCompleto)
+    {
+        if (string.IsNullOrWhiteSpace(numeroCompleto))
+            return (PaisDdi.Padrao, string.Empty);
+
+        // Remove caracteres não numéricos para comparar
+        var digitos = new string(numeroCompleto.Where(char.IsDigit).ToArray());
+
+        // Tenta encontrar DDI por prefixo (do maior para o menor para evitar match parcial)
+        foreach (var pais in PaisDdi.Todos.OrderByDescending(p => p.Codigo.Length))
+        {
+            if (digitos.StartsWith(pais.Codigo))
+                return (pais, digitos[pais.Codigo.Length..]);
+        }
+
+        return (PaisDdi.Padrao, digitos);
     }
 
     private async Task CarregarDadosDaApiAsync()
@@ -113,10 +155,11 @@ public class PerfilViewModel : BaseViewModel
 
             Nome            = perfil.Nome;
             Email           = perfil.Email;
-            WhatsApp        = perfil.WhatsApp;
             ContatoNome     = perfil.ContatoEmergenciaNome;
             ContatoEmail    = perfil.ContatoEmergenciaEmail;
-            ContatoWhatsApp = perfil.ContatoEmergenciaWhatsApp;
+
+            (PaisWhatsApp, WhatsAppNumero) = SepararDdi(perfil.WhatsApp);
+            (PaisContatoWhatsApp, ContatoWhatsAppNumero) = SepararDdi(perfil.ContatoEmergenciaWhatsApp);
 
             // Atualiza cache local
             _usuarioStorage.Salvar(new UsuarioLocal
@@ -139,9 +182,9 @@ public class PerfilViewModel : BaseViewModel
     {
         LimparErro();
 
-        if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(WhatsApp) ||
+        if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(WhatsAppNumero) ||
             string.IsNullOrWhiteSpace(ContatoNome) || string.IsNullOrWhiteSpace(ContatoEmail) ||
-            string.IsNullOrWhiteSpace(ContatoWhatsApp))
+            string.IsNullOrWhiteSpace(ContatoWhatsAppNumero))
         {
             ErrorMessage = "Preencha todos os campos.";
             return;
@@ -176,10 +219,10 @@ public class PerfilViewModel : BaseViewModel
             {
                 Nome = Nome.Trim(),
                 Email = Email,
-                WhatsApp = WhatsApp.Trim(),
+                WhatsApp = WhatsApp,
                 ContatoEmergenciaNome = ContatoNome.Trim(),
                 ContatoEmergenciaEmail = ContatoEmail.Trim(),
-                ContatoEmergenciaWhatsApp = ContatoWhatsApp.Trim()
+                ContatoEmergenciaWhatsApp = ContatoWhatsApp
             });
 
             await Application.Current!.Windows[0].Page!.DisplayAlertAsync(
@@ -245,10 +288,12 @@ public class PerfilViewModel : BaseViewModel
         // Reseta campos em memória antes de navegar — Shell reutiliza esta instância
         Nome            = string.Empty;
         Email           = string.Empty;
-        WhatsApp        = string.Empty;
+        WhatsAppNumero  = string.Empty;
+        PaisWhatsApp    = PaisDdi.Padrao;
         ContatoNome     = string.Empty;
         ContatoEmail    = string.Empty;
-        ContatoWhatsApp = string.Empty;
+        ContatoWhatsAppNumero  = string.Empty;
+        PaisContatoWhatsApp    = PaisDdi.Padrao;
 
         await _authService.LogoffAsync();
         await _tokenStorage.RemoverAsync();

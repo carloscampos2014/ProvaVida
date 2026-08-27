@@ -72,10 +72,27 @@
 
                         <VerticalStackLayout Spacing="6">
                             <Label Text="WhatsApp" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
-                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
-                                    StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
-                                <Entry Text="{Binding WhatsApp}" Keyboard="Telephone" VerticalOptions="Center"/>
-                            </Border>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <!-- Seletor de país -->
+                                <Border Grid.Column="0" Stroke="{StaticResource Border}"
+                                        StrokeShape="RoundRectangle 12"
+                                        StrokeThickness="1.5" Padding="8,0" HeightRequest="52">
+                                    <Picker ItemsSource="{Binding PaisesDdi}"
+                                            SelectedItem="{Binding PaisWhatsApp}"
+                                            ItemDisplayBinding="{Binding Exibicao}"
+                                            WidthRequest="100"
+                                            VerticalOptions="Center"/>
+                                </Border>
+                                <!-- Número sem DDI -->
+                                <Border Grid.Column="1" Stroke="{StaticResource Border}"
+                                        StrokeShape="RoundRectangle 12"
+                                        StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                                    <Entry Text="{Binding WhatsAppNumero}"
+                                           Keyboard="Telephone"
+                                           Placeholder="11999999999"
+                                           VerticalOptions="Center"/>
+                                </Border>
+                            </Grid>
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
@@ -108,10 +125,27 @@
 
                         <VerticalStackLayout Spacing="6">
                             <Label Text="WhatsApp" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
-                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
-                                    StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
-                                <Entry Text="{Binding ContatoWhatsApp}" Keyboard="Telephone" VerticalOptions="Center"/>
-                            </Border>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <!-- Seletor de país -->
+                                <Border Grid.Column="0" Stroke="{StaticResource Border}"
+                                        StrokeShape="RoundRectangle 12"
+                                        StrokeThickness="1.5" Padding="8,0" HeightRequest="52">
+                                    <Picker ItemsSource="{Binding PaisesDdi}"
+                                            SelectedItem="{Binding PaisContatoWhatsApp}"
+                                            ItemDisplayBinding="{Binding Exibicao}"
+                                            WidthRequest="100"
+                                            VerticalOptions="Center"/>
+                                </Border>
+                                <!-- Número sem DDI -->
+                                <Border Grid.Column="1" Stroke="{StaticResource Border}"
+                                        StrokeShape="RoundRectangle 12"
+                                        StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                                    <Entry Text="{Binding ContatoWhatsAppNumero}"
+                                           Keyboard="Telephone"
+                                           Placeholder="11999999999"
+                                           VerticalOptions="Center"/>
+                                </Border>
+                            </Grid>
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
