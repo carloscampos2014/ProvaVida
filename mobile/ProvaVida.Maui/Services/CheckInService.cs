@@ -27,8 +27,8 @@ public class CheckInService : ICheckInService
         DateTimeOffset? dataInicio = null, DateTimeOffset? dataFim = null, CancellationToken ct = default)
     {
         var query = string.Empty;
-        if (dataInicio.HasValue) query += $"?dataInicio={dataInicio:O}";
-        if (dataFim.HasValue) query += (query.Contains('?') ? "&" : "?") + $"dataFim={dataFim:O}";
+        if (dataInicio.HasValue) query += $"?dataInicio={Uri.EscapeDataString(dataInicio.Value.ToString("O"))}";
+        if (dataFim.HasValue) query += (query.Contains('?') ? "&" : "?") + $"dataFim={Uri.EscapeDataString(dataFim.Value.ToString("O"))}";
 
         using var request = await CriarRequestAsync(HttpMethod.Get, $"checkin/historico{query}");
         var response = await _http.SendAsync(request, ct);
