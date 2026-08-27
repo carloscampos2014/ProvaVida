@@ -95,8 +95,10 @@ public class LocalDatabase
     public async Task<List<CheckInLocal>> ObterCheckInsDaSemanaAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        // Compara em UTC puro ("Z") — evita ambiguidade de comparação lexicográfica entre offsets
-        var inicioUtc = DateTime.UtcNow.AddDays(-6).Date.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        // Usa horário local do dispositivo para calcular o início da semana — evita que check-ins
+        // feitos após 21h BRT (= 00h UTC do dia seguinte) apareçam no dia errado
+        var inicioLocal = DateTime.Now.AddDays(-6).Date;
+        var inicioUtc   = inicioLocal.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
         return (await db.QueryAsync<CheckInLocal>(
             "SELECT * FROM checkins_local WHERE usuario_id = @UsuarioId AND data_hora >= @Inicio ORDER BY data_hora DESC",
             new { UsuarioId = usuarioId, Inicio = inicioUtc })).ToList();
@@ -113,9 +115,11 @@ public class LocalDatabase
     public async Task<bool> FezCheckInHojeAsync(string usuarioId)
     {
         var db = await GetDbAsync();
-        // Janela do dia atual em UTC — evita ambiguidade de comparação lexicográfica entre offsets
-        var inicioUtc = DateTime.UtcNow.Date.ToString("yyyy-MM-ddTHH:mm:ssZ");
-        var fimUtc    = DateTime.UtcNow.Date.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ssZ");
+        // Usa horário local do dispositivo para definir a janela do "hoje" — evita que check-ins
+        // feitos após 21h BRT (= 00h UTC do dia seguinte) apareçam como "ontem"
+        var hojeLocal = DateTime.Now.Date;
+        var inicioUtc = hojeLocal.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var fimUtc    = hojeLocal.AddDays(1).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
         var count = await db.ExecuteScalarAsync<int>(
             "SELECT COUNT(1) FROM checkins_local WHERE usuario_id = @UsuarioId AND data_hora >= @Inicio AND data_hora < @Fim",
             new { UsuarioId = usuarioId, Inicio = inicioUtc, Fim = fimUtc });

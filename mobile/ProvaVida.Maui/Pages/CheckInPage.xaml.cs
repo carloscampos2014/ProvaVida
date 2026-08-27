@@ -204,9 +204,6 @@ public partial class CheckInPage : ContentPage
         var semana = _vm.Semana;
         var hoje   = DateTime.Now.Date;
 
-        // Nomes dos dias alinhados com DayOfWeek (.NET: 0=Dom, 1=Seg... 6=Sab)
-        var nomesDias = new[] { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
-
         for (int i = 0; i < 7; i++)
         {
             var dia   = hoje.AddDays(-(6 - i));   // mesmo cálculo do ViewModel
@@ -248,7 +245,7 @@ public partial class CheckInPage : ContentPage
 
             var label = new Label
             {
-                Text = nomesDias[(int)dia.DayOfWeek], // nome correto pelo dia real
+                Text = dia.ToString("dd/MM"),
                 FontSize = 10,
                 FontAttributes = feito ? FontAttributes.Bold : FontAttributes.None,
                 TextColor = feito

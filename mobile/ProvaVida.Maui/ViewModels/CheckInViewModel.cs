@@ -65,14 +65,19 @@ public class CheckInViewModel : BaseViewModel
 
         var checkInsSemana = await _db.ObterCheckInsDaSemanaAsync(usuario.Email);
 
-        // Usa horário local do dispositivo — DataHora é string UTC "yyyy-MM-ddTHH:mm:ssZ"
-        var hoje = DateTime.UtcNow.Date;
+        // Usa horário local do dispositivo — compara data local do check-in com data local atual
+        var hojeLocal = DateTime.Now.Date;
         var semana = new List<bool>();
         for (int i = 6; i >= 0; i--)
         {
-            var diaUtc = hoje.AddDays(-i).ToString("yyyy-MM-dd");
-            // Compara prefixo UTC — "2026-08-25T..." começa com "2026-08-25"
-            semana.Add(checkInsSemana.Any(c => c.DataHora.StartsWith(diaUtc)));
+            var diaLocal = hojeLocal.AddDays(-i);
+            // Converte cada check-in UTC para horário local antes de comparar a data
+            semana.Add(checkInsSemana.Any(c =>
+            {
+                if (DateTime.TryParse(c.DataHora, out var dtUtc))
+                    return dtUtc.ToLocalTime().Date == diaLocal;
+                return false;
+            }));
         }
         Semana = semana;
 
