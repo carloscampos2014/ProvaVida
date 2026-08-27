@@ -137,16 +137,6 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Botão para compartilhar logs de diagnóstico -->
-            <Button x:Name="BtnCompartilharLogs"
-                    Text="📋 Compartilhar Logs"
-                    Margin="0,8,0,0"
-                    BackgroundColor="{StaticResource Secondary}"
-                    TextColor="White"
-                    CornerRadius="10"
-                    FontSize="13"
-                    Clicked="OnCompartilharLogsTapped"/>
-
         </VerticalStackLayout>
 
     </Grid>
