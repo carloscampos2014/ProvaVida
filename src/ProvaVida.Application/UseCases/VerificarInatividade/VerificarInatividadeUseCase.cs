@@ -233,6 +233,7 @@ public class VerificarInatividadeUseCase
 
     private async Task EnviarAvisoAoUsuarioAsync(Usuario usuario, CancellationToken ct)
     {
+        // E-mail — sempre tentado independente do telefone
         try
         {
             await _emailService.EnviarAsync(new EmailMensagem(
@@ -250,6 +251,60 @@ public class VerificarInatividadeUseCase
             _logger.LogError(ex,
                 "Falha ao enviar aviso de inatividade ao usuário {UsuarioId} ({Email})",
                 usuario.Id, usuario.Email);
+        }
+
+        // WhatsApp/SMS/Voz — apenas se o usuário tiver telefone cadastrado
+        if (string.IsNullOrWhiteSpace(usuario.WhatsApp)) return;
+
+        try
+        {
+            await _whatsAppService.EnviarAsync(
+                usuario.WhatsApp,
+                MontarMensagemWhatsAppAviso(usuario.Nome),
+                ct);
+            _logger.LogInformation(
+                "WhatsApp de aviso enviado ao usuário {UsuarioId} ({Telefone})",
+                usuario.Id, usuario.WhatsApp);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Falha ao enviar WhatsApp de aviso ao usuário {UsuarioId} ({Telefone})",
+                usuario.Id, usuario.WhatsApp);
+        }
+
+        try
+        {
+            await _smsService.EnviarAsync(
+                usuario.WhatsApp,
+                MontarMensagemSmsAviso(usuario.Nome),
+                ct);
+            _logger.LogInformation(
+                "SMS de aviso enviado ao usuário {UsuarioId} ({Telefone})",
+                usuario.Id, usuario.WhatsApp);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Falha ao enviar SMS de aviso ao usuário {UsuarioId} ({Telefone})",
+                usuario.Id, usuario.WhatsApp);
+        }
+
+        try
+        {
+            await _voiceService.LigarAsync(
+                usuario.WhatsApp,
+                MontarMensagemVozAviso(usuario.Nome),
+                ct);
+            _logger.LogInformation(
+                "Ligação de aviso iniciada para o usuário {UsuarioId} ({Telefone})",
+                usuario.Id, usuario.WhatsApp);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Falha ao realizar ligação de aviso ao usuário {UsuarioId} ({Telefone})",
+                usuario.Id, usuario.WhatsApp);
         }
     }
 
@@ -284,4 +339,18 @@ public class VerificarInatividadeUseCase
         $"Olá! Você é contato de emergência de {nomeUsuario} no ProvaVida. " +
         $"{nomeUsuario} não fez check-in há mais de 48 horas e não respondeu ao aviso enviado. " +
         $"Por favor, verifique se está bem. Esta mensagem foi enviada automaticamente pelo ProvaVida.";
+
+    private static string MontarMensagemWhatsAppAviso(string nomeUsuario) =>
+        $"Olá *{nomeUsuario}*! Não detectamos seu check-in no ProvaVida nas últimas 48 horas. " +
+        $"Se você está bem, abra o app e faça seu check-in para cancelar este aviso. " +
+        $"Caso não responda em 6 horas, notificaremos seu contato de emergência. - Equipe ProvaVida";
+
+    private static string MontarMensagemSmsAviso(string nomeUsuario) =>
+        $"ProvaVida: Ola {nomeUsuario}! Nao detectamos seu check-in nas ultimas 48h. " +
+        $"Abra o app e faca seu check-in para cancelar este aviso.";
+
+    private static string MontarMensagemVozAviso(string nomeUsuario) =>
+        $"Olá {nomeUsuario}! Você não fez check-in no ProvaVida há mais de 48 horas. " +
+        $"Se você está bem, abra o app e faça seu check-in para cancelar este aviso. " +
+        $"Esta mensagem foi enviada automaticamente pelo ProvaVida.";
 }
