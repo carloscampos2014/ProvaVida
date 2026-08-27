@@ -77,30 +77,6 @@ public partial class CheckInPage : ContentPage
     private async void OnHamburgerTapped(object? sender, TappedEventArgs e)
         => Shell.Current.FlyoutIsPresented = true;
 
-    private async void OnCompartilharLogsTapped(object? sender, EventArgs e)
-    {
-        try
-        {
-            var logPath = Path.Combine(FileSystem.AppDataDirectory,
-                $"provavida-{DateTime.Now:yyyyMMdd}.log");
-
-            if (!File.Exists(logPath))
-            {
-                await DisplayAlertAsync("Logs", "Nenhum log encontrado para hoje.", "OK");
-                return;
-            }
-
-            await Share.Default.RequestAsync(new ShareFileRequest
-            {
-                Title = "Logs ProvaVida",
-                File  = new ShareFile(logPath)
-            });
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlertAsync("Erro", $"Não foi possível compartilhar logs: {ex.Message}", "OK");
-        }
-    }
 
     private async void OnPerfilTapped(object? sender, TappedEventArgs e)
         => await Shell.Current.GoToAsync("//perfil");
