@@ -30,6 +30,7 @@ if (!builder.Environment.IsEnvironment("IntegrationTests"))
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices();
+builder.Services.AddApiRateLimiting();
 
 // Basic Auth para o painel Admin — adiciona o scheme sem sobrescrever o esquema padrão (Bearer)
 builder.Services.AddAuthentication()
@@ -65,6 +66,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 

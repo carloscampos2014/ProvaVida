@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using ProvaVida.Api.Extensions;
 using ProvaVida.Application.UseCases.ObterHistoricoCheckIn;
 using ProvaVida.Application.UseCases.RegistrarCheckIn;
 
@@ -17,6 +19,7 @@ public class CheckInController : ControllerBase
         ?? throw new UnauthorizedAccessException("Token inválido."));
 
     [HttpPost]
+    [EnableRateLimiting(RateLimitingExtensions.PolicyCheckIn)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Registrar(
