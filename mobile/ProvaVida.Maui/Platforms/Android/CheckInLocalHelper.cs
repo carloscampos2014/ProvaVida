@@ -38,7 +38,7 @@ internal static class CheckInLocalHelper
     }
 
     /// <summary>
-    /// Verifica se o usuário fez check-in hoje, comparando em UTC com o dia local do dispositivo.
+    /// Verifica se o usuário fez check-in hoje, usando o horário local do dispositivo.
     /// </summary>
     public static bool FezCheckInHoje()
     {
@@ -48,9 +48,11 @@ internal static class CheckInLocalHelper
 
             using var db  = new SqliteConnection($"Data Source={DbPath}");
             db.Open();
-            // UTC puro — evita ambiguidade de comparação lexicográfica entre offsets
-            var inicioUtc = DateTime.UtcNow.Date.ToString("yyyy-MM-ddTHH:mm:ssZ");
-            var fimUtc    = DateTime.UtcNow.Date.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ssZ");
+            // Usa horário local do dispositivo para definir a janela do "hoje" —
+            // evita que check-ins feitos após 21h BRT apareçam como "ontem" no widget
+            var hojeLocal = DateTime.Now.Date;
+            var inicioUtc = hojeLocal.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+            var fimUtc    = hojeLocal.AddDays(1).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
 
             return db.ExecuteScalar<int>(
                 "SELECT COUNT(1) FROM checkins_local WHERE data_hora >= @Inicio AND data_hora < @Fim",
