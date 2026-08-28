@@ -69,9 +69,9 @@ public class CheckInViewModel : BaseViewModel
                 if (DateTime.TryParse(c.DataHora, out var dtUtc))
                 {
                     var local = dtUtc.ToLocalTime();
-                    return $"✓  {local:dd/MM/yyyy}  {local:HH:mm}";
+                    return $"{local:dd/MM/yyyy}  {local:HH:mm}";
                 }
-                return $"✓  {c.DataHora}";
+                return c.DataHora;
             })
             .ToList();
 
