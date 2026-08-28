@@ -104,6 +104,12 @@ if (!app.Environment.IsEnvironment("IntegrationTests"))
         job => job.ExecutarAsync(),
         "0 * * * *",
         new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+
+    RecurringJob.AddOrUpdate<BackupDatabaseJob>(
+        "backup-diario",
+        job => job.ExecutarAsync(),
+        "55 23 * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
 }
 
 app.Run();
