@@ -49,7 +49,9 @@ public static class AppShortcutsService
                     .SetLongLabel("Check-in registrado hoje")
                     .SetIcon(Android.Graphics.Drawables.Icon.CreateWithResource(
                         context, Android.Resource.Drawable.IcMenuAgenda))
-                    .SetIntent(new Intent(ActionCheckIn).SetPackage(context.PackageName))
+                    .SetIntent(new Intent(ActionCheckIn)
+                        .SetClassName(context.PackageName!, $"{context.PackageName}.MainActivity")
+                        .SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask))
                     .SetDisabledMessage("Check-in já feito hoje")
                     .Build();
                 shortcuts.Add(info);
@@ -74,8 +76,9 @@ public static class AppShortcutsService
         Context context, string id, string action,
         string shortLabel, string longLabel, int iconRes)
     {
+        // SetClassName é obrigatório — sem Activity explícita o Android retorna "app não instalado"
         var intent = new Intent(action)
-            .SetPackage(context.PackageName)
+            .SetClassName(context.PackageName!, $"{context.PackageName}.MainActivity")
             .SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTask);
 
         return new ShortcutInfo.Builder(context, id)
