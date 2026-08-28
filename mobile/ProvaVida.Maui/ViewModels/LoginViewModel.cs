@@ -139,7 +139,6 @@ public class LoginViewModel : BaseViewModel
             {
                 var ctx = Android.App.Application.Context;
                 CheckInWidgetSimples.AtualizarTodos(ctx);
-                CheckInWidgetCompleto.AtualizarTodos(ctx);
                 if (OperatingSystem.IsAndroidVersionAtLeast(25))
                     AppShortcutsService.Atualizar();
             }

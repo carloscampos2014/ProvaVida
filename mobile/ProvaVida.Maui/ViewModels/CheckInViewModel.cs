@@ -14,13 +14,11 @@ public class CheckInViewModel : BaseViewModel
     private readonly IUsuarioStorage _usuarioStorage;
 
     private bool _fezCheckInHoje;
-    private int _sequenciaDias;
-    private List<bool> _semana = new(7);
+    private List<string> _checkInsRecentes = new();
     private string _nomeUsuario = string.Empty;
 
     public bool FezCheckInHoje { get => _fezCheckInHoje; set => SetProperty(ref _fezCheckInHoje, value); }
-    public int SequenciaDias { get => _sequenciaDias; set => SetProperty(ref _sequenciaDias, value); }
-    public List<bool> Semana { get => _semana; set => SetProperty(ref _semana, value); }
+    public List<string> CheckInsRecentes { get => _checkInsRecentes; set => SetProperty(ref _checkInsRecentes, value); }
     public string NomeUsuario { get => _nomeUsuario; set => SetProperty(ref _nomeUsuario, value); }
 
     public ICommand CheckInCommand { get; }
@@ -63,32 +61,19 @@ public class CheckInViewModel : BaseViewModel
 
         FezCheckInHoje = await _db.FezCheckInHojeAsync(usuario.Email);
 
-        var checkInsSemana = await _db.ObterCheckInsDaSemanaAsync(usuario.Email);
+        var recentes = await _db.ObterCheckInsRecentesAsync(usuario.Email, 30);
 
-        // Usa horário local do dispositivo — compara data local do check-in com data local atual
-        var hojeLocal = DateTime.Now.Date;
-        var semana = new List<bool>();
-        for (int i = 6; i >= 0; i--)
-        {
-            var diaLocal = hojeLocal.AddDays(-i);
-            // Converte cada check-in UTC para horário local antes de comparar a data
-            semana.Add(checkInsSemana.Any(c =>
+        CheckInsRecentes = recentes
+            .Select(c =>
             {
                 if (DateTime.TryParse(c.DataHora, out var dtUtc))
-                    return dtUtc.ToLocalTime().Date == diaLocal;
-                return false;
-            }));
-        }
-        Semana = semana;
-
-        // Sequência de dias consecutivos
-        int seq = 0;
-        for (int i = 0; i < semana.Count; i++)
-        {
-            if (semana[semana.Count - 1 - i]) seq++;
-            else break;
-        }
-        SequenciaDias = seq;
+                {
+                    var local = dtUtc.ToLocalTime();
+                    return $"✓  {local:dd/MM/yyyy}  {local:HH:mm}";
+                }
+                return $"✓  {c.DataHora}";
+            })
+            .ToList();
 
         ((Command)CheckInCommand).ChangeCanExecute();
     }
@@ -164,7 +149,6 @@ public class CheckInViewModel : BaseViewModel
             {
                 var ctx = Android.App.Application.Context;
                 CheckInWidgetSimples.AtualizarTodos(ctx);
-                CheckInWidgetCompleto.AtualizarTodos(ctx);
             }
             catch { }
 #endif
