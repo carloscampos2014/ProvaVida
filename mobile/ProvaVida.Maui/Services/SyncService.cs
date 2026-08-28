@@ -67,8 +67,8 @@ public class SyncService
 
     /// <summary>
     /// Sincronização reversa: busca check-ins dos últimos 30 dias na API
-    /// e salva no SQLite local os que ainda não existem.
-    /// Resolve o problema de reinstalação do app ou troca de dispositivo.
+    /// e salva no SQLite local os que ainda não existem para aquele dia.
+    /// Usa data (sem hora) para evitar duplicatas entre dispositivos.
     /// </summary>
     private async Task SincronizarReversaAsync()
     {
@@ -82,12 +82,12 @@ public class SyncService
 
             foreach (var item in historico)
             {
-                var idLocal = item.IdLocal.ToString();
-                if (await _db.ExisteCheckInAsync(idLocal)) continue;
+                // Verifica por data (horário local) — 1 check-in por dia
+                if (await _db.ExisteCheckInNaDataAsync(usuario.Email, item.DataHora)) continue;
 
                 await _db.SalvarCheckInAsync(new CheckInLocal
                 {
-                    IdLocal      = idLocal,
+                    IdLocal      = item.IdLocal.ToString(),
                     UsuarioId    = usuario.Email,
                     DataHora     = item.DataHora.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                     Latitude     = item.Latitude,

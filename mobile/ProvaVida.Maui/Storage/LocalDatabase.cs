@@ -120,6 +120,21 @@ public class LocalDatabase
             new { IdLocal = idLocal }) > 0;
     }
 
+    /// <summary>
+    /// Verifica se já existe check-in para o dia (horário local) de uma data UTC.
+    /// Usado pela sync reversa para evitar duplicatas por data.
+    /// </summary>
+    public async Task<bool> ExisteCheckInNaDataAsync(string usuarioId, DateTimeOffset dataHoraUtc)
+    {
+        var db = await GetDbAsync();
+        var diaLocal = dataHoraUtc.ToLocalTime().Date;
+        var inicioUtc = diaLocal.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var fimUtc    = diaLocal.AddDays(1).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+        return await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(1) FROM checkins_local WHERE usuario_id = @UsuarioId AND data_hora >= @Inicio AND data_hora < @Fim",
+            new { UsuarioId = usuarioId, Inicio = inicioUtc, Fim = fimUtc }) > 0;
+    }
+
     public async Task<bool> FezCheckInHojeAsync(string usuarioId)
     {
         var db = await GetDbAsync();
