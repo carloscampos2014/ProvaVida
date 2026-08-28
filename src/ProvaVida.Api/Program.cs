@@ -8,7 +8,6 @@ using ProvaVida.Api.Middleware;
 using ProvaVida.Infrastructure.Jobs;
 using ProvaVida.Infrastructure.Persistence;
 using Serilog;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Notifica o systemd quando o app está pronto (Type=notify no service)
@@ -90,7 +89,10 @@ app.MapGet("/health", async (DbConnectionFactory db) =>
 
 if (!app.Environment.IsEnvironment("IntegrationTests"))
 {
-    app.MapHangfireDashboard();
+    app.MapHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = [new HangfireBasicAuthFilter(app.Configuration)]
+    });
 
     // Registrar jobs após o Hangfire middleware estar configurado (JobStorage já inicializado)
     RecurringJob.AddOrUpdate<VerificacaoInatividadeJob>(
