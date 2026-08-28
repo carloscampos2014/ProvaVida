@@ -24,8 +24,6 @@ public class CheckInWidgetCompleto : AppWidgetProvider
         Resource.Id.dia_6
     };
 
-    private static readonly string[] NomesDias = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
-
     public override void OnUpdate(Context? context, AppWidgetManager? appWidgetManager, int[]? appWidgetIds)
     {
         if (context is null || appWidgetManager is null || appWidgetIds is null) return;
@@ -93,7 +91,7 @@ public class CheckInWidgetCompleto : AppWidgetProvider
                 else
                     bgColor = unchecked((int)0xFFE4E0F2);
 
-                views.SetTextViewText(DiaIds[i], NomesDias[(int)dia.DayOfWeek]);
+                views.SetTextViewText(DiaIds[i], dia.ToString("dd/MM"));
                 views.SetInt(DiaIds[i], "setBackgroundColor", bgColor);
             }
 
