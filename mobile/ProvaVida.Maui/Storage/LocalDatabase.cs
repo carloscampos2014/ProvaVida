@@ -92,6 +92,14 @@ public class LocalDatabase
             new { IdLocal = idLocal });
     }
 
+    public async Task<List<CheckInLocal>> ObterCheckInsRecentesAsync(string usuarioId, int limite = 30)
+    {
+        var db = await GetDbAsync();
+        return (await db.QueryAsync<CheckInLocal>(
+            "SELECT * FROM checkins_local WHERE usuario_id = @UsuarioId ORDER BY data_hora DESC LIMIT @Limite",
+            new { UsuarioId = usuarioId, Limite = limite })).ToList();
+    }
+
     public async Task<List<CheckInLocal>> ObterCheckInsDaSemanaAsync(string usuarioId)
     {
         var db = await GetDbAsync();

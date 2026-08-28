@@ -7,7 +7,7 @@
 
     <Grid RowDefinitions="Auto,*,Auto">
 
-        <!-- Linha 0: Top bar + Card sequência -->
+        <!-- Linha 0: Top bar + Card sequência removido — lista de check-ins na parte inferior -->
         <VerticalStackLayout Grid.Row="0" Spacing="0">
 
             <!-- Top bar -->
@@ -43,32 +43,7 @@
                 </Grid>
             </Border>
 
-            <!-- Card sequência -->
-            <Border BackgroundColor="White" StrokeShape="RoundRectangle 20"
-                    StrokeThickness="0" Padding="20" Margin="20,12,20,0">
-                <Border.Shadow>
-                    <Shadow Brush="Black" Offset="0,4" Radius="16" Opacity="0.06"/>
-                </Border.Shadow>
-                <Grid ColumnDefinitions="*,Auto">
-                    <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label Text="Sequência" FontSize="12"
-                               TextColor="{StaticResource TextSecondary}"/>
-                        <Label Text="{Binding SequenciaDias, StringFormat='{0} dias consecutivos'}"
-                               FontSize="22" FontAttributes="Bold"
-                               TextColor="{StaticResource Primary}"/>
-                        <Label Text="com check-in ✓" FontSize="13"
-                               TextColor="{StaticResource TextSecondary}"/>
-                    </VerticalStackLayout>
-                    <Border Grid.Column="1"
-                            BackgroundColor="{StaticResource PrimaryLight}"
-                            StrokeShape="RoundRectangle 28"
-                            StrokeThickness="0"
-                            WidthRequest="56" HeightRequest="56">
-                        <Label Text="🔥" FontSize="22"
-                               HorizontalOptions="Center" VerticalOptions="Center"/>
-                    </Border>
-                </Grid>
-            </Border>
+
 
         </VerticalStackLayout>
 
@@ -79,24 +54,24 @@
                              Spacing="0">
 
             <Border BackgroundColor="{StaticResource PrimaryLight}"
-                    StrokeShape="RoundRectangle 126"
+                    StrokeShape="RoundRectangle 100"
                     StrokeThickness="0"
-                    WidthRequest="252" HeightRequest="252"
+                    WidthRequest="200" HeightRequest="200"
                     HorizontalOptions="Center">
                 <Border BackgroundColor="{Binding FezCheckInHoje, Converter={StaticResource BoolToColorConverter}}"
-                        StrokeShape="RoundRectangle 110"
+                        StrokeShape="RoundRectangle 88"
                         StrokeThickness="0"
-                        WidthRequest="220" HeightRequest="220"
+                        WidthRequest="176" HeightRequest="176"
                         HorizontalOptions="Center"
                         VerticalOptions="Center">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding CheckInCommand}"/>
                     </Border.GestureRecognizers>
                     <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="4">
-                        <Label Text="✓" FontSize="52" FontAttributes="Bold"
+                        <Label Text="✓" FontSize="44" FontAttributes="Bold"
                                TextColor="White" HorizontalOptions="Center"/>
                         <Label Text="{Binding FezCheckInHoje, Converter={StaticResource BoolToCheckInTextConverter}}"
-                               FontSize="18" FontAttributes="Bold"
+                               FontSize="15" FontAttributes="Bold"
                                TextColor="White" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </Border>
@@ -123,17 +98,52 @@
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                                Color="{StaticResource Primary}" HorizontalOptions="Center"/>
 
-            <!-- Card histórico da semana -->
+            <!-- Card histórico de check-ins recentes -->
             <Border BackgroundColor="White" StrokeShape="RoundRectangle 20"
                     StrokeThickness="0" Padding="20">
                 <Border.Shadow>
                     <Shadow Brush="Black" Offset="0,4" Radius="16" Opacity="0.06"/>
                 </Border.Shadow>
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="Esta semana" FontSize="14" FontAttributes="Bold"
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Check-ins recentes" FontSize="14" FontAttributes="Bold"
                            TextColor="{StaticResource TextPrimary}"/>
-                    <HorizontalStackLayout x:Name="SemanaLayout" Spacing="8"
-                                           HorizontalOptions="Center"/>
+                    <!-- Altura fixa para ~3 itens visíveis, scroll para ver mais -->
+                    <CollectionView ItemsSource="{Binding CheckInsRecentes}"
+                                    HeightRequest="168">
+                        <CollectionView.EmptyView>
+                            <Label Text="Nenhum check-in registrado"
+                                   FontSize="13"
+                                   TextColor="{StaticResource TextHint}"
+                                   HorizontalOptions="Center"
+                                   Margin="0,16,0,0"/>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,10,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{StaticResource PrimaryLight}"
+                                            StrokeShape="RoundRectangle 14"
+                                            StrokeThickness="0"
+                                            WidthRequest="28" HeightRequest="28"
+                                            Margin="0,0,12,0">
+                                        <Label Text="✓" FontSize="13" FontAttributes="Bold"
+                                               TextColor="{StaticResource Primary}"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Border>
+                                    <Label Grid.Column="1"
+                                           Text="{Binding .}"
+                                           FontSize="14"
+                                           TextColor="{StaticResource TextPrimary}"
+                                           VerticalOptions="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </VerticalStackLayout>
             </Border>
 
