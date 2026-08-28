@@ -642,6 +642,8 @@ public class AdminController : ControllerBase
                         window.fazerBackup    = fazerBackup;
                         window.restaurarBackup = restaurarBackup;
                     })();
+                </script>
+
                 <h2>Backup do Banco de Dados</h2>
                 <div style="background:white;border-radius:16px;padding:20px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.06)">
                     <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
@@ -658,9 +660,6 @@ public class AdminController : ControllerBase
                         </div>
                     </div>
                 </div>
-
-                <script>
-                </script>
             </body>
             </html>
             """;
