@@ -47,10 +47,24 @@
 
                 <VerticalStackLayout Spacing="6">
                     <Label Text="WhatsApp" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
-                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
-                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
-                        <Entry Text="{Binding WhatsApp}" Placeholder="(11) 99999-9999" Keyboard="Telephone" VerticalOptions="Center"/>
-                    </Border>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <Border Grid.Column="0" Stroke="{StaticResource Border}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1.5" Padding="8,0" HeightRequest="52">
+                            <Picker ItemsSource="{Binding PaisesDdi}"
+                                    SelectedItem="{Binding PaisWhatsApp}"
+                                    ItemDisplayBinding="{Binding Exibicao}"
+                                    WidthRequest="100"
+                                    VerticalOptions="Center"/>
+                        </Border>
+                        <Border Grid.Column="1" Stroke="{StaticResource Border}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                            <Entry Text="{Binding WhatsAppNumero}"
+                                   Placeholder="11999999999"
+                                   Keyboard="Telephone" VerticalOptions="Center"/>
+                        </Border>
+                    </Grid>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="6">
@@ -118,10 +132,24 @@
 
                 <VerticalStackLayout Spacing="6">
                     <Label Text="WhatsApp do contato" FontSize="13" TextColor="{StaticResource TextSecondary}"/>
-                    <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
-                            StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
-                        <Entry Text="{Binding ContatoWhatsApp}" Placeholder="(11) 98888-8888" Keyboard="Telephone" VerticalOptions="Center"/>
-                    </Border>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <Border Grid.Column="0" Stroke="{StaticResource Border}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1.5" Padding="8,0" HeightRequest="52">
+                            <Picker ItemsSource="{Binding PaisesDdi}"
+                                    SelectedItem="{Binding PaisContatoWhatsApp}"
+                                    ItemDisplayBinding="{Binding Exibicao}"
+                                    WidthRequest="100"
+                                    VerticalOptions="Center"/>
+                        </Border>
+                        <Border Grid.Column="1" Stroke="{StaticResource Border}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1.5" Padding="16,0" HeightRequest="52">
+                            <Entry Text="{Binding ContatoWhatsAppNumero}"
+                                   Placeholder="11988888888"
+                                   Keyboard="Telephone" VerticalOptions="Center"/>
+                        </Border>
+                    </Grid>
                 </VerticalStackLayout>
 
                 <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="13"
