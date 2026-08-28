@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProvaVida.Application.Interfaces;
 using ProvaVida.Application.UseCases.ObterMetricasAdmin;
 using ProvaVida.Application.UseCases.TestarNotificacao;
+using ProvaVida.Infrastructure.Jobs;
 namespace ProvaVida.Api.Controllers;
 
 [ApiController]
@@ -101,6 +102,84 @@ public class AdminController : ControllerBase
     {
         var resultado = await useCase.ExecutarAsync(pagina, ct);
         return Ok(resultado);
+    }
+
+    [HttpPost("backup")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> FazerBackup(
+        [FromServices] IConfiguration configuration,
+        CancellationToken ct)
+    {
+        var cs = configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("ConnectionStrings:Default não configurada.");
+
+        var (host, port, database, username, password) = BackupDatabaseJob.ParseConnectionString(cs);
+
+        var nomeArquivo = $"provavida-{DateTime.UtcNow:yyyyMMdd-HHmmss}.sql";
+        var tempPath    = Path.Combine(Path.GetTempPath(), nomeArquivo);
+
+        try
+        {
+            await BackupDatabaseJob.ExecutarPgDumpAsync(host, port, database, username, password, tempPath);
+            var bytes = await System.IO.File.ReadAllBytesAsync(tempPath, ct);
+            return File(bytes, "application/octet-stream", nomeArquivo);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempPath)) System.IO.File.Delete(tempPath);
+        }
+    }
+
+    [HttpPost("restore")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RestaurarBackup(
+        IFormFile arquivo,
+        [FromServices] IConfiguration configuration,
+        CancellationToken ct)
+    {
+        if (arquivo is null || arquivo.Length == 0)
+            return BadRequest(new { error = "Arquivo SQL inválido ou vazio." });
+
+        if (!arquivo.FileName.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { error = "Apenas arquivos .sql são aceitos." });
+
+        var cs = configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("ConnectionStrings:Default não configurada.");
+
+        var (host, port, database, username, password) = BackupDatabaseJob.ParseConnectionString(cs);
+
+        var tempPath = Path.Combine(Path.GetTempPath(), $"restore-{Guid.NewGuid()}.sql");
+        try
+        {
+            await using (var stream = System.IO.File.Create(tempPath))
+                await arquivo.CopyToAsync(stream, ct);
+
+            await BackupDatabaseJob.ExecutarPsqlRestoreAsync(host, port, database, username, password, tempPath);
+            return Ok(new { message = "Restore concluído com sucesso." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempPath)) System.IO.File.Delete(tempPath);
+        }
+    }
+
+    [HttpGet("backups")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult ListarBackups()
+    {
+        var arquivos = BackupDatabaseJob.ListarBackups()
+            .Select(f => new
+            {
+                nome        = f.Name,
+                tamanho     = f.Length,
+                criadoEm    = f.LastWriteTimeUtc.ToString("dd/MM/yyyy HH:mm") + " UTC"
+            });
+        return Ok(arquivos);
     }
 
     [HttpGet]
@@ -520,7 +599,67 @@ public class AdminController : ControllerBase
                             setTimeout(tick, 1000);
                         }
                         tick();
+
+                        function fazerBackup() {
+                            var btn = document.getElementById('btn-backup');
+                            var res = document.getElementById('backup-res');
+                            btn.disabled = true;
+                            res.innerHTML = '<span style="color:#6E648B">⏳ Gerando backup...</span>';
+                            fetch('/admin/backup', { method: 'POST' })
+                                .then(r => {
+                                    if (!r.ok) throw new Error('Status ' + r.status);
+                                    return r.blob().then(blob => ({ blob, disposition: r.headers.get('content-disposition') }));
+                                })
+                                .then(({ blob, disposition }) => {
+                                    var nome = 'backup.sql';
+                                    if (disposition) { var m = disposition.match(/filename="?([^"]+)"?/); if (m) nome = m[1]; }
+                                    var url = URL.createObjectURL(blob);
+                                    var a = document.createElement('a'); a.href = url; a.download = nome; a.click();
+                                    URL.revokeObjectURL(url);
+                                    res.innerHTML = '<span style="color:#2E9E6B">✅ Backup gerado: ' + nome + '</span>';
+                                })
+                                .catch(e => { res.innerHTML = '<span style="color:#E73C3C">❌ ' + e.message + '</span>'; })
+                                .finally(() => { btn.disabled = false; });
+                        }
+
+                        function restaurarBackup() {
+                            var input = document.getElementById('restore-file');
+                            var res   = document.getElementById('restore-res');
+                            if (!input.files.length) { res.innerHTML = '<span style="color:#E73C3C">⚠️ Selecione um arquivo .sql</span>'; return; }
+                            var form = new FormData();
+                            form.append('arquivo', input.files[0]);
+                            res.innerHTML = '<span style="color:#6E648B">⏳ Restaurando... isso pode levar alguns segundos.</span>';
+                            fetch('/admin/restore', { method: 'POST', body: form })
+                                .then(r => r.json().then(d => ({ ok: r.ok, d })))
+                                .then(({ ok, d }) => {
+                                    res.innerHTML = ok
+                                        ? '<span style="color:#2E9E6B">✅ ' + d.message + '</span>'
+                                        : '<span style="color:#E73C3C">❌ ' + d.error + '</span>';
+                                })
+                                .catch(e => { res.innerHTML = '<span style="color:#E73C3C">❌ ' + e.message + '</span>'; });
+                        }
+
+                        window.fazerBackup    = fazerBackup;
+                        window.restaurarBackup = restaurarBackup;
                     })();
+                <h2>Backup do Banco de Dados</h2>
+                <div style="background:white;border-radius:16px;padding:20px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.06)">
+                    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+                        <div style="flex:1;min-width:200px">
+                            <p style="font-size:13px;color:#6E648B;margin-bottom:12px">Gera um dump completo do banco provavida e faz o download como arquivo .sql.</p>
+                            <button id="btn-backup" class="btn" onclick="fazerBackup()">📥 Fazer Backup</button>
+                            <div id="backup-res" style="margin-top:8px;font-size:13px"></div>
+                        </div>
+                        <div style="flex:1;min-width:200px">
+                            <p style="font-size:13px;color:#6E648B;margin-bottom:12px">Restaura o banco a partir de um arquivo .sql gerado anteriormente. ⚠️ Dados existentes podem ser afetados.</p>
+                            <input type="file" id="restore-file" accept=".sql" style="font-size:13px;margin-bottom:8px;display:block"/>
+                            <button class="btn" style="background:#E73C3C" onclick="restaurarBackup()">📤 Restaurar Backup</button>
+                            <div id="restore-res" style="margin-top:8px;font-size:13px"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
                 </script>
             </body>
             </html>

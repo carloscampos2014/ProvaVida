@@ -135,6 +135,7 @@ public static class ServiceCollectionExtensions
         // Jobs
         services.AddScoped<VerificacaoInatividadeJob>();
         services.AddScoped<DispararAlertaJob>();
+        services.AddScoped<BackupDatabaseJob>();
 
         // Admin
         services.AddScoped<ObterMetricasAdminUseCase>();
