@@ -105,6 +105,23 @@ public class CadastroViewModel : BaseViewModel
         AlternarSenhaCommand = new Command(() => SenhaOculta = !SenhaOculta);
     }
 
+    public void Limpar()
+    {
+        Nome                  = string.Empty;
+        Email                 = string.Empty;
+        WhatsAppNumero        = string.Empty;
+        PaisWhatsApp          = PaisDdi.Padrao;
+        Senha                 = string.Empty;
+        SenhaOculta           = true;
+        ContatoNome           = string.Empty;
+        ContatoEmail          = string.Empty;
+        ContatoWhatsAppNumero = string.Empty;
+        PaisContatoWhatsApp   = PaisDdi.Padrao;
+        AceitouTermos         = false;
+        Passo                 = 1;
+        LimparErro();
+    }
+
     private async Task CadastrarAsync()
     {
         LimparErro();
