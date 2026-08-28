@@ -65,13 +65,13 @@ public static class MauiProgram
 
         // ViewModels
         builder.Services.AddTransient<LoginViewModel>();
-        builder.Services.AddTransient<CadastroViewModel>();
+        builder.Services.AddSingleton<CadastroViewModel>();
         builder.Services.AddTransient<PerfilViewModel>();
         builder.Services.AddTransient<CheckInViewModel>();
 
         // Pages
         builder.Services.AddTransient<LoginPage>();
-        builder.Services.AddTransient<CadastroPage>();
+        builder.Services.AddSingleton<CadastroPage>();
         builder.Services.AddTransient<PerfilPage>();
         builder.Services.AddTransient<CheckInPage>();
         builder.Services.AddTransient<LoadingPage>();

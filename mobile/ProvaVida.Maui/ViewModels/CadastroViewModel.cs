@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using ProvaVida.Maui.Helpers;
+using ProvaVida.Maui.Models;
 using ProvaVida.Maui.Services;
 
 namespace ProvaVida.Maui.ViewModels;
@@ -11,27 +12,34 @@ public class CadastroViewModel : BaseViewModel
     // Passo 1 — Dados pessoais
     private string _nome = string.Empty;
     private string _email = string.Empty;
-    private string _whatsApp = string.Empty;
+    private string _whatsAppNumero = string.Empty;
+    private PaisDdi _paisWhatsApp = PaisDdi.Padrao;
     private string _senha = string.Empty;
     private bool _senhaOculta = true;
 
     // Passo 2 — Contato de emergência
     private string _contatoNome = string.Empty;
     private string _contatoEmail = string.Empty;
-    private string _contatoWhatsApp = string.Empty;
+    private string _contatoWhatsAppNumero = string.Empty;
+    private PaisDdi _paisContatoWhatsApp = PaisDdi.Padrao;
     private bool _aceitouTermos = false;
 
     private int _passo = 1;
 
     public string Nome { get => _nome; set => SetProperty(ref _nome, value); }
     public string Email { get => _email; set => SetProperty(ref _email, value); }
-    public string WhatsApp { get => _whatsApp; set => SetProperty(ref _whatsApp, value); }
+    public string WhatsAppNumero { get => _whatsAppNumero; set => SetProperty(ref _whatsAppNumero, value); }
+    public PaisDdi PaisWhatsApp { get => _paisWhatsApp; set => SetProperty(ref _paisWhatsApp, value); }
+    public string WhatsApp => $"{PaisWhatsApp.Codigo}{WhatsAppNumero}";
     public string Senha { get => _senha; set => SetProperty(ref _senha, value); }
     public bool SenhaOculta { get => _senhaOculta; set => SetProperty(ref _senhaOculta, value); }
     public string ContatoNome { get => _contatoNome; set => SetProperty(ref _contatoNome, value); }
     public string ContatoEmail { get => _contatoEmail; set => SetProperty(ref _contatoEmail, value); }
-    public string ContatoWhatsApp { get => _contatoWhatsApp; set => SetProperty(ref _contatoWhatsApp, value); }
+    public string ContatoWhatsAppNumero { get => _contatoWhatsAppNumero; set => SetProperty(ref _contatoWhatsAppNumero, value); }
+    public PaisDdi PaisContatoWhatsApp { get => _paisContatoWhatsApp; set => SetProperty(ref _paisContatoWhatsApp, value); }
+    public string ContatoWhatsApp => $"{PaisContatoWhatsApp.Codigo}{ContatoWhatsAppNumero}";
     public bool AceitouTermos { get => _aceitouTermos; set => SetProperty(ref _aceitouTermos, value); }
+    public IReadOnlyList<PaisDdi> PaisesDdi => PaisDdi.Todos;
     public int Passo
     {
         get => _passo;
@@ -61,7 +69,7 @@ public class CadastroViewModel : BaseViewModel
         {
             LimparErro();
             if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(Email) ||
-                string.IsNullOrWhiteSpace(WhatsApp) || string.IsNullOrWhiteSpace(Senha))
+                string.IsNullOrWhiteSpace(WhatsAppNumero) || string.IsNullOrWhiteSpace(Senha))
             {
                 ErrorMessage = "Preencha todos os campos.";
                 return;
@@ -97,12 +105,29 @@ public class CadastroViewModel : BaseViewModel
         AlternarSenhaCommand = new Command(() => SenhaOculta = !SenhaOculta);
     }
 
+    public void Limpar()
+    {
+        Nome                  = string.Empty;
+        Email                 = string.Empty;
+        WhatsAppNumero        = string.Empty;
+        PaisWhatsApp          = PaisDdi.Padrao;
+        Senha                 = string.Empty;
+        SenhaOculta           = true;
+        ContatoNome           = string.Empty;
+        ContatoEmail          = string.Empty;
+        ContatoWhatsAppNumero = string.Empty;
+        PaisContatoWhatsApp   = PaisDdi.Padrao;
+        AceitouTermos         = false;
+        Passo                 = 1;
+        LimparErro();
+    }
+
     private async Task CadastrarAsync()
     {
         LimparErro();
 
         if (string.IsNullOrWhiteSpace(ContatoNome) || string.IsNullOrWhiteSpace(ContatoEmail) ||
-            string.IsNullOrWhiteSpace(ContatoWhatsApp))
+            string.IsNullOrWhiteSpace(ContatoWhatsAppNumero))
         {
             ErrorMessage = "Preencha todos os dados do contato de emergência.";
             return;
