@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using ProvaVida.Api.Extensions;
 using ProvaVida.Application.UseCases.CadastrarUsuario;
 using ProvaVida.Application.UseCases.Login;
 using ProvaVida.Application.UseCases.Logoff;
@@ -13,6 +15,7 @@ public class AuthController : ControllerBase
 {
     [HttpPost("cadastro")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingExtensions.PolicyCadastro)]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -27,6 +30,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingExtensions.PolicyLogin)]
     [ProducesResponseType(typeof(LoginOutput), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(
