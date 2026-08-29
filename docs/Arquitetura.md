@@ -294,7 +294,27 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 
 ---
 
-## 10. Painel Administrativo
+## 10. Provedores de Notificação
+
+### WhatsApp, SMS e Ligação de Voz — Twilio
+
+Enviados via **Twilio SDK** (`Twilio` NuGet package) na `Api.Infrastructure`.
+
+| Canal | Secret utilizado |
+|-------|-----------------|
+| WhatsApp | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` |
+| SMS | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` |
+| Ligação de voz | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VOICE_FROM` |
+
+Todos os secrets já estão cadastrados no repositório GitHub. Na VM são injetados via `/etc/provavida/env` — nunca em arquivos de configuração no repositório.
+
+### E-mail — SMTP
+
+Enviado via SMTP usando `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USUARIO` e `EMAIL_SENHA`.
+
+---
+
+## 11. Painel Administrativo
 
 - **Stack:** Blazor Server (C#)
 - **Autenticação:** HTTP Basic Auth — credencial única de admin
@@ -311,7 +331,7 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 
 ---
 
-## 11. Padrões de Desenvolvimento
+## 12. Padrões de Desenvolvimento
 
 | Princípio | Aplicação |
 |-----------|-----------|
@@ -325,7 +345,7 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 
 ---
 
-## 12. Documentação da API
+## 13. Documentação da API
 
 - **Framework:** Scalar (substitui Swagger UI)
 - Configurado no `Api.Web` — acessível em `/scalar` no ambiente de desenvolvimento
@@ -333,7 +353,7 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 
 ---
 
-## 13. Padrão MVVM — Mobile
+## 14. Padrão MVVM — Mobile
 
 Toda tela do app Mobile segue o padrão MVVM estritamente:
 
@@ -349,7 +369,7 @@ Toda tela do app Mobile segue o padrão MVVM estritamente:
 
 ---
 
-## 14. Referência de Layout — Branch `origin/backup`
+## 15. Referência de Layout — Branch `origin/backup`
 
 Para implementação de telas do Mobile e do Admin, consultar o layout e estrutura visual do projeto original na branch `origin/backup` do repositório. O objetivo é manter consistência visual com o projeto anterior, adaptando a arquitetura sem redesenhar as telas do zero.
 
