@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\ProvaVida.Shared.csproj" />
+    <ProjectReference Include="..\ProvaVida.Api.Domain\ProvaVida.Api.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

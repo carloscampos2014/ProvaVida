@@ -70,4 +70,10 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\..\Shared\ProvaVida.Shared.csproj" />
+		<ProjectReference Include="..\ProvaVida.Mobile.Application\ProvaVida.Mobile.Application.csproj" />
+		<ProjectReference Include="..\ProvaVida.Mobile.Infrastructure\ProvaVida.Mobile.Infrastructure.csproj" />
+	</ItemGroup>
+
 </Project>

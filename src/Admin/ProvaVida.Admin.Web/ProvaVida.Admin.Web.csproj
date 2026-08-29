@@ -7,4 +7,10 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\ProvaVida.Shared.csproj" />
+    <ProjectReference Include="..\ProvaVida.Admin.Application\ProvaVida.Admin.Application.csproj" />
+    <ProjectReference Include="..\ProvaVida.Admin.Infrastructure\ProvaVida.Admin.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
