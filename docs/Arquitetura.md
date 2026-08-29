@@ -308,9 +308,9 @@ Enviados via **Twilio SDK** (`Twilio` NuGet package) na `Api.Infrastructure`.
 
 Todos os secrets já estão cadastrados no repositório GitHub. Na VM são injetados via `/etc/provavida/env` — nunca em arquivos de configuração no repositório.
 
-### E-mail — SMTP
+### E-mail — Gmail (SMTP)
 
-Enviado via SMTP usando `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USUARIO` e `EMAIL_SENHA`.
+Enviado via SMTP do Gmail usando `EMAIL_HOST` (`smtp.gmail.com`), `EMAIL_PORT` (`587`), `EMAIL_USUARIO` e `EMAIL_SENHA` (App Password do Google). Secrets já cadastrados no repositório.
 
 ---
 
