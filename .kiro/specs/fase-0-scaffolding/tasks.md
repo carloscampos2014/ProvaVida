@@ -15,7 +15,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-criar-solucao-slnx`
   - _Requirements: RF-01_
 
-- [ ] 2. Configurar referências entre projetos (Clean Architecture)
+- [x] 2. Configurar referências entre projetos (Clean Architecture)
   - Configurar `<ProjectReference>` em cada `.csproj` conforme diagrama de dependências do design
   - `Domain` sem referências de projeto; `Application` referencia `Domain` e `Shared`; `Infrastructure` referencia `Application` e `Domain`; `Web/App` referencia `Application` e `Infrastructure`
   - Branch: `feature/fase-0-referencias-clean-architecture`

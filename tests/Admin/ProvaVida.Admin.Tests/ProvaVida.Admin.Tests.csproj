@@ -18,4 +18,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Shared\ProvaVida.Shared.csproj" />
+    <ProjectReference Include="..\..\..\src\Admin\ProvaVida.Admin.Application\ProvaVida.Admin.Application.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -18,4 +18,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Shared\ProvaVida.Shared.csproj" />
+    <ProjectReference Include="..\..\..\src\Api\ProvaVida.Api.Domain\ProvaVida.Api.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Api\ProvaVida.Api.Application\ProvaVida.Api.Application.csproj" />
+  </ItemGroup>
+
 </Project>

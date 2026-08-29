@@ -10,4 +10,10 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\ProvaVida.Shared.csproj" />
+    <ProjectReference Include="..\ProvaVida.Api.Application\ProvaVida.Api.Application.csproj" />
+    <ProjectReference Include="..\ProvaVida.Api.Infrastructure\ProvaVida.Api.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
