@@ -321,6 +321,37 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 | **Clean Architecture** | Dependências apontam para o domínio; domínio sem referências externas |
 | **TDD** | Teste falha primeiro (Red) → implementação mínima (Green) → refactor |
 | **SDD** | Spec (requirements → design → tasks) → aprovação → implementação task a task |
+| **MVVM** | Padrão de apresentação obrigatório no Mobile — View, ViewModel, Model sem acoplamento |
+
+---
+
+## 12. Documentação da API
+
+- **Framework:** Scalar (substitui Swagger UI)
+- Configurado no `Api.Web` — acessível em `/scalar` no ambiente de desenvolvimento
+- Documenta todos os endpoints REST com exemplos de request/response
+
+---
+
+## 13. Padrão MVVM — Mobile
+
+Toda tela do app Mobile segue o padrão MVVM estritamente:
+
+| Camada | Responsabilidade |
+|--------|-----------------|
+| **View** (`.xaml`) | Apenas layout e binding — zero lógica |
+| **ViewModel** | Estado da tela, comandos, chamada de use cases |
+| **Model / Use Case** | Regra de negócio, repositório, lógica de domínio |
+
+- ViewModels implementam `INotifyPropertyChanged` (ou base class equivalente)
+- Navegação via serviço de navegação injetado — sem `Navigation.PushAsync` direto na View
+- Commands via `ICommand` / `RelayCommand`
+
+---
+
+## 14. Referência de Layout — Branch `origin/backup`
+
+Para implementação de telas do Mobile e do Admin, consultar o layout e estrutura visual do projeto original na branch `origin/backup` do repositório. O objetivo é manter consistência visual com o projeto anterior, adaptando a arquitetura sem redesenhar as telas do zero.
 
 ### Workflow SDD por módulo
 
