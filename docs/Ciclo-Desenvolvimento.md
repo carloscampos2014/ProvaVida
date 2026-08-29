@@ -57,7 +57,30 @@ refactor(shared): #12 extrair IRepository para projeto Shared
 
 ---
 
-## 3. Pull Request (feature → dev-refatoracao)
+## 3. E2E Manual (tasks com tela)
+
+Para toda task que envolve uma tela (Mobile ou Admin), o E2E manual é **obrigatório** antes do PR.
+
+```
+1. Rodar o app no target de debug adequado:
+      Mobile → Windows Machine ou Android 15 via WiFi
+      Admin  → Browser local (Blazor Server)
+
+2. Executar o roteiro de teste da tela:
+      Fluxo feliz (caminho esperado)
+      Fluxo de erro (campos inválidos, sem internet, etc.)
+      Navegação (voltar, avançar, redirecionamentos)
+
+3. Aprovação:
+      E2E OK → segue para PR
+      E2E com problema → corrige e repete
+```
+
+O roteiro de teste de cada tela será definido no `tasks.md` do spec da fase correspondente.
+
+---
+
+## 4. Pull Request (feature → dev-refatoracao)
 
 ```
 1. Push da branch feature para o remoto
@@ -67,10 +90,11 @@ refactor(shared): #12 extrair IRepository para projeto Shared
       Base: dev-refatoracao
       Head: feature/<descricao>
       Título: [Fase N.X] Descrição (máx 70 chars)
-      Body: o que foi feito, o que foi testado, Closes #N
+      Body: o que foi feito, testes automatizados, resultado E2E, Closes #N
 
 3. Revisão pelo usuário:
       Verificar Files Changed
+      Confirmar resultado do E2E no body do PR
       Aprovar ou solicitar mudanças
 
 4. Merge após aprovação
@@ -79,7 +103,7 @@ refactor(shared): #12 extrair IRepository para projeto Shared
 
 ---
 
-## 4. Finalização de fase (dev-refatoracao → master)
+## 5. Finalização de fase (dev-refatoracao → master)
 
 ```
 1. Todas as issues da fase fechadas
@@ -128,5 +152,6 @@ feature/fase-2-tela-checkin
 | Branch | `feature/<descricao>` a partir de `dev-refatoracao` |
 | Código | Red → Green → Refactor (TDD) |
 | Commit | `tipo(escopo): #N descrição` |
+| E2E manual | Obrigatório para tasks com tela — aprovado antes do PR |
 | PR | `feature/` → `dev-refatoracao` — revisão obrigatória |
 | Merge fase | `dev-refatoracao` → `master` |
