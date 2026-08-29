@@ -110,8 +110,48 @@ O roteiro de teste de cada tela será definido no `tasks.md` do spec da fase cor
 2. Build e testes passando em dev-refatoracao
 3. PR: dev-refatoracao → master
 4. Revisão e merge
-5. Próxima fase: novo spec → aprovação → issues
+5. GitHub Actions dispara o deploy automaticamente (trigger: push em master)
+6. Próxima fase: novo spec → aprovação → issues
 ```
+
+---
+
+## 6. Deploy (GitHub Actions)
+
+O merge em `master` dispara automaticamente o workflow de deploy da API para a VM Oracle.
+
+### Infraestrutura de destino
+
+| Item | Valor |
+|------|-------|
+| VM | Oracle Cloud — `137.131.209.235` |
+| Service | `provavida-api.service` |
+| Binários | `/opt/provavida/api/` |
+| Porta | `5001` (localhost, via Nginx) |
+| Banco | PostgreSQL 16 — banco `provavida` |
+| Estratégia | Substituição direta da API existente |
+
+### O que o workflow faz
+
+```
+1. Build e testes (dotnet build + dotnet test)
+2. Publish da API (dotnet publish -c Release)
+3. SCP dos binários para /opt/provavida/api/ na VM
+4. Restart do serviço: sudo systemctl restart provavida-api
+5. Health check: verifica se a API respondeu após restart
+```
+
+### Secrets necessários no GitHub
+
+| Secret | Descrição |
+|--------|-----------|
+| `VM_SSH_KEY` | Chave privada SSH para acesso à VM |
+| `VM_HOST` | IP da VM (`137.131.209.235`) |
+| `VM_PORT` | Porta SSH (`22022`) |
+| `VM_USER` | Usuário (`ubuntu`) |
+
+> Os secrets são configurados em **GitHub → Settings → Secrets and variables → Actions**.
+> O workflow de CI/CD será criado como parte da Fase 0 (scaffolding).
 
 ---
 
@@ -153,5 +193,6 @@ feature/fase-2-tela-checkin
 | Código | Red → Green → Refactor (TDD) |
 | Commit | `tipo(escopo): #N descrição` |
 | E2E manual | Obrigatório para tasks com tela — aprovado antes do PR |
-| PR | `feature/` → `dev-refatoracao` — revisão obrigatória |
-| Merge fase | `dev-refatoracao` → `master` |
+| PR feature | `feature/` → `dev-refatoracao` — revisão obrigatória |
+| PR fase | `dev-refatoracao` → `master` — revisão obrigatória |
+| Deploy | Automático via GitHub Actions no merge em `master` |
