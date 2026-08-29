@@ -1,4 +1,56 @@
 <Solution>
+  <Folder Name="/.kiro/hooks/">
+    <File Path=".kiro/hooks/pr-merged-cleanup.json" />
+    <File Path=".kiro/hooks/session-summary.json" />
+    <File Path=".kiro/hooks/spec-task-post-exec.json" />
+    <File Path=".kiro/hooks/spec-task-pre-exec.json" />
+  </Folder>
+  <Folder Name="/.kiro/knowledge/">
+    <File Path=".kiro/knowledge/sessions/session-2026-08-29.md" />
+  </Folder>
+  <Folder Name="/.kiro/settings/">
+    <File Path=".kiro/settings/mcp.json" />
+  </Folder>
+  <Folder Name="/.kiro/specs/fase-0-scaffolding/">
+    <File Path=".kiro/specs/fase-0-scaffolding/design.md" />
+    <File Path=".kiro/specs/fase-0-scaffolding/requirements.md" />
+    <File Path=".kiro/specs/fase-0-scaffolding/tasks.md" />
+    <File Path=".kiro/specs/fase-0-scaffolding/tasks.meta.json" />
+  </Folder>
+  <Folder Name="/.kiro/steering/">
+    <File Path=".kiro/steering/arquitetura.md" />
+    <File Path=".kiro/steering/briefing-detalhado.md" />
+    <File Path=".kiro/steering/git-commits.md" />
+    <File Path=".kiro/steering/harness-output-formatter.md" />
+    <File Path=".kiro/steering/vm-oracle.md" />
+    <File Path=".kiro/steering/workflow-aprovacao.md" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="docs/Arquitetura.md" />
+    <File Path="docs/Ciclo-Desenvolvimento.md" />
+    <File Path="docs/Cronograma.md" />
+    <File Path="docs/Fluxo-Alterar-Conta.md" />
+    <File Path="docs/Fluxo-Cadastrar-Conta.md" />
+    <File Path="docs/Fluxo-Checkin.md" />
+    <File Path="docs/Fluxo-Excluir-Conta.md" />
+    <File Path="docs/Fluxo-Heartbeat.md" />
+    <File Path="docs/Fluxo-Inicialização.md" />
+    <File Path="docs/Fluxo-Login.md" />
+    <File Path="docs/Fluxo-Logoff.md" />
+    <File Path="docs/Fluxo-Sincronizar-Dados.md" />
+    <File Path="docs/ProvaVida.md" />
+  </Folder>
+  <Folder Name="/docs/resources/">
+    <File Path="docs/resources/appicon.svg" />
+    <File Path="docs/resources/appiconfg.svg" />
+    <File Path="docs/resources/Colors.xaml" />
+    <File Path="docs/resources/splash.svg" />
+    <File Path="docs/resources/Styles.xaml" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+  </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Admin/">
     <Project Path="src/Admin/ProvaVida.Admin.Application/ProvaVida.Admin.Application.csproj" />
