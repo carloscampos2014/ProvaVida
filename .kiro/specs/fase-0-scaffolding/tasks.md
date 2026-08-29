@@ -110,14 +110,21 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
 
 ## Task Dependency Graph
 
-```
-1 → 2 → 3 → 4 → 5
-                ↘
-                  7 → 9 → 10 → 11 → 12
-                ↗
-            4 → 6 → 8
-
-13 e 14 podem ser feitas após a Task 1 (independentes das demais)
+```json
+{
+  "waves": [
+    { "wave": 1, "tasks": [1] },
+    { "wave": 2, "tasks": [2] },
+    { "wave": 3, "tasks": [3] },
+    { "wave": 4, "tasks": [4, 13, 14] },
+    { "wave": 5, "tasks": [5, 6] },
+    { "wave": 6, "tasks": [7, 8] },
+    { "wave": 7, "tasks": [9] },
+    { "wave": 8, "tasks": [10] },
+    { "wave": 9, "tasks": [11] },
+    { "wave": 10, "tasks": [12] }
+  ]
+}
 ```
 
 ```mermaid
@@ -127,6 +134,8 @@ graph LR
   T3 --> T4[4-repository]
   T4 --> T5[5-dbup-api]
   T4 --> T6[6-dbup-mobile]
+  T4 --> T13[13-ci]
+  T4 --> T14[14-deploy]
   T5 --> T7[7-repos-postgres]
   T6 --> T8[8-repos-sqlite]
   T7 --> T9[9-repos-admin]
@@ -134,8 +143,6 @@ graph LR
   T9 --> T10[10-startup-api]
   T10 --> T11[11-startup-mobile]
   T11 --> T12[12-startup-admin]
-  T1 --> T13[13-ci]
-  T1 --> T14[14-deploy]
 ```
 
 ## Notes
