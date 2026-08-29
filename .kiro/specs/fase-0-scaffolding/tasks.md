@@ -1,177 +1,148 @@
-# Tasks — Fase 0: Scaffolding
+# Implementation Plan
 
-> Cada task é uma issue no GitHub com label `fase-0-scaffolding`.
-> Branch: `feature/fase-0-<descricao>` a partir de `dev-refatoracao`.
-> Critério de conclusão: build passando + testes passando + PR aprovado.
+## Overview
 
----
+Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Clean Architecture, Result pattern, repositórios Dapper com base genérica, DbUp migrations (PostgreSQL e SQLite), DI e startup das 3 apps (API, Mobile MAUI, Admin Blazor) e workflows CI/CD via GitHub Actions.
 
-- [ ] **Task 0.1 — Criar solução ProvaVida.slnx e estrutura de pastas**
+## Tasks
 
-  Branch: `feature/fase-0-criar-solucao-slnx`
-
+- [ ] 1. Criar solução ProvaVida.slnx e estrutura de pastas
   - Criar o arquivo `ProvaVida.slnx` na raiz do repositório
   - Criar a estrutura de pastas: `src/Api/`, `src/Mobile/`, `src/Admin/`, `src/Shared/`, `tests/`
   - Criar todos os 15 projetos `.csproj` conforme tabela do design
   - Adicionar todos os projetos ao `.slnx`
   - Todos os projetos targeting `net10.0` (MAUI: `net10.0-android;net10.0-ios;net10.0-windows10.0.19041.0`)
-  - Critério: `dotnet build ProvaVida.slnx` conclui sem erros
+  - Branch: `feature/fase-0-criar-solucao-slnx`
+  - _Requirements: RF-01_
 
----
-
-- [ ] **Task 0.2 — Configurar referências entre projetos (Clean Architecture)**
-
-  Branch: `feature/fase-0-referencias-clean-architecture`
-
+- [ ] 2. Configurar referências entre projetos (Clean Architecture)
   - Configurar `<ProjectReference>` em cada `.csproj` conforme diagrama de dependências do design
-  - `Domain` sem referências de projeto
-  - `Application` referencia apenas `Domain` e `Shared`
-  - `Infrastructure` referencia `Application` e `Domain`
-  - `Web/App` referencia `Application` e `Infrastructure` (apenas para DI)
-  - Critério: `dotnet build` passa, nenhuma referência circular
+  - `Domain` sem referências de projeto; `Application` referencia `Domain` e `Shared`; `Infrastructure` referencia `Application` e `Domain`; `Web/App` referencia `Application` e `Infrastructure`
+  - Branch: `feature/fase-0-referencias-clean-architecture`
+  - _Requirements: RF-02_
 
----
-
-- [ ] **Task 0.3 — Implementar Result e Result\<T\> no Shared**
-
-  Branch: `feature/fase-0-result-pattern`
-
+- [ ] 3. Implementar Result e Result\<T\> no Shared
   - Criar `src/Shared/Common/Result.cs` com `Success`, `MessageErro`, `Ok()`, `Fail(string)`
   - Criar `src/Shared/Common/ResultT.cs` herdando de `Result` com `Data`, `Ok(T)`, `Fail(string)`
   - XML docs em ambas as classes
   - Testes TDD: `Result_Ok_DeveRetornarSuccessTrue`, `Result_Fail_DeveRetornarSuccessFalseComMensagem`, `ResultT_Ok_DeveRetornarSuccessTrueComDado`, `ResultT_Fail_DeveRetornarSuccessFalseSemDado`
-  - Critério: 4 testes passando, `dotnet build` passa
+  - Branch: `feature/fase-0-result-pattern`
+  - _Requirements: RF-05_
 
----
-
-- [ ] **Task 0.4 — Implementar IRepository\<T\> e DapperRepository\<T\> no Shared**
-
-  Branch: `feature/fase-0-repository-base`
-
+- [ ] 4. Implementar IRepository\<T\> e DapperRepository\<T\> no Shared
   - Criar `IRepository.cs` com `GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`
   - Criar `DapperRepository.cs` como classe abstrata base com Dapper
   - Criar `IUsuarioRepository.cs` e `ICheckinRepository.cs` (interfaces vazias por ora)
   - XML docs em todas as interfaces e classe base
-  - Critério: `dotnet build` passa, teste de contrato passando
+  - Branch: `feature/fase-0-repository-base`
+  - _Requirements: RF-04_
 
----
-
-- [ ] **Task 0.5 — Configurar DbUp + migrations iniciais para API (PostgreSQL)**
-
-  Branch: `feature/fase-0-dbup-api-postgresql`
-
+- [ ] 5. Configurar DbUp + migrations iniciais para API (PostgreSQL)
   - Adicionar NuGet `DbUp-PostgreSQL` em `Api.Infrastructure`
   - Criar `DatabaseMigrator.cs` em `Api.Infrastructure/Data/`
   - Criar scripts `V001__criar_tabela_usuarios.sql` e `V002__criar_tabela_checkins.sql` como `EmbeddedResource`
   - Registrar execução das migrations no startup da API
-  - Critério: `dotnet build` passa, migrations executam no startup
+  - Branch: `feature/fase-0-dbup-api-postgresql`
+  - _Requirements: RF-03_
 
----
-
-- [ ] **Task 0.6 — Configurar DbUp + migrations iniciais para Mobile (SQLite)**
-
-  Branch: `feature/fase-0-dbup-mobile-sqlite`
-
+- [ ] 6. Configurar DbUp + migrations iniciais para Mobile (SQLite)
   - Adicionar NuGet `DbUp-SQLite` e `Microsoft.Data.Sqlite` em `Mobile.Infrastructure`
   - Criar `DatabaseMigrator.cs` em `Mobile.Infrastructure/Data/`
   - Criar scripts `V001__criar_tabela_usuarios.sql` e `V002__criar_tabela_checkins.sql` como `EmbeddedResource`
-  - Caminho do SQLite via `FileSystem.AppDataDirectory`
-  - Registrar execução no startup do MAUI
-  - Critério: `dotnet build` passa para o projeto Mobile
+  - Caminho do SQLite via `FileSystem.AppDataDirectory`; registrar no startup do MAUI
+  - Branch: `feature/fase-0-dbup-mobile-sqlite`
+  - _Requirements: RF-03_
 
----
-
-- [ ] **Task 0.7 — Implementar repositórios concretos PostgreSQL (API)**
-
-  Branch: `feature/fase-0-repositorios-postgres-api`
-
-  - Criar entidades `Usuario` e `Checkin` em `Api.Domain` (POCOs puros)
-  - Criar `PostgresUsuarioRepository.cs` implementando `IUsuarioRepository`, herdando `DapperRepository<Usuario>`
-  - Criar `PostgresCheckinRepository.cs` implementando `ICheckinRepository`, herdando `DapperRepository<Checkin>`
+- [ ] 7. Implementar repositórios concretos PostgreSQL (API)
+  - Criar entidades `Usuario` e `Checkin` em `Api.Domain` (POCOs puros, sem atributos de ORM)
+  - Criar `PostgresUsuarioRepository.cs` e `PostgresCheckinRepository.cs` herdando `DapperRepository<T>`
   - Teste TDD: `PostgresUsuarioRepository_GetByIdAsync_DeveRetornarNull_QuandoNaoEncontrado`
-  - Critério: testes passando, `dotnet build` passa
+  - Branch: `feature/fase-0-repositorios-postgres-api`
+  - _Requirements: RF-04_
 
----
-
-- [ ] **Task 0.8 — Implementar repositórios concretos SQLite (Mobile)**
-
-  Branch: `feature/fase-0-repositorios-sqlite-mobile`
-
+- [ ] 8. Implementar repositórios concretos SQLite (Mobile)
   - Criar entidades `Usuario` e `Checkin` em `Mobile.Domain` (POCOs puros)
-  - Criar `SqliteUsuarioRepository.cs` e `SqliteCheckinRepository.cs`
+  - Criar `SqliteUsuarioRepository.cs` e `SqliteCheckinRepository.cs` herdando `DapperRepository<T>`
   - Teste TDD: `SqliteUsuarioRepository_GetByIdAsync_DeveRetornarNull_QuandoNaoEncontrado`
-  - Critério: teste passando, `dotnet build` passa
+  - Branch: `feature/fase-0-repositorios-sqlite-mobile`
+  - _Requirements: RF-04_
 
----
-
-- [ ] **Task 0.9 — Implementar repositórios Admin (PostgreSQL direto)**
-
-  Branch: `feature/fase-0-repositorios-admin`
-
-  - Criar `AdminUsuarioRepository.cs` implementando `IUsuarioRepository`, herdando `DapperRepository<Usuario>`
-  - Por enquanto apenas `GetAllAsync` e `GetByIdAsync`
+- [ ] 9. Implementar repositórios Admin (PostgreSQL direto)
+  - Criar `AdminUsuarioRepository.cs` implementando `IUsuarioRepository`, com `GetAllAsync` e `GetByIdAsync`
   - XML docs
-  - Critério: `dotnet build` passa
+  - Branch: `feature/fase-0-repositorios-admin`
+  - _Requirements: RF-04_
 
----
-
-- [ ] **Task 0.10 — Configurar DI e startup da API**
-
-  Branch: `feature/fase-0-di-startup-api`
-
+- [ ] 10. Configurar DI e startup da API
   - Configurar `Program.cs`: `IDbConnection` → `NpgsqlConnection`, repositórios, DbUp, Scalar (`/scalar`), JWT middleware
-  - `appsettings.json` e `appsettings.Development.json` sem secrets (apenas via env var)
-  - Criar `global.json` na raiz com `sdk.version: "10.0"`
-  - Critério: API sobe sem erro, `/scalar` acessível, `dotnet build` passa
+  - `appsettings.json` sem secrets (apenas env vars); criar `global.json` com `sdk.version: "10.0"`
+  - Branch: `feature/fase-0-di-startup-api`
+  - _Requirements: RF-06, RF-08_
 
----
-
-- [ ] **Task 0.11 — Configurar DI, resources e startup do Mobile (MAUI)**
-
-  Branch: `feature/fase-0-di-startup-mobile`
-
+- [ ] 11. Configurar DI, resources e startup do Mobile (MAUI)
   - Configurar `MauiProgram.cs`: `IDbConnection` → `SqliteConnection`, repositórios, DbUp
-  - Nome do app: **"Enzojb Prova de Vida"** (`ApplicationTitle` e `DisplayName` no `.csproj`)
-  - Copiar resources de `docs/resources/`: `appicon.svg` e `appiconfg.svg` → `AppIcon/`, `splash.svg` → `Splash/`, `Colors.xaml` e `Styles.xaml` → `Styles/`
+  - Nome do app: "Enzojb Prova de Vida" (`ApplicationTitle` e `DisplayName` no `.csproj`)
+  - Copiar resources de `docs/resources/`: ícones → `AppIcon/`, splash → `Splash/`, estilos → `Styles/`
   - Tela inicial placeholder (`ContentPage` vazio)
   - **E2E Manual (Windows):** app abre sem crash, banco SQLite criado com tabelas `usuarios` e `checkins`
-  - Critério: E2E aprovado, `dotnet build` passa para target Windows
+  - Branch: `feature/fase-0-di-startup-mobile`
+  - _Requirements: RF-06_
 
----
-
-- [ ] **Task 0.12 — Configurar DI, Basic Auth e startup do Admin**
-
-  Branch: `feature/fase-0-di-startup-admin`
-
-  - Configurar `Program.cs`: `IDbConnection` → `NpgsqlConnection`, repositórios, HTTP Basic Auth (valida `ADMIN_USUARIO` e `ADMIN_SENHA` env vars), porta `5019`
+- [ ] 12. Configurar DI, Basic Auth e startup do Admin
+  - Configurar `Program.cs`: `IDbConnection` → `NpgsqlConnection`, repositórios, HTTP Basic Auth (env vars `ADMIN_USUARIO` e `ADMIN_SENHA`), porta `5019`
   - Página inicial Blazor placeholder: "ProvaVida Admin — Em construção"
-  - **E2E Manual:** browser pede credenciais → corretas abrem placeholder → erradas retornam 401
-  - Critério: E2E aprovado, `dotnet build` passa
+  - **E2E Manual:** credenciais corretas → placeholder; erradas → 401
+  - Branch: `feature/fase-0-di-startup-admin`
+  - _Requirements: RF-06, RF-09_
 
----
+- [ ] 13. Criar workflow CI (GitHub Actions)
+  - Criar `.github/workflows/ci.yml`; trigger: push em qualquer branch + pull_request
+  - Passos: checkout → setup .NET 10 → restore → build → test (excluindo projetos MAUI)
+  - Branch: `feature/fase-0-github-actions-ci`
+  - _Requirements: RF-07_
 
-- [ ] **Task 0.13 — Criar workflow CI (GitHub Actions)**
-
-  Branch: `feature/fase-0-github-actions-ci`
-
-  - Criar `.github/workflows/ci.yml`
-  - Trigger: `push` em qualquer branch + `pull_request`
-  - Passos: checkout → setup .NET 10 → restore → build → test
-  - Excluir projetos MAUI do build do CI (requer workloads específicos)
-  - Critério: CI passa no GitHub, build e testes verdes
-
----
-
-- [ ] **Task 0.14 — Criar workflow Deploy API (GitHub Actions)**
-
-  Branch: `feature/fase-0-github-actions-deploy`
-
-  - Criar `.github/workflows/deploy-api.yml`
-  - Trigger: `push` em `master`
+- [ ] 14. Criar workflow Deploy API (GitHub Actions)
+  - Criar `.github/workflows/deploy-api.yml`; trigger: push em `master`
   - Passos: checkout → setup .NET 10 → restore → build → test → publish → SCP para VM → restart `provavida-api` → health check
-  - Usa secrets: `SSH_KEY`, `SSH_HOST`, `SSH_PORT`, `SSH_USER`
-  - Critério: deploy funciona após merge em `master`, API respondendo na VM
+  - Secrets: `SSH_KEY`, `SSH_HOST`, `SSH_PORT`, `SSH_USER`
+  - Branch: `feature/fase-0-github-actions-deploy`
+  - _Requirements: RF-07_
 
----
+## Task Dependency Graph
 
-> **Ordem recomendada:** 0.1 → 0.2 → 0.3 → 0.4 → (0.5 ∥ 0.6) → (0.7 ∥ 0.8) → 0.9 → 0.10 → 0.11 → 0.12 → (0.13 ∥ 0.14)
+```
+1 → 2 → 3 → 4 → 5
+                ↘
+                  7 → 9 → 10 → 11 → 12
+                ↗
+            4 → 6 → 8
+
+13 e 14 podem ser feitas após a Task 1 (independentes das demais)
+```
+
+```mermaid
+graph LR
+  T1[1-slnx] --> T2[2-refs]
+  T2 --> T3[3-result]
+  T3 --> T4[4-repository]
+  T4 --> T5[5-dbup-api]
+  T4 --> T6[6-dbup-mobile]
+  T5 --> T7[7-repos-postgres]
+  T6 --> T8[8-repos-sqlite]
+  T7 --> T9[9-repos-admin]
+  T8 --> T9
+  T9 --> T10[10-startup-api]
+  T10 --> T11[11-startup-mobile]
+  T11 --> T12[12-startup-admin]
+  T1 --> T13[13-ci]
+  T1 --> T14[14-deploy]
+```
+
+## Notes
+
+- Branch padrão: `feature/fase-0-<descricao>` a partir de `dev-refatoracao`
+- Critério global de conclusão por task: build passando + testes passando + PR aprovado
+- Tasks com **E2E Manual** (11 e 12) requerem aprovação visual antes do PR
+- Tasks 5 e 6 podem ser desenvolvidas em paralelo após a Task 4
+- Tasks 7 e 8 podem ser desenvolvidas em paralelo após suas respectivas dependencies
+- Tasks 13 e 14 podem ser feitas a qualquer momento após a Task 1
