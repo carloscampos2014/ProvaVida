@@ -6,7 +6,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
 
 ## Tasks
 
-- [ ] 1. Criar solução ProvaVida.slnx e estrutura de pastas
+- [x] 1. Criar solução ProvaVida.slnx e estrutura de pastas
   - Criar o arquivo `ProvaVida.slnx` na raiz do repositório
   - Criar a estrutura de pastas: `src/Api/`, `src/Mobile/`, `src/Admin/`, `src/Shared/`, `tests/`
   - Criar todos os 15 projetos `.csproj` conforme tabela do design
