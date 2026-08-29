@@ -36,6 +36,7 @@
 
 | Componente | Tecnologia | Observação |
 |------------|------------|------------|
+| Runtime | **.NET 10** | Todos os projetos — API, Mobile, Admin, Shared, Tests |
 | Mobile | .NET MAUI (C#) | Android e iOS — online preferencial, fallback offline |
 | API | ASP.NET Core (C#) | REST API |
 | Admin | Blazor Server (C#) | Painel interno |
@@ -45,7 +46,7 @@
 | Migrations | DbUp | Scripts SQL versionados |
 | Auth Mobile→API | JWT | Access token de curta duração |
 | Auth Admin | HTTP Basic Auth | Acesso via SSH Tunnel |
-| Testes | xUnit + Moq | TDD |
+| Testes | xUnit + FluentAssertions + Moq + Bogus | TDD |
 | Workflow | SDD (Spec Driven Development) | Spec → aprovação → implementação |
 
 ---
