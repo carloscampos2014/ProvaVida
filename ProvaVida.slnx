@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Admin/">
+    <Project Path="src/Admin/ProvaVida.Admin.Application/ProvaVida.Admin.Application.csproj" />
+    <Project Path="src/Admin/ProvaVida.Admin.Infrastructure/ProvaVida.Admin.Infrastructure.csproj" />
+    <Project Path="src/Admin/ProvaVida.Admin.Web/ProvaVida.Admin.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/ProvaVida.Api.Application/ProvaVida.Api.Application.csproj" />
+    <Project Path="src/Api/ProvaVida.Api.Domain/ProvaVida.Api.Domain.csproj" />
+    <Project Path="src/Api/ProvaVida.Api.Infrastructure/ProvaVida.Api.Infrastructure.csproj" />
+    <Project Path="src/Api/ProvaVida.Api.Web/ProvaVida.Api.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Mobile/">
+    <Project Path="src/Mobile/ProvaVida.Mobile.App/ProvaVida.Mobile.App.csproj" />
+    <Project Path="src/Mobile/ProvaVida.Mobile.Application/ProvaVida.Mobile.Application.csproj" />
+    <Project Path="src/Mobile/ProvaVida.Mobile.Domain/ProvaVida.Mobile.Domain.csproj" />
+    <Project Path="src/Mobile/ProvaVida.Mobile.Infrastructure/ProvaVida.Mobile.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/ProvaVida.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Admin/">
+    <Project Path="tests/Admin/ProvaVida.Admin.Tests/ProvaVida.Admin.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Api/">
+    <Project Path="tests/Api/ProvaVida.Api.Tests/ProvaVida.Api.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Mobile/">
+    <Project Path="tests/Mobile/ProvaVida.Mobile.Tests/ProvaVida.Mobile.Tests.csproj" />
+  </Folder>
+</Solution>
