@@ -41,9 +41,13 @@ ProvaVida.slnx
 │   │   │   │   └── DatabaseMigrator.cs
 │   │   │   └── ProvaVida.Mobile.Infrastructure.csproj
 │   │   └── ProvaVida.Mobile.App/
+│   │       ├── Resources/
+│   │       │   ├── AppIcon/        ← appicon.svg + appiconfg.svg (de docs/resources/)
+│   │       │   ├── Splash/         ← splash.svg (de docs/resources/)
+│   │       │   └── Styles/         ← Colors.xaml + Styles.xaml (de docs/resources/)
 │   │       ├── MauiProgram.cs
 │   │       ├── App.xaml / App.xaml.cs
-│   │       └── ProvaVida.Mobile.App.csproj
+│   │       └── ProvaVida.Mobile.App.csproj  ← ApplicationTitle: "Enzojb Prova de Vida"
 │   ├── Admin/
 │   │   ├── ProvaVida.Admin.Application/
 │   │   │   └── ProvaVida.Admin.Application.csproj

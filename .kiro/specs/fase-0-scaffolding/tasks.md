@@ -226,6 +226,13 @@
   - `IDbConnection` → `SqliteConnection` (caminho via `FileSystem.AppDataDirectory`)
   - Repositórios SQLite registrados
   - DbUp migrations no startup
+- Configurar o projeto MAUI com o nome de exibição **"Enzojb Prova de Vida"** (`ApplicationTitle` e `DisplayName` no `.csproj`)
+- Copiar resources de `docs/resources/` para `Resources/` do projeto MAUI:
+  - `appicon.svg` → `Resources/AppIcon/`
+  - `appiconfg.svg` → `Resources/AppIcon/` (foreground)
+  - `splash.svg` → `Resources/Splash/`
+  - `Colors.xaml` → `Resources/Styles/`
+  - `Styles.xaml` → `Resources/Styles/`
 - App deve iniciar sem crash no target Windows
 - Tela inicial placeholder (apenas `ContentPage` vazio com título "ProvaVida")
 
