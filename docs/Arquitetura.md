@@ -342,6 +342,99 @@ Enviado via SMTP do Gmail usando `EMAIL_HOST` (`smtp.gmail.com`), `EMAIL_PORT` (
 | **TDD** | Teste falha primeiro (Red) → implementação mínima (Green) → refactor |
 | **SDD** | Spec (requirements → design → tasks) → aprovação → implementação task a task |
 | **MVVM** | Padrão de apresentação obrigatório no Mobile — View, ViewModel, Model sem acoplamento |
+| **CQRS simples** | Separação de interfaces de leitura e escrita — sem MediatR |
+
+---
+
+## 16. Padrões de Geração de Código
+
+### Estrutura de arquivos
+
+- **Uma classe por arquivo `.cs`** — sem exceção. Nome do arquivo igual ao nome da classe.
+- **XML docs obrigatório** em todas as classes e interfaces públicas (`/// <summary>`).
+
+### Result Pattern
+
+Dois tipos complementares definidos no `Shared`:
+
+```csharp
+// Result — operações sem retorno de dado
+public class Result
+{
+    public bool Success { get; }
+    public string? MessageErro { get; }
+    public static Result Ok() => new(true, null);
+    public static Result Fail(string erro) => new(false, erro);
+}
+
+// Result<T> — operações que retornam dado
+public class Result<T> : Result
+{
+    public T? Data { get; }
+    public static Result<T> Ok(T data) => new(true, null, data);
+    public static new Result<T> Fail(string erro) => new(false, erro, default);
+}
+```
+
+Use `Result` quando não há dado de retorno (cadastro, exclusão, logoff). Use `Result<T>` quando há dado (login retorna token, consulta retorna entidade).
+
+### CQRS simples
+
+Separação de interfaces de leitura e escrita — sem MediatR:
+
+```
+IUsuarioCommandService  → métodos que alteram estado (cadastrar, alterar, excluir)
+IUsuarioQueryService    → métodos de leitura (buscar, listar)
+```
+
+Cada interface em seu próprio arquivo. Implementações concretas na camada `Application`.
+
+### Notifications (Domain Notifications)
+
+Para agregar múltiplos erros de validação sem lançar exceção:
+
+```
+INotificationService   → AddNotification(campo, mensagem)
+                       → HasNotifications → bool
+                       → GetNotifications → IReadOnlyList<Notification>
+```
+
+Usado em conjunto com FluentValidation — o validator adiciona notificações, o use case verifica antes de prosseguir.
+
+### Validação
+
+- **FluentValidation** para todos os inputs (Commands, DTOs de request)
+- Validators em classes separadas: `CadastrarUsuarioValidator`, etc.
+- Sem validação inline no use case ou controller
+
+### Logs de erro
+
+- `ILogger<T>` injetado via DI em todas as classes que executam operações de infraestrutura
+- `logger.LogError(ex, "mensagem descritiva {parametro}", valor)` para exceções
+- `logger.LogWarning(...)` para falhas de negócio esperadas
+- Nunca swallow de exceção sem log
+
+### ViewModel (Mobile)
+
+- **Proibido** qualquer referência a `IDbConnection`, repositório ou Dapper no ViewModel
+- ViewModel acessa apenas `Application` (use cases / query services) via interfaces injetadas
+- Toda lógica de dados fica na camada `Application` ou `Infrastructure`
+
+### Mapeamento
+
+- **AutoMapper proibido**
+- Mapeamentos via **métodos de extensão estáticos** (`ToDto()`, `ToEntity()`, `ToViewModel()`)
+- Cada mapeamento em arquivo próprio: `UsuarioMappingExtensions.cs`
+
+### Stack de testes
+
+| Biblioteca | Uso |
+|------------|-----|
+| **xUnit** | Framework de testes |
+| **FluentAssertions** | Assertions expressivas (`result.Should().BeTrue()`) |
+| **Moq** | Mocks de interfaces (`Mock<IUsuarioRepository>`) |
+| **Bogus** | Geração de dados fake realistas (`Faker<Usuario>`) |
+| **Fixtures** | Dados compartilhados entre testes (`IClassFixture<T>`) |
 
 ---
 
