@@ -39,7 +39,7 @@ public abstract class DapperRepository<T> : IRepository<T>
     }
 
     /// <inheritdoc/>
-    public async Task<Result<T>> GetByIdAsync(Guid id)
+    public virtual async Task<Result<T>> GetByIdAsync(Guid id)
     {
         try
         {
@@ -56,7 +56,7 @@ public abstract class DapperRepository<T> : IRepository<T>
     }
 
     /// <inheritdoc/>
-    public async Task<Result<IEnumerable<T>>> GetAllAsync()
+    public virtual async Task<Result<IEnumerable<T>>> GetAllAsync()
     {
         try
         {
@@ -71,7 +71,7 @@ public abstract class DapperRepository<T> : IRepository<T>
     }
 
     /// <inheritdoc/>
-    public async Task<Result> UpsertAsync(T entity)
+    public virtual async Task<Result> UpsertAsync(T entity)
     {
         try
         {
@@ -86,7 +86,7 @@ public abstract class DapperRepository<T> : IRepository<T>
     }
 
     /// <inheritdoc/>
-    public async Task<Result> DeleteAsync(Guid id)
+    public virtual async Task<Result> DeleteAsync(Guid id)
     {
         try
         {
