@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Moq;
 using ProvaVida.Api.Infrastructure.Repositories;
+using ProvaVida.Shared.Common;
 using ProvaVida.Shared.Entities;
 using ProvaVida.Shared.Repositories;
 
@@ -11,17 +12,15 @@ namespace ProvaVida.Api.Tests.Repositories;
 /// </summary>
 public class PostgresCheckinRepositoryTests
 {
+    // ── Caminhos de sucesso (via fakes) ────────────────────────────────────
+
     [Fact]
     public async Task GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado()
     {
-        // Arrange
-        var mockFactory = new Mock<IDbConnectionFactory>();
-        var repo = new FakeNotFoundCheckinRepository(mockFactory.Object);
+        var repo = new FakeNotFoundCheckinRepository(new Mock<IDbConnectionFactory>().Object);
 
-        // Act
         var result = await repo.GetByIdAsync(Guid.NewGuid());
 
-        // Assert
         result.Success.Should().BeFalse();
         result.MessageErro.Should().NotBeNullOrWhiteSpace();
     }
@@ -29,30 +28,81 @@ public class PostgresCheckinRepositoryTests
     [Fact]
     public async Task UpsertAsync_DeveRetornarSuccess_QuandoConexaoOk()
     {
-        // Arrange
-        var mockFactory = new Mock<IDbConnectionFactory>();
-        var repo = new FakeSuccessCheckinRepository(mockFactory.Object);
-        var checkin = CriarCheckinValido();
+        var repo = new FakeSuccessCheckinRepository(new Mock<IDbConnectionFactory>().Object);
 
-        // Act
-        var result = await repo.UpsertAsync(checkin);
+        var result = await repo.UpsertAsync(CriarCheckinValido());
 
-        // Assert
         result.Success.Should().BeTrue();
     }
 
     [Fact]
     public async Task DeleteAsync_DeveRetornarSuccess_QuandoConexaoOk()
     {
-        // Arrange
-        var mockFactory = new Mock<IDbConnectionFactory>();
-        var repo = new FakeSuccessCheckinRepository(mockFactory.Object);
+        var repo = new FakeSuccessCheckinRepository(new Mock<IDbConnectionFactory>().Object);
 
-        // Act
         var result = await repo.DeleteAsync(Guid.NewGuid());
 
-        // Assert
         result.Success.Should().BeTrue();
+    }
+
+    // ── Caminhos de erro — exercita o bloco catch do DapperRepository ──────
+
+    [Fact]
+    public async Task GetByIdAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresCheckinRepository(factory);
+
+        var result = await repo.GetByIdAsync(Guid.NewGuid());
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    [Fact]
+    public async Task GetAllAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresCheckinRepository(factory);
+
+        var result = await repo.GetAllAsync();
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    [Fact]
+    public async Task UpsertAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresCheckinRepository(factory);
+
+        var result = await repo.UpsertAsync(CriarCheckinValido());
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    [Fact]
+    public async Task DeleteAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresCheckinRepository(factory);
+
+        var result = await repo.DeleteAsync(Guid.NewGuid());
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+
+    private static IDbConnectionFactory CriarFactoryQueExplode()
+    {
+        var mock = new Mock<IDbConnectionFactory>();
+        mock.Setup(f => f.Create())
+            .Throws(new InvalidOperationException("Conexão inválida"));
+        return mock.Object;
     }
 
     private static Checkin CriarCheckinValido() => new()
@@ -67,33 +117,31 @@ public class PostgresCheckinRepositoryTests
         CriadoEm = DateTimeOffset.UtcNow
     };
 
-    // --- Fakes ---
+    // ── Fakes ──────────────────────────────────────────────────────────────
 
-    private class FakeNotFoundCheckinRepository : PostgresCheckinRepository
+    private class FakeNotFoundCheckinRepository(IDbConnectionFactory factory)
+        : PostgresCheckinRepository(factory)
     {
-        public FakeNotFoundCheckinRepository(IDbConnectionFactory factory) : base(factory) { }
-
-        public override async Task<ProvaVida.Shared.Common.Result<Checkin>> GetByIdAsync(Guid id)
+        public override async Task<Result<Checkin>> GetByIdAsync(Guid id)
         {
             await Task.CompletedTask;
-            return ProvaVida.Shared.Common.Result<Checkin>.Fail("Entidade não encontrada");
+            return Result<Checkin>.Fail("Entidade não encontrada");
         }
     }
 
-    private class FakeSuccessCheckinRepository : PostgresCheckinRepository
+    private class FakeSuccessCheckinRepository(IDbConnectionFactory factory)
+        : PostgresCheckinRepository(factory)
     {
-        public FakeSuccessCheckinRepository(IDbConnectionFactory factory) : base(factory) { }
-
-        public override async Task<ProvaVida.Shared.Common.Result> UpsertAsync(Checkin entity)
+        public override async Task<Result> UpsertAsync(Checkin entity)
         {
             await Task.CompletedTask;
-            return ProvaVida.Shared.Common.Result.Ok();
+            return Result.Ok();
         }
 
-        public override async Task<ProvaVida.Shared.Common.Result> DeleteAsync(Guid id)
+        public override async Task<Result> DeleteAsync(Guid id)
         {
             await Task.CompletedTask;
-            return ProvaVida.Shared.Common.Result.Ok();
+            return Result.Ok();
         }
     }
 }

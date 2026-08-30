@@ -21,9 +21,6 @@ public class PostgresRepositoryIntegrationTests : IAsyncLifetime
 
     public PostgresRepositoryIntegrationTests()
     {
-        // Configura o endpoint Docker explicitamente para WSL2 via TCP.
-        // O Testcontainers não lê DOCKER_HOST automaticamente em todos os cenários;
-        // WithDockerEndpoint garante que o endpoint correto seja usado.
         var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST")
             ?? "tcp://localhost:2375";
 
@@ -50,21 +47,19 @@ public class PostgresRepositoryIntegrationTests : IAsyncLifetime
         await _postgres.StopAsync();
     }
 
+    // ── Usuario ────────────────────────────────────────────────────────────
+
     [Fact]
     public async Task PostgresUsuarioRepository_UpsertAsync_DeveInserirERecuperar()
     {
-        // Arrange
         var repo = new PostgresUsuarioRepository(_factory);
         var usuario = CriarUsuarioValido();
 
-        // Act
         var upsertResult = await repo.UpsertAsync(usuario);
         var getResult = await repo.GetByIdAsync(usuario.Id);
 
-        // Assert
         upsertResult.Success.Should().BeTrue(because: upsertResult.MessageErro);
         getResult.Success.Should().BeTrue(because: getResult.MessageErro);
-        getResult.Data.Should().NotBeNull();
         getResult.Data!.Id.Should().Be(usuario.Id);
         getResult.Data.Nome.Should().Be(usuario.Nome);
         getResult.Data.Email.Should().Be(usuario.Email);
@@ -74,46 +69,140 @@ public class PostgresRepositoryIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task PostgresUsuarioRepository_GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado()
     {
-        // Arrange
         var repo = new PostgresUsuarioRepository(_factory);
-        var idInexistente = Guid.NewGuid();
 
-        // Act
-        var result = await repo.GetByIdAsync(idInexistente);
+        var result = await repo.GetByIdAsync(Guid.NewGuid());
 
-        // Assert
         result.Success.Should().BeFalse();
         result.MessageErro.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
+    public async Task PostgresUsuarioRepository_GetAllAsync_DeveRetornarListaComItensInseridos()
+    {
+        var repo = new PostgresUsuarioRepository(_factory);
+        var u1 = CriarUsuarioValido();
+        var u2 = CriarUsuarioValido();
+        await repo.UpsertAsync(u1);
+        await repo.UpsertAsync(u2);
+
+        var result = await repo.GetAllAsync();
+
+        result.Success.Should().BeTrue(because: result.MessageErro);
+        result.Data.Should().NotBeNull();
+        result.Data!.Should().Contain(u => u.Id == u1.Id);
+        result.Data!.Should().Contain(u => u.Id == u2.Id);
+    }
+
+    [Fact]
+    public async Task PostgresUsuarioRepository_DeleteAsync_DeveRemoverEntidade()
+    {
+        var repo = new PostgresUsuarioRepository(_factory);
+        var usuario = CriarUsuarioValido();
+        await repo.UpsertAsync(usuario);
+
+        var deleteResult = await repo.DeleteAsync(usuario.Id);
+        var getResult = await repo.GetByIdAsync(usuario.Id);
+
+        deleteResult.Success.Should().BeTrue(because: deleteResult.MessageErro);
+        getResult.Success.Should().BeFalse("entidade foi removida");
+    }
+
+    [Fact]
+    public async Task PostgresUsuarioRepository_UpsertAsync_DeveAtualizarEntidadeExistente()
+    {
+        var repo = new PostgresUsuarioRepository(_factory);
+        var usuario = CriarUsuarioValido();
+        await repo.UpsertAsync(usuario);
+
+        // Atualiza o nome
+        usuario.Nome = "Nome Atualizado";
+        usuario.AtualizadoEm = DateTimeOffset.UtcNow;
+        await repo.UpsertAsync(usuario);
+
+        var getResult = await repo.GetByIdAsync(usuario.Id);
+
+        getResult.Success.Should().BeTrue();
+        getResult.Data!.Nome.Should().Be("Nome Atualizado");
+    }
+
+    // ── Checkin ────────────────────────────────────────────────────────────
+
+    [Fact]
     public async Task PostgresCheckinRepository_UpsertAsync_DeveInserirERecuperar()
     {
-        // Arrange
+        var usuarioRepo = new PostgresUsuarioRepository(_factory);
+        var checkinRepo = new PostgresCheckinRepository(_factory);
+
+        var usuario = CriarUsuarioValido();
+        await usuarioRepo.UpsertAsync(usuario);
+        var checkin = CriarCheckinValido(usuario.Id);
+
+        var upsertResult = await checkinRepo.UpsertAsync(checkin);
+        var getResult = await checkinRepo.GetByIdAsync(checkin.Id);
+
+        upsertResult.Success.Should().BeTrue(because: upsertResult.MessageErro);
+        getResult.Success.Should().BeTrue(because: getResult.MessageErro);
+        getResult.Data!.Id.Should().Be(checkin.Id);
+        getResult.Data.UsuarioId.Should().Be(usuario.Id);
+        getResult.Data.Latitude.Should().BeApproximately(checkin.Latitude, 0.0001);
+        getResult.Data.Longitude.Should().BeApproximately(checkin.Longitude, 0.0001);
+        getResult.Data.IdentificacaoAparelho.Should().Be(checkin.IdentificacaoAparelho);
+        getResult.Data.Sincronizado.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task PostgresCheckinRepository_GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado()
+    {
+        var repo = new PostgresCheckinRepository(_factory);
+
+        var result = await repo.GetByIdAsync(Guid.NewGuid());
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task PostgresCheckinRepository_GetAllAsync_DeveRetornarListaComItensInseridos()
+    {
         var usuarioRepo = new PostgresUsuarioRepository(_factory);
         var checkinRepo = new PostgresCheckinRepository(_factory);
 
         var usuario = CriarUsuarioValido();
         await usuarioRepo.UpsertAsync(usuario);
 
-        var checkin = CriarCheckinValido(usuario.Id);
+        var c1 = CriarCheckinValido(usuario.Id);
+        var c2 = CriarCheckinValido(usuario.Id, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)));
+        await checkinRepo.UpsertAsync(c1);
+        await checkinRepo.UpsertAsync(c2);
 
-        // Act
-        var upsertResult = await checkinRepo.UpsertAsync(checkin);
-        var getResult = await checkinRepo.GetByIdAsync(checkin.Id);
+        var result = await checkinRepo.GetAllAsync();
 
-        // Assert
-        upsertResult.Success.Should().BeTrue(because: upsertResult.MessageErro);
-        getResult.Success.Should().BeTrue(because: getResult.MessageErro);
-        getResult.Data.Should().NotBeNull();
-        getResult.Data!.Id.Should().Be(checkin.Id);
-        getResult.Data.UsuarioId.Should().Be(usuario.Id);
-        getResult.Data.Latitude.Should().BeApproximately(checkin.Latitude, 0.0001);
-        getResult.Data.Longitude.Should().BeApproximately(checkin.Longitude, 0.0001);
-        getResult.Data.IdentificacaoAparelho.Should().Be(checkin.IdentificacaoAparelho);
+        result.Success.Should().BeTrue(because: result.MessageErro);
+        result.Data.Should().NotBeNull();
+        result.Data!.Should().Contain(c => c.Id == c1.Id);
+        result.Data!.Should().Contain(c => c.Id == c2.Id);
     }
 
-    // --- Helpers ---
+    [Fact]
+    public async Task PostgresCheckinRepository_DeleteAsync_DeveRemoverEntidade()
+    {
+        var usuarioRepo = new PostgresUsuarioRepository(_factory);
+        var checkinRepo = new PostgresCheckinRepository(_factory);
+
+        var usuario = CriarUsuarioValido();
+        await usuarioRepo.UpsertAsync(usuario);
+        var checkin = CriarCheckinValido(usuario.Id);
+        await checkinRepo.UpsertAsync(checkin);
+
+        var deleteResult = await checkinRepo.DeleteAsync(checkin.Id);
+        var getResult = await checkinRepo.GetByIdAsync(checkin.Id);
+
+        deleteResult.Success.Should().BeTrue(because: deleteResult.MessageErro);
+        getResult.Success.Should().BeFalse("checkin foi removido");
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
 
     private static Usuario CriarUsuarioValido() => new()
     {
@@ -129,14 +218,14 @@ public class PostgresRepositoryIntegrationTests : IAsyncLifetime
         AtualizadoEm = DateTimeOffset.UtcNow
     };
 
-    private static Checkin CriarCheckinValido(Guid usuarioId) => new()
+    private static Checkin CriarCheckinValido(Guid usuarioId, DateOnly? data = null) => new()
     {
         Id = Guid.NewGuid(),
         UsuarioId = usuarioId,
-        Data = DateOnly.FromDateTime(DateTime.UtcNow),
+        Data = data ?? DateOnly.FromDateTime(DateTime.UtcNow),
         Latitude = -23.5505,
         Longitude = -46.6333,
-        IdentificacaoAparelho = "device-integration-test",
+        IdentificacaoAparelho = $"device-{Guid.NewGuid():N}",
         Sincronizado = false,
         CriadoEm = DateTimeOffset.UtcNow
     };

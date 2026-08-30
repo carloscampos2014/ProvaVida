@@ -1,8 +1,8 @@
 using System.Data;
-using Dapper;
 using FluentAssertions;
 using Moq;
 using ProvaVida.Api.Infrastructure.Repositories;
+using ProvaVida.Shared.Common;
 using ProvaVida.Shared.Entities;
 using ProvaVida.Shared.Repositories;
 
@@ -10,29 +10,18 @@ namespace ProvaVida.Api.Tests.Repositories;
 
 /// <summary>
 /// Testes unitários para <see cref="PostgresUsuarioRepository"/>.
-/// Usam Moq para simular <see cref="IDbConnectionFactory"/> e <see cref="IDbConnection"/>,
-/// evitando dependência de banco real.
 /// </summary>
 public class PostgresUsuarioRepositoryTests
 {
+    // ── Caminhos de sucesso (via fakes) ────────────────────────────────────
+
     [Fact]
     public async Task GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado()
     {
-        // Arrange
-        var mockConn = new Mock<IDbConnection>();
-        var mockFactory = new Mock<IDbConnectionFactory>();
-        mockFactory.Setup(f => f.Create()).Returns(mockConn.Object);
+        var repo = new FakeNotFoundUsuarioRepository(new Mock<IDbConnectionFactory>().Object);
 
-        // QueryFirstOrDefaultAsync retorna null via extensão Dapper — simulamos via repositório
-        // com uma factory que lança QuerySingleOrDefaultAsync retornando null.
-        // Como Dapper usa IDbConnection diretamente e não é fácil mockar, usamos uma subclasse
-        // de DapperRepository que sobrescreve GetByIdAsync para retornar Fail.
-        var repo = new FakeNotFoundUsuarioRepository(mockFactory.Object);
-
-        // Act
         var result = await repo.GetByIdAsync(Guid.NewGuid());
 
-        // Assert
         result.Success.Should().BeFalse();
         result.MessageErro.Should().NotBeNullOrWhiteSpace();
     }
@@ -40,54 +29,96 @@ public class PostgresUsuarioRepositoryTests
     [Fact]
     public async Task UpsertAsync_DeveRetornarSuccess_QuandoConexaoOk()
     {
-        // Arrange
-        var mockFactory = new Mock<IDbConnectionFactory>();
-        var mockConn = new Mock<IDbConnection>();
-        mockFactory.Setup(f => f.Create()).Returns(mockConn.Object);
+        var repo = new FakeSuccessUsuarioRepository(new Mock<IDbConnectionFactory>().Object);
 
-        var repo = new FakeSuccessUsuarioRepository(mockFactory.Object);
-        var usuario = CriarUsuarioValido();
+        var result = await repo.UpsertAsync(CriarUsuarioValido());
 
-        // Act
-        var result = await repo.UpsertAsync(usuario);
-
-        // Assert
         result.Success.Should().BeTrue();
     }
 
     [Fact]
     public async Task DeleteAsync_DeveRetornarSuccess_QuandoConexaoOk()
     {
-        // Arrange
-        var mockFactory = new Mock<IDbConnectionFactory>();
-        var mockConn = new Mock<IDbConnection>();
-        mockFactory.Setup(f => f.Create()).Returns(mockConn.Object);
+        var repo = new FakeSuccessUsuarioRepository(new Mock<IDbConnectionFactory>().Object);
 
-        var repo = new FakeSuccessUsuarioRepository(mockFactory.Object);
-
-        // Act
         var result = await repo.DeleteAsync(Guid.NewGuid());
 
-        // Assert
         result.Success.Should().BeTrue();
     }
 
     [Fact]
     public async Task GetAllAsync_DeveRetornarSuccess_ComListaVazia_QuandoConexaoOk()
     {
-        // Arrange
-        var mockFactory = new Mock<IDbConnectionFactory>();
-        var mockConn = new Mock<IDbConnection>();
-        mockFactory.Setup(f => f.Create()).Returns(mockConn.Object);
+        var repo = new FakeEmptyListUsuarioRepository(new Mock<IDbConnectionFactory>().Object);
 
-        var repo = new FakeEmptyListUsuarioRepository(mockFactory.Object);
-
-        // Act
         var result = await repo.GetAllAsync();
 
-        // Assert
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
+    }
+
+    // ── Caminhos de erro — exercita o bloco catch do DapperRepository ──────
+
+    [Fact]
+    public async Task GetByIdAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresUsuarioRepository(factory);
+
+        var result = await repo.GetByIdAsync(Guid.NewGuid());
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    [Fact]
+    public async Task GetAllAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresUsuarioRepository(factory);
+
+        var result = await repo.GetAllAsync();
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    [Fact]
+    public async Task UpsertAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresUsuarioRepository(factory);
+
+        var result = await repo.UpsertAsync(CriarUsuarioValido());
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    [Fact]
+    public async Task DeleteAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new PostgresUsuarioRepository(factory);
+
+        var result = await repo.DeleteAsync(Guid.NewGuid());
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Cria uma factory cujo <c>Create()</c> lança <see cref="InvalidOperationException"/>,
+    /// forçando a execução dos blocos <c>catch</c> do <see cref="DapperRepository{T}"/>.
+    /// </summary>
+    private static IDbConnectionFactory CriarFactoryQueExplode()
+    {
+        var mock = new Mock<IDbConnectionFactory>();
+        mock.Setup(f => f.Create())
+            .Throws(new InvalidOperationException("Conexão inválida"));
+        return mock.Object;
     }
 
     private static Usuario CriarUsuarioValido() => new()
@@ -104,47 +135,41 @@ public class PostgresUsuarioRepositoryTests
         AtualizadoEm = DateTimeOffset.UtcNow
     };
 
-    // --- Fakes para isolar sem depender de banco real ---
+    // ── Fakes de sucesso ───────────────────────────────────────────────────
 
-    /// <summary>Simula GetByIdAsync retornando "não encontrado".</summary>
-    private class FakeNotFoundUsuarioRepository : PostgresUsuarioRepository
+    private class FakeNotFoundUsuarioRepository(IDbConnectionFactory factory)
+        : PostgresUsuarioRepository(factory)
     {
-        public FakeNotFoundUsuarioRepository(IDbConnectionFactory factory) : base(factory) { }
-
-        public override async Task<ProvaVida.Shared.Common.Result<Usuario>> GetByIdAsync(Guid id)
+        public override async Task<Result<Usuario>> GetByIdAsync(Guid id)
         {
             await Task.CompletedTask;
-            return ProvaVida.Shared.Common.Result<Usuario>.Fail("Entidade não encontrada");
+            return Result<Usuario>.Fail("Entidade não encontrada");
         }
     }
 
-    /// <summary>Simula operações de escrita retornando sucesso.</summary>
-    private class FakeSuccessUsuarioRepository : PostgresUsuarioRepository
+    private class FakeSuccessUsuarioRepository(IDbConnectionFactory factory)
+        : PostgresUsuarioRepository(factory)
     {
-        public FakeSuccessUsuarioRepository(IDbConnectionFactory factory) : base(factory) { }
-
-        public override async Task<ProvaVida.Shared.Common.Result> UpsertAsync(Usuario entity)
+        public override async Task<Result> UpsertAsync(Usuario entity)
         {
             await Task.CompletedTask;
-            return ProvaVida.Shared.Common.Result.Ok();
+            return Result.Ok();
         }
 
-        public override async Task<ProvaVida.Shared.Common.Result> DeleteAsync(Guid id)
+        public override async Task<Result> DeleteAsync(Guid id)
         {
             await Task.CompletedTask;
-            return ProvaVida.Shared.Common.Result.Ok();
+            return Result.Ok();
         }
     }
 
-    /// <summary>Simula GetAllAsync retornando lista vazia com sucesso.</summary>
-    private class FakeEmptyListUsuarioRepository : PostgresUsuarioRepository
+    private class FakeEmptyListUsuarioRepository(IDbConnectionFactory factory)
+        : PostgresUsuarioRepository(factory)
     {
-        public FakeEmptyListUsuarioRepository(IDbConnectionFactory factory) : base(factory) { }
-
-        public override async Task<ProvaVida.Shared.Common.Result<IEnumerable<Usuario>>> GetAllAsync()
+        public override async Task<Result<IEnumerable<Usuario>>> GetAllAsync()
         {
             await Task.CompletedTask;
-            return ProvaVida.Shared.Common.Result<IEnumerable<Usuario>>.Ok([]);
+            return Result<IEnumerable<Usuario>>.Ok([]);
         }
     }
 }
