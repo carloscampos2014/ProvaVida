@@ -58,7 +58,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-dbup-mobile-sqlite`
   - _Requirements: RF-03_
 
-- [ ] 7. Implementar repositórios concretos PostgreSQL (API)
+- [x] 7. Implementar repositórios concretos PostgreSQL (API)
   - **Decisão de arquitetura:** `Usuario` e `Checkin` ficam em `src/Shared/Entities/` — schemas idênticos entre PostgreSQL e SQLite, apenas tipos nativos diferem (Dapper resolve automaticamente)
   - Criar `Usuario.cs` e `Checkin.cs` em `src/Shared/Entities/` como POCOs puros sem atributos de ORM
   - Atualizar `IUsuarioRepository` e `ICheckinRepository` no `Shared` para usar `Usuario` e `Checkin` no lugar de `object`
