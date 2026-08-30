@@ -37,7 +37,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-repository-base`
   - _Requirements: RF-04_
 
-- [ ] 5. Configurar DbUp + migrations iniciais para API (PostgreSQL)
+- [x] 5. Configurar DbUp + migrations iniciais para API (PostgreSQL)
   - Adicionar NuGet `DbUp-PostgreSQL` em `Api.Infrastructure`
   - Criar `DatabaseMigrator.cs` em `Api.Infrastructure/Data/`
   - Usar `EnsureDatabase.For.PostgresqlDatabase(connectionString)` **antes** de rodar as migrations — cria o banco se não existir (conecta ao banco `postgres` padrão do PostgreSQL)
