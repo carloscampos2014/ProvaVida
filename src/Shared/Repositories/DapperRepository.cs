@@ -8,14 +8,14 @@ namespace ProvaVida.Shared.Repositories;
 /// Classe base abstrata para repositórios que utilizam Dapper como acesso a dados.
 /// </summary>
 /// <remarks>
-/// As subclasses devem fornecer as SQLs específicas de cada entidade via propriedades abstratas.
-/// A conexão é injetada via construtor e não é gerenciada pelo repositório (sem <c>using</c>).
+/// A conexão é criada e descartada por operação via <see cref="IDbConnectionFactory"/>,
+/// evitando conexões de longa duração. As subclasses fornecem as SQLs específicas
+/// de cada entidade via propriedades abstratas.
 /// </remarks>
 /// <typeparam name="T">Tipo da entidade gerenciada pelo repositório.</typeparam>
 public abstract class DapperRepository<T> : IRepository<T>
 {
-    /// <summary>Conexão de banco de dados injetada via DI.</summary>
-    protected readonly IDbConnection Connection;
+    private readonly IDbConnectionFactory _factory;
 
     /// <summary>SQL para buscar uma entidade por <c>@Id</c>.</summary>
     protected abstract string SelectByIdSql { get; }
@@ -30,12 +30,12 @@ public abstract class DapperRepository<T> : IRepository<T>
     protected abstract string DeleteSql { get; }
 
     /// <summary>
-    /// Inicializa o repositório com a conexão fornecida.
+    /// Inicializa o repositório com a fábrica de conexões fornecida.
     /// </summary>
-    /// <param name="connection">Conexão de banco de dados.</param>
-    protected DapperRepository(IDbConnection connection)
+    /// <param name="factory">Fábrica responsável por criar conexões de banco de dados.</param>
+    protected DapperRepository(IDbConnectionFactory factory)
     {
-        Connection = connection;
+        _factory = factory;
     }
 
     /// <inheritdoc/>
@@ -43,7 +43,8 @@ public abstract class DapperRepository<T> : IRepository<T>
     {
         try
         {
-            var entity = await Connection.QueryFirstOrDefaultAsync<T>(SelectByIdSql, new { Id = id });
+            using var conn = _factory.Create();
+            var entity = await conn.QueryFirstOrDefaultAsync<T>(SelectByIdSql, new { Id = id });
             return entity is null
                 ? Result<T>.Fail("Entidade não encontrada")
                 : Result<T>.Ok(entity);
@@ -59,7 +60,8 @@ public abstract class DapperRepository<T> : IRepository<T>
     {
         try
         {
-            var items = await Connection.QueryAsync<T>(SelectAllSql);
+            using var conn = _factory.Create();
+            var items = await conn.QueryAsync<T>(SelectAllSql);
             return Result<IEnumerable<T>>.Ok(items);
         }
         catch (Exception ex)
@@ -73,7 +75,8 @@ public abstract class DapperRepository<T> : IRepository<T>
     {
         try
         {
-            await Connection.ExecuteAsync(UpsertSql, entity);
+            using var conn = _factory.Create();
+            await conn.ExecuteAsync(UpsertSql, entity);
             return Result.Ok();
         }
         catch (Exception ex)
@@ -87,7 +90,8 @@ public abstract class DapperRepository<T> : IRepository<T>
     {
         try
         {
-            await Connection.ExecuteAsync(DeleteSql, new { Id = id });
+            using var conn = _factory.Create();
+            await conn.ExecuteAsync(DeleteSql, new { Id = id });
             return Result.Ok();
         }
         catch (Exception ex)
