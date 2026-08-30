@@ -29,7 +29,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-result-pattern`
   - _Requirements: RF-05_
 
-- [ ] 4. Implementar IRepository\<T\> e DapperRepository\<T\> no Shared
+- [-] 4. Implementar IRepository\<T\> e DapperRepository\<T\> no Shared
   - Criar `IRepository.cs` com `GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`
   - Criar `DapperRepository.cs` como classe abstrata base com Dapper
   - Criar `IUsuarioRepository.cs` e `ICheckinRepository.cs` (interfaces vazias por ora)
