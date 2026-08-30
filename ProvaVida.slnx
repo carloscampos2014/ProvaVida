@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/.kiro/" />
   <Folder Name="/.kiro/hooks/">
     <File Path=".kiro/hooks/pr-merged-cleanup.json" />
     <File Path=".kiro/hooks/session-summary.json" />
@@ -11,6 +12,7 @@
   <Folder Name="/.kiro/settings/">
     <File Path=".kiro/settings/mcp.json" />
   </Folder>
+  <Folder Name="/.kiro/specs/" />
   <Folder Name="/.kiro/specs/fase-0-scaffolding/">
     <File Path=".kiro/specs/fase-0-scaffolding/design.md" />
     <File Path=".kiro/specs/fase-0-scaffolding/requirements.md" />
@@ -77,6 +79,7 @@
     <Project Path="tests/Admin/ProvaVida.Admin.Tests/ProvaVida.Admin.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Api/">
+    <Project Path="tests/Api/ProvaVida.Api.IntegrationTests/ProvaVida.Api.IntegrationTests.csproj" />
     <Project Path="tests/Api/ProvaVida.Api.Tests/ProvaVida.Api.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Mobile/">

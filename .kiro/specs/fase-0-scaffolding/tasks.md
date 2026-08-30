@@ -59,9 +59,11 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - _Requirements: RF-03_
 
 - [ ] 7. Implementar repositórios concretos PostgreSQL (API)
-  - Criar entidades `Usuario` e `Checkin` em `Api.Domain` (POCOs puros, sem atributos de ORM)
+  - **Decisão de arquitetura:** `Usuario` e `Checkin` ficam em `src/Shared/Entities/` — schemas idênticos entre PostgreSQL e SQLite, apenas tipos nativos diferem (Dapper resolve automaticamente)
+  - Criar `Usuario.cs` e `Checkin.cs` em `src/Shared/Entities/` como POCOs puros sem atributos de ORM
+  - Atualizar `IUsuarioRepository` e `ICheckinRepository` no `Shared` para usar `Usuario` e `Checkin` no lugar de `object`
   - Criar `PostgresConnectionFactory.cs` em `Api.Infrastructure` implementando `IDbConnectionFactory`
-  - Criar `PostgresUsuarioRepository.cs` e `PostgresCheckinRepository.cs` herdando `DapperRepository<T>`
+  - Criar `PostgresUsuarioRepository.cs` e `PostgresCheckinRepository.cs` em `Api.Infrastructure/Repositories/` herdando `DapperRepository<T>`
   - Testes unitários: mock de `IDbConnectionFactory` via Moq em `Api.Tests`
   - Testes de integração: `Api.IntegrationTests` com PostgreSQL via **Testcontainers** (`Testcontainers.PostgreSql`) — requer Docker Engine no WSL2
   - Teste TDD: `PostgresUsuarioRepository_GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado`
@@ -69,9 +71,9 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - _Requirements: RF-04_
 
 - [ ] 8. Implementar repositórios concretos SQLite (Mobile)
-  - Criar entidades `Usuario` e `Checkin` em `Mobile.Domain` (POCOs puros)
+  - **Decisão de arquitetura:** reutilizar `Usuario` e `Checkin` de `src/Shared/Entities/` criados na task 7 — sem entidades em `Mobile.Domain`
   - Criar `SqliteConnectionFactory.cs` em `Mobile.Infrastructure` implementando `IDbConnectionFactory`
-  - Criar `SqliteUsuarioRepository.cs` e `SqliteCheckinRepository.cs` herdando `DapperRepository<T>`
+  - Criar `SqliteUsuarioRepository.cs` e `SqliteCheckinRepository.cs` em `Mobile.Infrastructure/Repositories/` herdando `DapperRepository<T>`
   - Testes unitários: mock de `IDbConnectionFactory` via Moq em `Mobile.Tests`
   - Testes de integração: `Mobile.IntegrationTests` com SQLite em arquivo temporário (`Path.GetTempPath()`) — sem Docker
   - Teste TDD: `SqliteUsuarioRepository_GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado`
