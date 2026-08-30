@@ -12,4 +12,14 @@
     <ProjectReference Include="..\ProvaVida.Mobile.Application\ProvaVida.Mobile.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="dbup-sqlite" Version="6.0.4" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\V001__criar_tabela_usuarios.sql" />
+    <EmbeddedResource Include="Migrations\V002__criar_tabela_checkins.sql" />
+  </ItemGroup>
+
 </Project>
