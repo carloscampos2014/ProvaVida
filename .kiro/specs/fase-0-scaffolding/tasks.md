@@ -50,7 +50,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-dbup-api-postgresql`
   - _Requirements: RF-03_
 
-- [ ] 6. Configurar DbUp + migrations iniciais para Mobile (SQLite)
+- [x] 6. Configurar DbUp + migrations iniciais para Mobile (SQLite)
   - Adicionar NuGet `DbUp-SQLite` e `Microsoft.Data.Sqlite` em `Mobile.Infrastructure`
   - Criar `DatabaseMigrator.cs` em `Mobile.Infrastructure/Data/`
   - Criar scripts `V001__criar_tabela_usuarios.sql` e `V002__criar_tabela_checkins.sql` como `EmbeddedResource`
