@@ -27,6 +27,8 @@ public class DatabaseMigrator : IDatabaseMigrator
     {
         try
         {
+            _logger.LogInformation("Banco de dados SQLite: {DbPath}", _dbPath);
+
             // SQLite cria o arquivo automaticamente; garantimos apenas que o diretório exista
             var directory = Path.GetDirectoryName(_dbPath);
             if (!string.IsNullOrEmpty(directory))
