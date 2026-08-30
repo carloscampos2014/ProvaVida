@@ -49,3 +49,7 @@ TesteProVidaApi.ps1
 # RAG / knowledge base local (gerado pelo Kiro)
 data/
 
+
+# Configurações locais com secrets (connection strings, jwt secrets, etc.)
+**/appsettings.Development.json
+**/appsettings.Local.json

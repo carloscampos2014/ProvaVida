@@ -40,8 +40,13 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
 - [ ] 5. Configurar DbUp + migrations iniciais para API (PostgreSQL)
   - Adicionar NuGet `DbUp-PostgreSQL` em `Api.Infrastructure`
   - Criar `DatabaseMigrator.cs` em `Api.Infrastructure/Data/`
+  - Usar `EnsureDatabase.For.PostgresqlDatabase(connectionString)` **antes** de rodar as migrations — cria o banco se não existir (conecta ao banco `postgres` padrão do PostgreSQL)
   - Criar scripts `V001__criar_tabela_usuarios.sql` e `V002__criar_tabela_checkins.sql` como `EmbeddedResource`
   - Registrar execução das migrations no startup da API
+  - **Nomes de banco por ambiente:**
+    - Produção (VM Oracle): `provavida` (via env var `DB_CONNECTION_STRING`)
+    - Desenvolvimento local (WSL2): `provavida_dev` (via `appsettings.Development.json`, **não comitar secrets**)
+  - `appsettings.Development.json` deve conter a connection string apontando para `provavida_dev` no WSL2 — esse arquivo está no `.gitignore`
   - Branch: `feature/fase-0-dbup-api-postgresql`
   - _Requirements: RF-03_
 

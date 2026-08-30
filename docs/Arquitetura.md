@@ -252,6 +252,8 @@ services.AddScoped<IUserRepository, AdminUserRepository>();
 - Nomenclatura: `V001__criar_tabela_usuarios.sql`, `V002__criar_tabela_checkins.sql`, etc.
 - DbUp executa na inicialização da API e do Admin — só scripts ainda não executados.
 - Scripts são imutáveis após aplicados em produção.
+- **`EnsureDatabase.For.PostgresqlDatabase(connectionString)`** é chamado antes das migrations — cria o banco `provavida` automaticamente se não existir, conectando ao banco `postgres` padrão. Elimina necessidade de criar o banco manualmente na VM.
+- **Nomes de banco por ambiente:** produção = `provavida` (env var); desenvolvimento local WSL2 = `provavida_dev` (`appsettings.Development.json`, fora do git).
 
 ### Mobile — SQLite
 
