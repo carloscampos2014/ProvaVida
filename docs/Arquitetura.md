@@ -438,6 +438,23 @@ Usado em conjunto com FluentValidation — o validator adiciona notificações, 
 | **Moq** | Mocks de interfaces (`Mock<IUsuarioRepository>`) |
 | **Bogus** | Geração de dados fake realistas (`Faker<Usuario>`) |
 | **Fixtures** | Dados compartilhados entre testes (`IClassFixture<T>`) |
+| **Testcontainers** | Containers efêmeros para testes de integração |
+
+### Estratégia de testes por camada
+
+| Tipo | Projeto | Banco | Quando roda |
+|------|---------|-------|-------------|
+| Unitário | `Api.Tests`, `Mobile.Tests`, `Admin.Tests` | Mock de `IDbConnectionFactory` (Moq) | CI + local |
+| Integração | `Api.IntegrationTests` | PostgreSQL via Testcontainers | CI + local |
+| Integração | `Mobile.IntegrationTests` | SQLite em arquivo temporário | CI + local |
+
+**Pré-requisito local:** Docker Engine instalado no WSL2 (sem Docker Desktop). O Testcontainers conecta via socket do Docker no WSL2. No CI, o runner GitHub-hosted já possui Docker disponível.
+
+**Configuração Docker no WSL2 (Ubuntu 24.04):**
+- Docker Engine instalado via repositório oficial (`apt-get install docker-ce`)
+- Usuário adicionado ao grupo `docker` (sem necessidade de `sudo`)
+- Auto-start configurado no `~/.bashrc` via `service docker start`
+- Permissões `sudoers` para `service docker status/start` sem senha
 
 ---
 

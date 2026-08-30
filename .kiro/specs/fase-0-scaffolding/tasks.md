@@ -60,20 +60,28 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
 
 - [ ] 7. Implementar repositórios concretos PostgreSQL (API)
   - Criar entidades `Usuario` e `Checkin` em `Api.Domain` (POCOs puros, sem atributos de ORM)
+  - Criar `PostgresConnectionFactory.cs` em `Api.Infrastructure` implementando `IDbConnectionFactory`
   - Criar `PostgresUsuarioRepository.cs` e `PostgresCheckinRepository.cs` herdando `DapperRepository<T>`
-  - Teste TDD: `PostgresUsuarioRepository_GetByIdAsync_DeveRetornarNull_QuandoNaoEncontrado`
+  - Testes unitários: mock de `IDbConnectionFactory` via Moq em `Api.Tests`
+  - Testes de integração: `Api.IntegrationTests` com PostgreSQL via **Testcontainers** (`Testcontainers.PostgreSql`) — requer Docker Engine no WSL2
+  - Teste TDD: `PostgresUsuarioRepository_GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado`
   - Branch: `feature/fase-0-repositorios-postgres-api`
   - _Requirements: RF-04_
 
 - [ ] 8. Implementar repositórios concretos SQLite (Mobile)
   - Criar entidades `Usuario` e `Checkin` em `Mobile.Domain` (POCOs puros)
+  - Criar `SqliteConnectionFactory.cs` em `Mobile.Infrastructure` implementando `IDbConnectionFactory`
   - Criar `SqliteUsuarioRepository.cs` e `SqliteCheckinRepository.cs` herdando `DapperRepository<T>`
-  - Teste TDD: `SqliteUsuarioRepository_GetByIdAsync_DeveRetornarNull_QuandoNaoEncontrado`
+  - Testes unitários: mock de `IDbConnectionFactory` via Moq em `Mobile.Tests`
+  - Testes de integração: `Mobile.IntegrationTests` com SQLite em arquivo temporário (`Path.GetTempPath()`) — sem Docker
+  - Teste TDD: `SqliteUsuarioRepository_GetByIdAsync_DeveRetornarFail_QuandoNaoEncontrado`
   - Branch: `feature/fase-0-repositorios-sqlite-mobile`
   - _Requirements: RF-04_
 
 - [ ] 9. Implementar repositórios Admin (PostgreSQL direto)
   - Criar `AdminUsuarioRepository.cs` implementando `IUsuarioRepository`, com `GetAllAsync` e `GetByIdAsync`
+  - Reutilizar `PostgresConnectionFactory` da API ou criar instância própria em `Admin.Infrastructure`
+  - Testes de integração: `Admin.Tests` com PostgreSQL via **Testcontainers** (mesmo padrão da task 7)
   - XML docs
   - Branch: `feature/fase-0-repositorios-admin`
   - _Requirements: RF-04_
