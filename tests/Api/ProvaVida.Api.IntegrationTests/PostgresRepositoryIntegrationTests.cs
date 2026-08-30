@@ -10,8 +10,8 @@ namespace ProvaVida.Api.IntegrationTests;
 
 /// <summary>
 /// Testes de integração para os repositórios PostgreSQL usando Testcontainers.
-/// Requer Docker disponível na máquina. Use <c>--filter "Category!=Integration"</c>
-/// para pular estes testes em ambientes sem Docker.
+/// Requer Docker disponível via TCP em tcp://localhost:2375 (WSL2).
+/// Use <c>--filter "Category!=Integration"</c> para pular em ambientes sem Docker.
 /// </summary>
 [Trait("Category", "Integration")]
 public class PostgresRepositoryIntegrationTests : IAsyncLifetime
@@ -21,7 +21,14 @@ public class PostgresRepositoryIntegrationTests : IAsyncLifetime
 
     public PostgresRepositoryIntegrationTests()
     {
+        // Configura o endpoint Docker explicitamente para WSL2 via TCP.
+        // O Testcontainers não lê DOCKER_HOST automaticamente em todos os cenários;
+        // WithDockerEndpoint garante que o endpoint correto seja usado.
+        var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST")
+            ?? "tcp://localhost:2375";
+
         _postgres = new PostgreSqlBuilder()
+            .WithDockerEndpoint(dockerEndpoint)
             .WithImage("postgres:16-alpine")
             .WithDatabase("provavida_test")
             .WithUsername("test")
@@ -136,8 +143,6 @@ public class PostgresRepositoryIntegrationTests : IAsyncLifetime
 
     private async Task ExecutarMigrationsAsync()
     {
-        // Lê os scripts de migration do assembly de Infrastructure via recursos embarcados
-        // e executa diretamente na conexão do container de teste.
         using var conn = _factory.Create();
         conn.Open();
 
