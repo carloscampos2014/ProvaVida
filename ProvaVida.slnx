@@ -83,6 +83,7 @@
     <Project Path="tests/Api/ProvaVida.Api.Tests/ProvaVida.Api.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Mobile/">
+    <Project Path="tests/Mobile/ProvaVida.Mobile.IntegrationTests/ProvaVida.Mobile.IntegrationTests.csproj" />
     <Project Path="tests/Mobile/ProvaVida.Mobile.Tests/ProvaVida.Mobile.Tests.csproj" />
   </Folder>
 </Solution>
