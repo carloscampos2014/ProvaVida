@@ -70,7 +70,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-repositorios-postgres-api`
   - _Requirements: RF-04_
 
-- [ ] 8. Implementar repositórios concretos SQLite (Mobile)
+- [x] 8. Implementar repositórios concretos SQLite (Mobile)
   - **Decisão de arquitetura:** reutilizar `Usuario` e `Checkin` de `src/Shared/Entities/` criados na task 7 — sem entidades em `Mobile.Domain`
   - Criar `SqliteConnectionFactory.cs` em `Mobile.Infrastructure` implementando `IDbConnectionFactory`
   - Criar `SqliteUsuarioRepository.cs` e `SqliteCheckinRepository.cs` em `Mobile.Infrastructure/Repositories/` herdando `DapperRepository<T>`
