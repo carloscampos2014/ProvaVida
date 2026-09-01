@@ -80,7 +80,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-repositorios-sqlite-mobile`
   - _Requirements: RF-04_
 
-- [ ] 9. Implementar repositórios Admin (PostgreSQL direto)
+- [x] 9. Implementar repositórios Admin (PostgreSQL direto)
   - Criar `AdminUsuarioRepository.cs` implementando `IUsuarioRepository`, com `GetAllAsync` e `GetByIdAsync`
   - Reutilizar `PostgresConnectionFactory` da API ou criar instância própria em `Admin.Infrastructure`
   - Testes de integração: `Admin.Tests` com PostgreSQL via **Testcontainers** (mesmo padrão da task 7)
