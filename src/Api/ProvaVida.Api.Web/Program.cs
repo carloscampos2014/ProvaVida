@@ -1,9 +1,8 @@
-using System.Data;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Npgsql;
 using Scalar.AspNetCore;
+using ProvaVida.Api.Infrastructure;
 using ProvaVida.Api.Infrastructure.Data;
 using ProvaVida.Api.Infrastructure.Repositories;
 using ProvaVida.Shared.Repositories;
@@ -18,8 +17,8 @@ var connectionString =
         "Connection string não configurada. " +
         "Defina a variável de ambiente 'DB_CONNECTION_STRING' ou 'ConnectionStrings:DefaultConnection' no appsettings.");
 
-// IDbConnection como Scoped
-builder.Services.AddScoped<IDbConnection>(_ => new NpgsqlConnection(connectionString));
+// IDbConnectionFactory como Singleton (stateless, só guarda a connection string)
+builder.Services.AddSingleton<IDbConnectionFactory>(_ => new PostgresConnectionFactory(connectionString));
 
 // Repositórios
 builder.Services.AddScoped<IUsuarioRepository, PostgresUsuarioRepository>();

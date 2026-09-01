@@ -88,7 +88,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-repositorios-admin`
   - _Requirements: RF-04_
 
-- [ ] 10. Configurar DI e startup da API
+- [x] 10. Configurar DI e startup da API
   - Configurar `Program.cs`: `IDbConnection` → `NpgsqlConnection`, repositórios, DbUp, Scalar (`/scalar`), JWT middleware
   - `appsettings.json` sem secrets (apenas env vars); criar `global.json` com `sdk.version: "10.0"`
   - Branch: `feature/fase-0-di-startup-api`
