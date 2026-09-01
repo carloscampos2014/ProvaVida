@@ -1,23 +1,15 @@
-﻿namespace ProvaVida.Mobile.App;
+namespace ProvaVida.Mobile.App;
 
+/// <summary>
+/// Tela inicial placeholder do aplicativo.
+/// </summary>
 public partial class MainPage : ContentPage
 {
-	int count = 0;
-
-	public MainPage()
-	{
-		InitializeComponent();
-	}
-
-	private void OnCounterClicked(object? sender, EventArgs e)
-	{
-		count++;
-
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
-		else
-			CounterBtn.Text = $"Clicked {count} times";
-
-		SemanticScreenReader.Announce(CounterBtn.Text);
-	}
+    /// <summary>
+    /// Inicializa a tela principal.
+    /// </summary>
+    public MainPage()
+    {
+        InitializeComponent();
+    }
 }
