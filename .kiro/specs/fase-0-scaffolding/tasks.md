@@ -94,7 +94,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-di-startup-api`
   - _Requirements: RF-06, RF-08_
 
-- [ ] 11. Configurar DI, resources e startup do Mobile (MAUI)
+- [x] 11. Configurar DI, resources e startup do Mobile (MAUI)
   - Configurar `MauiProgram.cs`: `IDbConnection` → `SqliteConnection`, repositórios, DbUp
   - Nome do app: "Enzojb Prova de Vida" (`ApplicationTitle` e `DisplayName` no `.csproj`)
   - Copiar resources de `docs/resources/`: ícones → `AppIcon/`, splash → `Splash/`, estilos → `Styles/`
