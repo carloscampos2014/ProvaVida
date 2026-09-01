@@ -103,7 +103,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-di-startup-mobile`
   - _Requirements: RF-06_
 
-- [ ] 12. Configurar DI, Basic Auth e startup do Admin
+- [x] 12. Configurar DI, Basic Auth e startup do Admin
   - Configurar `Program.cs`: `IDbConnection` → `NpgsqlConnection`, repositórios, HTTP Basic Auth (env vars `ADMIN_USUARIO` e `ADMIN_SENHA`), porta `5019`
   - Página inicial Blazor placeholder: "ProvaVida Admin — Em construção"
   - **E2E Manual:** credenciais corretas → placeholder; erradas → 401
