@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using ProvaVida.Mobile.Infrastructure.Data;
+using ProvaVida.Mobile.Infrastructure.Repositories;
+using ProvaVida.Shared.Repositories;
 
 namespace ProvaVida.Mobile.App;
 
@@ -26,10 +28,23 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        // Registrar DatabaseMigrator no DI
+        // Caminho do banco SQLite no diretório de dados do app
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "provavida.db");
+
+        // Migrator: singleton pois controla schema único
         builder.Services.AddSingleton<IDatabaseMigrator>(sp =>
             new DatabaseMigrator(dbPath, sp.GetRequiredService<ILogger<DatabaseMigrator>>()));
+
+        // Fábrica de conexões: singleton — compartilha o caminho do banco
+        builder.Services.AddSingleton<IDbConnectionFactory>(
+            new SqliteConnectionFactory(dbPath));
+
+        // Repositórios: transient — cada operação abre/fecha sua própria conexão via factory
+        builder.Services.AddTransient<IUsuarioRepository, SqliteUsuarioRepository>();
+        builder.Services.AddTransient<ICheckinRepository, SqliteCheckinRepository>();
+
+        // Tela inicial
+        builder.Services.AddTransient<MainPage>();
 
         var app = builder.Build();
 
