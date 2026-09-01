@@ -5,9 +5,12 @@
         "commandName": "Project",
         "dotnetRunMessages": true,
         "launchBrowser": true,
-        "applicationUrl": "http://localhost:5162",
+        "applicationUrl": "http://localhost:5019",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ADMIN_USUARIO": "admin",
+          "ADMIN_SENHA": "admin123",
+          "DB_CONNECTION_STRING": "Host=localhost;Port=5432;Database=provavida;Username=postgres;Password=12345678"
         }
       },
       "https": {
@@ -16,7 +19,10 @@
         "launchBrowser": true,
         "applicationUrl": "https://localhost:7021;http://localhost:5162",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ADMIN_USUARIO": "admin",
+          "ADMIN_SENHA": "admin123",
+          "DB_CONNECTION_STRING": "Host=localhost;Port=5432;Database=provavida;Username=postgres;Password=12345678"
         }
       }
     }
