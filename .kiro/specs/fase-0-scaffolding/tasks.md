@@ -110,7 +110,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-di-startup-admin`
   - _Requirements: RF-06, RF-09_
 
-- [ ] 13. Criar workflow CI (GitHub Actions)
+- [x] 13. Criar workflow CI (GitHub Actions)
   - Criar `.github/workflows/ci.yml`; trigger: push em qualquer branch + pull_request
   - Passos: checkout → setup .NET 10 → restore → build → test (excluindo projetos MAUI)
   - Branch: `feature/fase-0-github-actions-ci`
