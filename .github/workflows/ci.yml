@@ -18,11 +18,70 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore
-        run: dotnet restore ProvaVida.slnx
+      # Restore individual projects — excludes Mobile.App (requires MAUI workload)
+      - name: Restore — Shared
+        run: dotnet restore src/Shared/ProvaVida.Shared.csproj
 
-      - name: Build
-        run: dotnet build ProvaVida.slnx --configuration Release --no-restore
+      - name: Restore — Api
+        run: |
+          dotnet restore src/Api/ProvaVida.Api.Domain/ProvaVida.Api.Domain.csproj
+          dotnet restore src/Api/ProvaVida.Api.Application/ProvaVida.Api.Application.csproj
+          dotnet restore src/Api/ProvaVida.Api.Infrastructure/ProvaVida.Api.Infrastructure.csproj
+          dotnet restore src/Api/ProvaVida.Api.Web/ProvaVida.Api.Web.csproj
 
-      - name: Test
-        run: dotnet test ProvaVida.slnx --configuration Release --no-build --verbosity normal --filter "FullyQualifiedName!~Mobile.App"
+      - name: Restore — Admin
+        run: |
+          dotnet restore src/Admin/ProvaVida.Admin.Application/ProvaVida.Admin.Application.csproj
+          dotnet restore src/Admin/ProvaVida.Admin.Infrastructure/ProvaVida.Admin.Infrastructure.csproj
+          dotnet restore src/Admin/ProvaVida.Admin.Web/ProvaVida.Admin.Web.csproj
+
+      - name: Restore — Mobile (sem App)
+        run: |
+          dotnet restore src/Mobile/ProvaVida.Mobile.Domain/ProvaVida.Mobile.Domain.csproj
+          dotnet restore src/Mobile/ProvaVida.Mobile.Application/ProvaVida.Mobile.Application.csproj
+          dotnet restore src/Mobile/ProvaVida.Mobile.Infrastructure/ProvaVida.Mobile.Infrastructure.csproj
+
+      - name: Restore — Tests
+        run: |
+          dotnet restore tests/Api/ProvaVida.Api.Tests/ProvaVida.Api.Tests.csproj
+          dotnet restore tests/Api/ProvaVida.Api.IntegrationTests/ProvaVida.Api.IntegrationTests.csproj
+          dotnet restore tests/Mobile/ProvaVida.Mobile.Tests/ProvaVida.Mobile.Tests.csproj
+          dotnet restore tests/Mobile/ProvaVida.Mobile.IntegrationTests/ProvaVida.Mobile.IntegrationTests.csproj
+          dotnet restore tests/Admin/ProvaVida.Admin.Tests/ProvaVida.Admin.Tests.csproj
+
+      # Build
+      - name: Build — Shared
+        run: dotnet build src/Shared/ProvaVida.Shared.csproj --configuration Release --no-restore
+
+      - name: Build — Api
+        run: |
+          dotnet build src/Api/ProvaVida.Api.Domain/ProvaVida.Api.Domain.csproj --configuration Release --no-restore
+          dotnet build src/Api/ProvaVida.Api.Application/ProvaVida.Api.Application.csproj --configuration Release --no-restore
+          dotnet build src/Api/ProvaVida.Api.Infrastructure/ProvaVida.Api.Infrastructure.csproj --configuration Release --no-restore
+          dotnet build src/Api/ProvaVida.Api.Web/ProvaVida.Api.Web.csproj --configuration Release --no-restore
+
+      - name: Build — Admin
+        run: |
+          dotnet build src/Admin/ProvaVida.Admin.Application/ProvaVida.Admin.Application.csproj --configuration Release --no-restore
+          dotnet build src/Admin/ProvaVida.Admin.Infrastructure/ProvaVida.Admin.Infrastructure.csproj --configuration Release --no-restore
+          dotnet build src/Admin/ProvaVida.Admin.Web/ProvaVida.Admin.Web.csproj --configuration Release --no-restore
+
+      - name: Build — Mobile (sem App)
+        run: |
+          dotnet build src/Mobile/ProvaVida.Mobile.Domain/ProvaVida.Mobile.Domain.csproj --configuration Release --no-restore
+          dotnet build src/Mobile/ProvaVida.Mobile.Application/ProvaVida.Mobile.Application.csproj --configuration Release --no-restore
+          dotnet build src/Mobile/ProvaVida.Mobile.Infrastructure/ProvaVida.Mobile.Infrastructure.csproj --configuration Release --no-restore
+
+      # Test
+      - name: Test — Api
+        run: |
+          dotnet test tests/Api/ProvaVida.Api.Tests/ProvaVida.Api.Tests.csproj --configuration Release --no-build --verbosity normal
+          dotnet test tests/Api/ProvaVida.Api.IntegrationTests/ProvaVida.Api.IntegrationTests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Test — Mobile
+        run: |
+          dotnet test tests/Mobile/ProvaVida.Mobile.Tests/ProvaVida.Mobile.Tests.csproj --configuration Release --no-build --verbosity normal
+          dotnet test tests/Mobile/ProvaVida.Mobile.IntegrationTests/ProvaVida.Mobile.IntegrationTests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Test — Admin
+        run: dotnet test tests/Admin/ProvaVida.Admin.Tests/ProvaVida.Admin.Tests.csproj --configuration Release --no-build --verbosity normal
