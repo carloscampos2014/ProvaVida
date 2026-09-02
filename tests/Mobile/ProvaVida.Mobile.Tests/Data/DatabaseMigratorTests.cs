@@ -80,8 +80,9 @@ public class DatabaseMigratorTests : IDisposable
     [Fact]
     public void Migrate_DeveRetornarFalse_QuandoCaminhoEInvalido()
     {
-        // Um caminho com caracteres inválidos força a exceção no bloco catch
-        var caminhoInvalido = "Z:\\caminho\\que\\nao\\existe\\impossivel\\test.db";
+        // Caminho com caractere nulo é inválido em qualquer sistema operacional
+        // e força a exceção no bloco catch do DatabaseMigrator
+        var caminhoInvalido = Path.Combine(Path.GetTempPath(), "\0invalid.db");
         var migrator = new DatabaseMigrator(caminhoInvalido, _loggerMock.Object);
 
         var result = migrator.Migrate();
