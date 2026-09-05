@@ -116,7 +116,7 @@ Scaffolding completo do monorepo ProvaVida: solução `.slnx`, 15 projetos em Cl
   - Branch: `feature/fase-0-github-actions-ci`
   - _Requirements: RF-07_
 
-- [ ] 14. Criar workflow Deploy API (GitHub Actions)
+- [x] 14. Criar workflow Deploy API (GitHub Actions)
   - Criar `.github/workflows/deploy-api.yml`; trigger: push em `master`
   - Passos: checkout → setup .NET 10 → restore → build → test → publish → SCP para VM → restart `provavida-api` → health check
   - Secrets: `SSH_KEY`, `SSH_HOST`, `SSH_PORT`, `SSH_USER`
