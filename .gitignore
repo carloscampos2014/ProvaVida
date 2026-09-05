@@ -47,5 +47,9 @@ Thumbs.db
 TesteProVidaApi.ps1
 
 # RAG / knowledge base local (gerado pelo Kiro)
-data/
+/data/
 
+
+# Configurações locais com secrets (connection strings, jwt secrets, etc.)
+**/appsettings.Development.json
+**/appsettings.Local.json

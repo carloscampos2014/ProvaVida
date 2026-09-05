@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 456 456">
+  <!-- Coração branco centralizado — fundo definido pelo Color no csproj (#774CCC) -->
+  <path d="M228 340
+           C228 340 100 258 100 184
+           C100 148 128 120 164 120
+           C188 120 208 132 228 152
+           C248 132 268 120 292 120
+           C328 120 356 148 356 184
+           C356 258 228 340 228 340 Z"
+        fill="white"/>
+</svg>

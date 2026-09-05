@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProvaVida.Mobile.App.MainPage"
+             Title="Enzojb Prova de Vida">
+
+    <VerticalStackLayout
+        VerticalOptions="Center"
+        HorizontalOptions="Center"
+        Spacing="16">
+
+        <Label
+            Text="Enzojb Prova de Vida"
+            Style="{StaticResource Headline}"
+            SemanticProperties.HeadingLevel="Level1" />
+
+        <Label
+            Text="Em construção"
+            Style="{StaticResource SubHeadline}"
+            SemanticProperties.HeadingLevel="Level2" />
+
+    </VerticalStackLayout>
+
+</ContentPage>

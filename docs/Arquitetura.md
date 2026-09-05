@@ -36,6 +36,7 @@
 
 | Componente | Tecnologia | Observação |
 |------------|------------|------------|
+| Runtime | **.NET 10** | Todos os projetos — API, Mobile, Admin, Shared, Tests |
 | Mobile | .NET MAUI (C#) | Android e iOS — online preferencial, fallback offline |
 | API | ASP.NET Core (C#) | REST API |
 | Admin | Blazor Server (C#) | Painel interno |
@@ -45,7 +46,7 @@
 | Migrations | DbUp | Scripts SQL versionados |
 | Auth Mobile→API | JWT | Access token de curta duração |
 | Auth Admin | HTTP Basic Auth | Acesso via SSH Tunnel |
-| Testes | xUnit + Moq | TDD |
+| Testes | xUnit + FluentAssertions + Moq + Bogus | TDD |
 | Workflow | SDD (Spec Driven Development) | Spec → aprovação → implementação |
 
 ---
@@ -251,6 +252,8 @@ services.AddScoped<IUserRepository, AdminUserRepository>();
 - Nomenclatura: `V001__criar_tabela_usuarios.sql`, `V002__criar_tabela_checkins.sql`, etc.
 - DbUp executa na inicialização da API e do Admin — só scripts ainda não executados.
 - Scripts são imutáveis após aplicados em produção.
+- **`EnsureDatabase.For.PostgresqlDatabase(connectionString)`** é chamado antes das migrations — cria o banco `provavida` automaticamente se não existir, conectando ao banco `postgres` padrão. Elimina necessidade de criar o banco manualmente na VM.
+- **Nomes de banco por ambiente:** produção = `provavida` (env var); desenvolvimento local WSL2 = `provavida_dev` (`appsettings.Development.json`, fora do git).
 
 ### Mobile — SQLite
 
@@ -294,7 +297,27 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 
 ---
 
-## 10. Painel Administrativo
+## 10. Provedores de Notificação
+
+### WhatsApp, SMS e Ligação de Voz — Twilio
+
+Enviados via **Twilio SDK** (`Twilio` NuGet package) na `Api.Infrastructure`.
+
+| Canal | Secret utilizado |
+|-------|-----------------|
+| WhatsApp | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` |
+| SMS | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` |
+| Ligação de voz | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VOICE_FROM` |
+
+Todos os secrets já estão cadastrados no repositório GitHub. Na VM são injetados via `/etc/provavida/env` — nunca em arquivos de configuração no repositório.
+
+### E-mail — Gmail (SMTP)
+
+Enviado via SMTP do Gmail usando `EMAIL_HOST` (`smtp.gmail.com`), `EMAIL_PORT` (`587`), `EMAIL_USUARIO` e `EMAIL_SENHA` (App Password do Google). Secrets já cadastrados no repositório.
+
+---
+
+## 11. Painel Administrativo
 
 - **Stack:** Blazor Server (C#)
 - **Autenticação:** HTTP Basic Auth — credencial única de admin
@@ -311,7 +334,7 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 
 ---
 
-## 11. Padrões de Desenvolvimento
+## 12. Padrões de Desenvolvimento
 
 | Princípio | Aplicação |
 |-----------|-----------|
@@ -321,6 +344,147 @@ E-mail, WhatsApp e SMS são **disparados em paralelo** — não são tentativas 
 | **Clean Architecture** | Dependências apontam para o domínio; domínio sem referências externas |
 | **TDD** | Teste falha primeiro (Red) → implementação mínima (Green) → refactor |
 | **SDD** | Spec (requirements → design → tasks) → aprovação → implementação task a task |
+| **MVVM** | Padrão de apresentação obrigatório no Mobile — View, ViewModel, Model sem acoplamento |
+| **CQRS simples** | Separação de interfaces de leitura e escrita — sem MediatR |
+
+---
+
+## 16. Padrões de Geração de Código
+
+### Estrutura de arquivos
+
+- **Uma classe por arquivo `.cs`** — sem exceção. Nome do arquivo igual ao nome da classe.
+- **XML docs obrigatório** em todas as classes e interfaces públicas (`/// <summary>`).
+
+### Result Pattern
+
+Dois tipos complementares definidos no `Shared`:
+
+```csharp
+// Result — operações sem retorno de dado
+public class Result
+{
+    public bool Success { get; }
+    public string? MessageErro { get; }
+    public static Result Ok() => new(true, null);
+    public static Result Fail(string erro) => new(false, erro);
+}
+
+// Result<T> — operações que retornam dado
+public class Result<T> : Result
+{
+    public T? Data { get; }
+    public static Result<T> Ok(T data) => new(true, null, data);
+    public static new Result<T> Fail(string erro) => new(false, erro, default);
+}
+```
+
+Use `Result` quando não há dado de retorno (cadastro, exclusão, logoff). Use `Result<T>` quando há dado (login retorna token, consulta retorna entidade).
+
+### CQRS simples
+
+Separação de interfaces de leitura e escrita — sem MediatR:
+
+```
+IUsuarioCommandService  → métodos que alteram estado (cadastrar, alterar, excluir)
+IUsuarioQueryService    → métodos de leitura (buscar, listar)
+```
+
+Cada interface em seu próprio arquivo. Implementações concretas na camada `Application`.
+
+### Notifications (Domain Notifications)
+
+Para agregar múltiplos erros de validação sem lançar exceção:
+
+```
+INotificationService   → AddNotification(campo, mensagem)
+                       → HasNotifications → bool
+                       → GetNotifications → IReadOnlyList<Notification>
+```
+
+Usado em conjunto com FluentValidation — o validator adiciona notificações, o use case verifica antes de prosseguir.
+
+### Validação
+
+- **FluentValidation** para todos os inputs (Commands, DTOs de request)
+- Validators em classes separadas: `CadastrarUsuarioValidator`, etc.
+- Sem validação inline no use case ou controller
+
+### Logs de erro
+
+- `ILogger<T>` injetado via DI em todas as classes que executam operações de infraestrutura
+- `logger.LogError(ex, "mensagem descritiva {parametro}", valor)` para exceções
+- `logger.LogWarning(...)` para falhas de negócio esperadas
+- Nunca swallow de exceção sem log
+
+### ViewModel (Mobile)
+
+- **Proibido** qualquer referência a `IDbConnection`, repositório ou Dapper no ViewModel
+- ViewModel acessa apenas `Application` (use cases / query services) via interfaces injetadas
+- Toda lógica de dados fica na camada `Application` ou `Infrastructure`
+
+### Mapeamento
+
+- **AutoMapper proibido**
+- Mapeamentos via **métodos de extensão estáticos** (`ToDto()`, `ToEntity()`, `ToViewModel()`)
+- Cada mapeamento em arquivo próprio: `UsuarioMappingExtensions.cs`
+
+### Stack de testes
+
+| Biblioteca | Uso |
+|------------|-----|
+| **xUnit** | Framework de testes |
+| **FluentAssertions** | Assertions expressivas (`result.Should().BeTrue()`) |
+| **Moq** | Mocks de interfaces (`Mock<IUsuarioRepository>`) |
+| **Bogus** | Geração de dados fake realistas (`Faker<Usuario>`) |
+| **Fixtures** | Dados compartilhados entre testes (`IClassFixture<T>`) |
+| **Testcontainers** | Containers efêmeros para testes de integração |
+
+### Estratégia de testes por camada
+
+| Tipo | Projeto | Banco | Quando roda |
+|------|---------|-------|-------------|
+| Unitário | `Api.Tests`, `Mobile.Tests`, `Admin.Tests` | Mock de `IDbConnectionFactory` (Moq) | CI + local |
+| Integração | `Api.IntegrationTests` | PostgreSQL via Testcontainers | CI + local |
+| Integração | `Mobile.IntegrationTests` | SQLite em arquivo temporário | CI + local |
+
+**Pré-requisito local:** Docker Engine instalado no WSL2 (sem Docker Desktop). O Testcontainers conecta via socket do Docker no WSL2. No CI, o runner GitHub-hosted já possui Docker disponível.
+
+**Configuração Docker no WSL2 (Ubuntu 24.04):**
+- Docker Engine instalado via repositório oficial (`apt-get install docker-ce`)
+- Usuário adicionado ao grupo `docker` (sem necessidade de `sudo`)
+- Auto-start configurado no `~/.bashrc` via `service docker start`
+- Permissões `sudoers` para `service docker status/start` sem senha
+
+---
+
+## 13. Documentação da API
+
+- **Framework:** Scalar (substitui Swagger UI)
+- Configurado no `Api.Web` — acessível em `/scalar` no ambiente de desenvolvimento
+- Documenta todos os endpoints REST com exemplos de request/response
+
+---
+
+## 14. Padrão MVVM — Mobile
+
+Toda tela do app Mobile segue o padrão MVVM estritamente:
+
+| Camada | Responsabilidade |
+|--------|-----------------|
+| **View** (`.xaml`) | Apenas layout e binding — zero lógica |
+| **ViewModel** | Estado da tela, comandos, chamada de use cases |
+| **Model / Use Case** | Regra de negócio, repositório, lógica de domínio |
+
+- ViewModels implementam `INotifyPropertyChanged` (ou base class equivalente)
+- Navegação via serviço de navegação injetado — sem `Navigation.PushAsync` direto na View
+- Commands via `ICommand` / `RelayCommand`
+
+---
+
+## 15. Referência de Layout — Branch `origin/backup`
+
+Para implementação de telas do Mobile e do Admin, consultar o layout e estrutura visual do projeto original na branch `origin/backup` do repositório. O objetivo é manter consistência visual com o projeto anterior, adaptando a arquitetura sem redesenhar as telas do zero.
 
 ### Workflow SDD por módulo
 
