@@ -2,9 +2,12 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using ProvaVida.Api.Application.Services;
+using ProvaVida.Api.Domain.Interfaces;
 using ProvaVida.Api.Infrastructure;
 using ProvaVida.Api.Infrastructure.Data;
 using ProvaVida.Api.Infrastructure.Repositories;
+using ProvaVida.Api.Infrastructure.Services;
 using ProvaVida.Shared.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,10 +26,19 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ => new PostgresConnectionF
 // Repositórios
 builder.Services.AddScoped<IUsuarioRepository, PostgresUsuarioRepository>();
 builder.Services.AddScoped<ICheckinRepository, PostgresCheckinRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, PostgresRefreshTokenRepository>();
 
-// JWT Bearer
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
-    ?? throw new InvalidOperationException("Variável de ambiente 'JWT_SECRET' não configurada.");
+// Serviços de autenticação
+builder.Services.AddScoped<ITokenService, JwtTokenService>();
+builder.Services.AddScoped<IAuthApplicationService, AuthApplicationService>();
+
+// JWT Bearer — lê de env var com fallback para Jwt:Secret na configuração
+var jwtSecret =
+    Environment.GetEnvironmentVariable("JWT_SECRET")
+    ?? builder.Configuration["Jwt:Secret"]
+    ?? throw new InvalidOperationException(
+        "Segredo JWT não configurado. " +
+        "Defina a variável de ambiente 'JWT_SECRET' ou 'Jwt:Secret' no appsettings.");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -41,6 +53,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// Controllers
+builder.Services.AddControllers();
 
 // OpenAPI + Scalar
 builder.Services.AddOpenApi();
@@ -63,5 +78,7 @@ app.MapOpenApi();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
