@@ -24,7 +24,7 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - Branch: `feature/fase-2-migration-token-repository`
   - _Requirements: RF-203, RF-204, RNF-203_
 
-- [ ] 3. Implementar `ISessionManager` e `SessionManager`
+- [x] 3. Implementar `ISessionManager` e `SessionManager`
   - Criar `src/Mobile/ProvaVida.Mobile.Application/Auth/ISessionManager.cs` e `SessionManager.cs`
   - Métodos: `IsLoggedInAsync()`, `GetCurrentUserAsync()`, `SaveSessionAsync(Usuario, string senhaHash)`, `ClearSessionAsync()`
   - `ClearSessionAsync` deve excluir dados de check-ins e do usuário do SQLite (conforme `Fluxo-Logoff.md`)
