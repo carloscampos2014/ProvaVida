@@ -53,14 +53,15 @@ public class AuthApplicationServiceTests
             ContatoEmergenciaWhatsapp: _faker.Random.ReplaceNumbers("##########")
         );
 
-    private Usuario CriarUsuario(string email = "", string senhaHash = "") =>
+    private Usuario CriarUsuario(string email = "") =>
         new()
         {
             Id = Guid.NewGuid(),
             Nome = _faker.Name.FullName(),
             Email = string.IsNullOrEmpty(email) ? _faker.Internet.Email() : email,
             Whatsapp = _faker.Random.ReplaceNumbers("##########"),
-            SenhaHash = string.IsNullOrEmpty(senhaHash) ? _faker.Random.AlphaNumeric(64) : senhaHash,
+            SenhaHash = _faker.Random.AlphaNumeric(64),
+            SenhaSalt = string.Empty,
             ContatoEmergenciaNome = _faker.Name.FullName(),
             ContatoEmergenciaEmail = _faker.Internet.Email(),
             ContatoEmergenciaWhatsapp = _faker.Random.ReplaceNumbers("##########"),
@@ -76,8 +77,8 @@ public class AuthApplicationServiceTests
         // Arrange
         var command = CriarComandoCadastroValido();
         _usuarioRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(Result<IEnumerable<Usuario>>.Ok([]));
+            .Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(Result<Usuario>.Fail("Não encontrado."));
         _usuarioRepositoryMock
             .Setup(r => r.UpsertAsync(It.IsAny<Usuario>()))
             .ReturnsAsync(Result.Ok());
@@ -100,8 +101,8 @@ public class AuthApplicationServiceTests
         var usuarioExistente = CriarUsuario(email: command.Email.ToLowerInvariant());
 
         _usuarioRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(Result<IEnumerable<Usuario>>.Ok([usuarioExistente]));
+            .Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(Result<Usuario>.Ok(usuarioExistente));
 
         // Act
         var result = await _service.RegisterAsync(command);
@@ -160,8 +161,8 @@ public class AuthApplicationServiceTests
         // Arrange
         var command = CriarComandoCadastroValido();
         _usuarioRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(Result<IEnumerable<Usuario>>.Ok([]));
+            .Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(Result<Usuario>.Fail("Não encontrado."));
         _usuarioRepositoryMock
             .Setup(r => r.UpsertAsync(It.IsAny<Usuario>()))
             .ReturnsAsync(Result.Fail("Erro de banco de dados"));
@@ -179,14 +180,17 @@ public class AuthApplicationServiceTests
     [Fact]
     public async Task LoginAsync_ComCredenciaisValidas_DeveRetornarTokens()
     {
-        // Arrange
-        var senhaHash = _faker.Random.AlphaNumeric(64);
-        var usuario = CriarUsuario(senhaHash: senhaHash);
-        var command = new LoginCommand(Email: usuario.Email, SenhaHash: senhaHash);
+        // Arrange — gerar PBKDF2 real para testar verificação
+        var sha256Hash = _faker.Random.AlphaNumeric(64);
+        var (pbkdf2Hash, salt) = PasswordHashHelper.Hash(sha256Hash);
+        var usuario = CriarUsuario();
+        usuario.SenhaHash = pbkdf2Hash;
+        usuario.SenhaSalt = salt;
+        var command = new LoginCommand(Email: usuario.Email, SenhaHash: sha256Hash);
 
         _usuarioRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(Result<IEnumerable<Usuario>>.Ok([usuario]));
+            .Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(Result<Usuario>.Ok(usuario));
         _tokenServiceMock
             .Setup(t => t.GenerateAccessToken(It.IsAny<Usuario>()))
             .Returns("access-token-fake");
@@ -217,8 +221,8 @@ public class AuthApplicationServiceTests
             SenhaHash: _faker.Random.AlphaNumeric(64));
 
         _usuarioRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(Result<IEnumerable<Usuario>>.Ok([]));
+            .Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(Result<Usuario>.Fail("Não encontrado."));
 
         // Act
         var result = await _service.LoginAsync(command);
@@ -231,15 +235,19 @@ public class AuthApplicationServiceTests
     [Fact]
     public async Task LoginAsync_ComSenhaErrada_DeveRetornarFalha()
     {
-        // Arrange
-        var usuario = CriarUsuario(senhaHash: _faker.Random.AlphaNumeric(64));
+        // Arrange — usuário com PBKDF2 real, mas command com hash diferente
+        var sha256HashReal = _faker.Random.AlphaNumeric(64);
+        var (pbkdf2Hash, salt) = PasswordHashHelper.Hash(sha256HashReal);
+        var usuario = CriarUsuario();
+        usuario.SenhaHash = pbkdf2Hash;
+        usuario.SenhaSalt = salt;
         var command = new LoginCommand(
             Email: usuario.Email,
             SenhaHash: _faker.Random.AlphaNumeric(64)); // hash diferente
 
         _usuarioRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(Result<IEnumerable<Usuario>>.Ok([usuario]));
+            .Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(Result<Usuario>.Ok(usuario));
 
         // Act
         var result = await _service.LoginAsync(command);
