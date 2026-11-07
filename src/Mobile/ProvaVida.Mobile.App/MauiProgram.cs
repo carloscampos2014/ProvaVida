@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Logging;
 using ProvaVida.Mobile.Application.Auth;
 using ProvaVida.Mobile.Application.Http;
+using ProvaVida.Mobile.Application.Navigation;
 using ProvaVida.Mobile.Infrastructure.Data;
 using ProvaVida.Mobile.Infrastructure.Http;
 using ProvaVida.Mobile.Infrastructure.Repositories;
+using ProvaVida.Mobile.App.Navigation;
 using ProvaVida.Mobile.App.Pages;
 using ProvaVida.Mobile.App.ViewModels;
 using ProvaVida.Shared.Repositories;
@@ -11,12 +13,14 @@ using ProvaVida.Shared.Repositories;
 namespace ProvaVida.Mobile.App;
 
 /// <summary>
-/// Ponto de entrada do aplicativo MAUI. Configura o DI e executa as migrations do SQLite.
+/// Ponto de entrada do aplicativo MAUI. Configura o contêiner DI.
+/// As migrations são executadas em <see cref="App.InicializarAppAsync"/> (OnStart),
+/// onde falhas podem ser exibidas ao usuário antes de encerrar.
 /// </summary>
 public static class MauiProgram
 {
     /// <summary>
-    /// Cria e configura o <see cref="MauiApp"/>, registrando serviços e executando migrations.
+    /// Cria e configura o <see cref="MauiApp"/>, registrando todos os serviços necessários.
     /// </summary>
     public static MauiApp CreateMauiApp()
     {
@@ -39,6 +43,7 @@ public static class MauiProgram
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "provavida.db");
 
         // Migrator: singleton pois controla schema único
+        // Migrations executadas em App.OnStart para tratar falhas com mensagem ao usuário (RF-206.2)
         builder.Services.AddSingleton<IDatabaseMigrator>(sp =>
             new DatabaseMigrator(dbPath, sp.GetRequiredService<ILogger<DatabaseMigrator>>()));
 
@@ -55,7 +60,7 @@ public static class MauiProgram
 
         // ── HTTP / API ────────────────────────────────────────────────────────
 
-        // Base URL configurável: Development = localhost:5001; Produção = VM Oracle
+        // Base URL configurável: Development = localhost:5001; Produção = VM Oracle (RNF-206)
         var apiBaseUrl = "http://localhost:5001/";
         builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
         {
@@ -63,23 +68,25 @@ public static class MauiProgram
             client.Timeout = TimeSpan.FromSeconds(30);
         });
 
+        // ── Navegação ─────────────────────────────────────────────────────────
+
+        // IAppNavigation: permite que TokenManager navegue para Login sem depender do MAUI diretamente
+        builder.Services.AddSingleton<IAppNavigation, MauiAppNavigation>();
+
         // ── Serviços de autenticação ──────────────────────────────────────────
 
         builder.Services.AddTransient<ISessionManager, SessionManager>();
+        builder.Services.AddTransient<ITokenManager, TokenManager>();
         builder.Services.AddTransient<IAuthMobileService, AuthMobileService>();
 
         // ── ViewModels e Pages ────────────────────────────────────────────────
 
         builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<LoginViewModel>();
+        builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<CadastroViewModel>();
         builder.Services.AddTransient<CadastroPage>();
 
-        var app = builder.Build();
-
-        // Executar migrations antes de subir o app
-        var migrator = app.Services.GetRequiredService<IDatabaseMigrator>();
-        migrator.Migrate();
-
-        return app;
+        return builder.Build();
     }
 }

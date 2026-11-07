@@ -64,7 +64,7 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - Branch: `feature/fase-2-cadastro-page`
   - _Requirements: RF-202_
 
-- [ ] 8. Implementar fluxo de inicialização e registrar DI
+- [x] 8. Implementar fluxo de inicialização e registrar DI
   - Atualizar `App.xaml.cs` com lógica de `OnStart` conforme `docs/Fluxo-Inicialização.md`: DbUp → usuário logado? → Check-in; senão → online? → Login; senão → erro + encerrar
   - Registrar no `MauiProgram.cs`: `IAuthMobileService`, `ISessionManager`, `ITokenManager`, `IApiClient`, `ITokenRepository`, ViewModels e Pages
   - Configurar `HttpClient` com base URL via appsettings (Development: `http://localhost:5001`; Produção: VM Oracle)
