@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:ProvaVida.Mobile.App.ViewModels"
+    x:Class="ProvaVida.Mobile.App.Pages.CadastroPage"
+    x:DataType="vm:CadastroViewModel"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource Surface}">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="32,48,32,32"
+            Spacing="0">
+
+            <!-- Cabeçalho -->
+            <VerticalStackLayout
+                Spacing="8"
+                Margin="0,0,0,32">
+
+                <Image
+                    Source="appicon.png"
+                    HeightRequest="56"
+                    WidthRequest="56"
+                    HorizontalOptions="Center"
+                    SemanticProperties.Description="Logo Prova de Vida" />
+
+                <Label
+                    Text="Criar Conta"
+                    FontSize="26"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextPrimary}"
+                    HorizontalOptions="Center"
+                    SemanticProperties.HeadingLevel="Level1" />
+
+                <Label
+                    Text="Preencha seus dados para se cadastrar"
+                    FontSize="14"
+                    TextColor="{StaticResource TextSecondary}"
+                    HorizontalOptions="Center"
+                    SemanticProperties.HeadingLevel="Level2" />
+
+            </VerticalStackLayout>
+
+            <!-- ── Seção: Dados da Conta ──────────────────────────── -->
+            <Label
+                Text="Dados da Conta"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource Primary}"
+                Margin="0,0,0,12"
+                SemanticProperties.HeadingLevel="Level3" />
+
+            <!-- Campo Nome -->
+            <Label
+                Text="Nome completo"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,16"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding Nome}"
+                    Placeholder="Seu nome completo"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    Keyboard="Text"
+                    ReturnType="Next"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de nome completo" />
+            </Border>
+
+            <!-- Campo E-mail -->
+            <Label
+                Text="E-mail"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,16"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding Email}"
+                    Placeholder="seu@email.com"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    Keyboard="Email"
+                    ReturnType="Next"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de e-mail" />
+            </Border>
+
+            <!-- Campo Senha -->
+            <Label
+                Text="Senha"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,16"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding Senha}"
+                    Placeholder="Crie uma senha"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    IsPassword="True"
+                    ReturnType="Next"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de senha" />
+            </Border>
+
+            <!-- Campo Confirmação de Senha -->
+            <Label
+                Text="Confirmar senha"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,16"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding ConfirmacaoSenha}"
+                    Placeholder="Repita a senha"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    IsPassword="True"
+                    ReturnType="Next"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de confirmação de senha" />
+            </Border>
+
+            <!-- Campo WhatsApp -->
+            <Label
+                Text="WhatsApp"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,24"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding Whatsapp}"
+                    Placeholder="Somente números (ex: 11999990000)"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    Keyboard="Telephone"
+                    ReturnType="Next"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de WhatsApp" />
+            </Border>
+
+            <!-- ── Seção: Contato de Emergência ───────────────────── -->
+            <Label
+                Text="Contato de Emergência"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource Primary}"
+                Margin="0,0,0,12"
+                SemanticProperties.HeadingLevel="Level3" />
+
+            <!-- Campo Nome do Contato -->
+            <Label
+                Text="Nome do contato"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,16"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding ContatoNome}"
+                    Placeholder="Nome do contato de emergência"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    Keyboard="Text"
+                    ReturnType="Next"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de nome do contato de emergência" />
+            </Border>
+
+            <!-- Campo E-mail do Contato -->
+            <Label
+                Text="E-mail do contato"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,16"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding ContatoEmail}"
+                    Placeholder="email@contato.com"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    Keyboard="Email"
+                    ReturnType="Next"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de e-mail do contato de emergência" />
+            </Border>
+
+            <!-- Campo WhatsApp do Contato -->
+            <Label
+                Text="WhatsApp do contato"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
+                Margin="0,0,0,6" />
+
+            <Border
+                StrokeShape="RoundRectangle 10"
+                Stroke="{StaticResource Border}"
+                StrokeThickness="1.5"
+                BackgroundColor="{StaticResource White}"
+                Padding="14,0"
+                Margin="0,0,0,8"
+                HeightRequest="52">
+                <Entry
+                    Text="{Binding ContatoWhatsapp}"
+                    Placeholder="Somente números (ex: 11999990000)"
+                    PlaceholderColor="{StaticResource TextHint}"
+                    TextColor="{StaticResource TextPrimary}"
+                    Keyboard="Telephone"
+                    ReturnType="Done"
+                    ReturnCommand="{Binding CadastrarCommand}"
+                    BackgroundColor="Transparent"
+                    FontSize="15"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                    SemanticProperties.Hint="Campo de WhatsApp do contato de emergência" />
+            </Border>
+
+            <!-- Mensagem de erro -->
+            <Border
+                IsVisible="{Binding MensagemErro, Converter={StaticResource StringNotEmptyConverter}}"
+                StrokeShape="RoundRectangle 8"
+                Stroke="{StaticResource Danger}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource DangerLight}"
+                Padding="12,10"
+                Margin="0,8,0,0">
+                <Label
+                    Text="{Binding MensagemErro}"
+                    TextColor="{StaticResource Danger}"
+                    FontSize="13" />
+            </Border>
+
+            <!-- Botão Cadastrar -->
+            <Button
+                Text="Criar Conta"
+                Command="{Binding CadastrarCommand}"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                BackgroundColor="{StaticResource Primary}"
+                TextColor="{StaticResource White}"
+                FontSize="16"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                HeightRequest="52"
+                Margin="0,24,0,0"
+                SemanticProperties.Hint="Botão de cadastro" />
+
+            <!-- ActivityIndicator -->
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                Color="{StaticResource Primary}"
+                Margin="0,12,0,0"
+                HorizontalOptions="Center" />
+
+            <!-- Link Já tenho conta -->
+            <HorizontalStackLayout
+                HorizontalOptions="Center"
+                Spacing="4"
+                Margin="0,28,0,0">
+                <Label
+                    Text="Já tem uma conta?"
+                    FontSize="14"
+                    TextColor="{StaticResource TextSecondary}" />
+                <Label
+                    Text="Entrar"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource Primary}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding VoltarParaLoginCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
