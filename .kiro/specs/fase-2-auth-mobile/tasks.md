@@ -50,7 +50,7 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - Branch: `feature/fase-2-auth-mobile-service`
   - _Requirements: RF-202, RF-203, RF-207, RNF-202_
 
-- [-] 6. Implementar `LoginPage` e `LoginViewModel`
+- [x] 6. Implementar `LoginPage` e `LoginViewModel`
   - Criar `src/Mobile/ProvaVida.Mobile.App/ViewModels/LoginViewModel.cs` com `ObservableProperty` para email, senha, isLoading, mensagemErro e `RelayCommand` para `LoginAsync` e `IrParaCadastroAsync`
   - Criar `src/Mobile/ProvaVida.Mobile.App/Pages/LoginPage.xaml` e `LoginPage.xaml.cs` com layout conforme referência visual em `origin/backup`
   - Validar conectividade antes de enviar
