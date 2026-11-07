@@ -57,7 +57,7 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - Branch: `feature/fase-2-login-page`
   - _Requirements: RF-203_
 
-- [ ] 7. Implementar `CadastroPage` e `CadastroViewModel`
+- [x] 7. Implementar `CadastroPage` e `CadastroViewModel`
   - Criar `src/Mobile/ProvaVida.Mobile.App/ViewModels/CadastroViewModel.cs` com campos: nome, email, senha, confirmacaoSenha, whatsapp, contatoNome, contatoEmail, contatoWhatsapp, isLoading, mensagemErro e `RelayCommand` para `CadastrarAsync` e `VoltarParaLoginAsync`
   - Criar `src/Mobile/ProvaVida.Mobile.App/Pages/CadastroPage.xaml` e `CadastroPage.xaml.cs`
   - Validar conectividade e campos antes de enviar
