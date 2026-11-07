@@ -32,7 +32,7 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - Branch: `feature/fase-2-session-manager`
   - _Requirements: RF-204, RF-207_
 
-- [ ] 4. Implementar `ITokenManager` e `TokenManager`
+- [x] 4. Implementar `ITokenManager` e `TokenManager`
   - Criar `src/Mobile/ProvaVida.Mobile.Application/Auth/ITokenManager.cs` e `TokenManager.cs`
   - Métodos: `GetAccessTokenAsync()`, `RefreshTokenAsync()`, `SilentLoginAsync()`
   - Fluxo: token válido → retornar; expirado → refresh; refresh inválido → login silencioso com hash; falha → `ClearSession` + navegar para Login
