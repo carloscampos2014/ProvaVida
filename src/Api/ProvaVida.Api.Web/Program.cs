@@ -40,6 +40,12 @@ var jwtSecret =
         "Segredo JWT não configurado. " +
         "Defina a variável de ambiente 'JWT_SECRET' ou 'Jwt:Secret' no appsettings.");
 
+// Fix: propaga o segredo JWT para Jwt:Secret para que JwtTokenService o encontre
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+{
+    ["Jwt:Secret"] = jwtSecret
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
