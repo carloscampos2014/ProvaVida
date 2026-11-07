@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using ProvaVida.Mobile.Application.Http;
 
 namespace ProvaVida.Mobile.Infrastructure.Http;
 
