@@ -24,6 +24,12 @@ public class Usuario
     /// <summary>Hash SHA-256 da senha, gerado no app mobile antes do envio.</summary>
     public string SenhaHash { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Salt aleatório em Base64 usado pelo PBKDF2 server-side.
+    /// Vazio nos registros SQLite do mobile (que armazena apenas o SHA-256).
+    /// </summary>
+    public string SenhaSalt { get; set; } = string.Empty;
+
     /// <summary>Nome do contato de emergência.</summary>
     public string ContatoEmergenciaNome { get; set; } = string.Empty;
 

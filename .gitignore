@@ -41,13 +41,17 @@ TestResults/
 ## Kiro — não versionar histórico de sessão e quality scores (específicos de cada dev)
 .kiro/
 
+## Kiro — estado de workflows e agentes (gerado automaticamente)
+.agents/
+
 ## OS
 .DS_Store
 Thumbs.db
 TesteProVidaApi.ps1
 
-# RAG / knowledge base local (gerado pelo Kiro)
+# RAG / knowledge base local (gerado pelo knowledge-rag MCP)
 /data/
+/config.yaml
 
 
 # Configurações locais com secrets (connection strings, jwt secrets, etc.)

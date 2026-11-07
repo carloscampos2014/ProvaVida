@@ -1,5 +1,6 @@
 using Dapper;
 using ProvaVida.Mobile.Infrastructure.Data;
+using ProvaVida.Shared.Common;
 using ProvaVida.Shared.Entities;
 using ProvaVida.Shared.Repositories;
 
@@ -66,4 +67,33 @@ public class SqliteUsuarioRepository : DapperRepository<Usuario>, IUsuarioReposi
 
     /// <inheritdoc/>
     protected override string DeleteSql => "DELETE FROM usuarios WHERE id = @Id";
+
+    /// <inheritdoc/>
+    public async Task<Result<Usuario>> GetByEmailAsync(string email)
+    {
+        const string sql = @"
+            SELECT id, nome, email, whatsapp,
+                   senha_hash                   AS SenhaHash,
+                   contato_emergencia_nome      AS ContatoEmergenciaNome,
+                   contato_emergencia_email     AS ContatoEmergenciaEmail,
+                   contato_emergencia_whatsapp  AS ContatoEmergenciaWhatsapp,
+                   criado_em                    AS CriadoEm,
+                   atualizado_em               AS AtualizadoEm
+            FROM usuarios
+            WHERE LOWER(email) = LOWER(@Email)
+            LIMIT 1";
+
+        try
+        {
+            using var conn = _factory.Create();
+            var usuario = await conn.QueryFirstOrDefaultAsync<Usuario>(sql, new { Email = email });
+            return usuario is null
+                ? Result<Usuario>.Fail("Usuário não encontrado.")
+                : Result<Usuario>.Ok(usuario);
+        }
+        catch (Exception ex)
+        {
+            return Result<Usuario>.Fail(ex.Message);
+        }
+    }
 }

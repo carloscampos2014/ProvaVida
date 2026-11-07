@@ -15,7 +15,8 @@ namespace ProvaVida.Shared.Repositories;
 /// <typeparam name="T">Tipo da entidade gerenciada pelo repositório.</typeparam>
 public abstract class DapperRepository<T> : IRepository<T>
 {
-    private readonly IDbConnectionFactory _factory;
+    /// <summary>Fábrica de conexões disponível para subclasses implementarem queries adicionais.</summary>
+    protected readonly IDbConnectionFactory _factory;
 
     /// <summary>SQL para buscar uma entidade por <c>@Id</c>.</summary>
     protected abstract string SelectByIdSql { get; }
