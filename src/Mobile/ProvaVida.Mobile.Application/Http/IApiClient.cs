@@ -1,4 +1,4 @@
-namespace ProvaVida.Mobile.Infrastructure.Http;
+namespace ProvaVida.Mobile.Application.Http;
 
 /// <summary>
 /// Abstração do cliente HTTP utilizado para comunicação com a API ProvaVida.

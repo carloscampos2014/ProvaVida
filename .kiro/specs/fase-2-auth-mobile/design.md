@@ -14,13 +14,14 @@ Mobile.App (MAUI)
   ViewModels: LoginViewModel, CadastroViewModel
       ↓
 Mobile.Application
-  Auth: IAuthMobileService, ISessionManager, ITokenManager
+  Auth: IAuthMobileService, ISessionManager, ITokenManager, ITokenRepository
+  Http: IApiClient                ← interface aqui, não na Infrastructure
   Utils: Sha256Helper
   Validators: CadastrarUsuarioMobileValidator, LoginMobileValidator
       ↓
 Mobile.Infrastructure
-  Http: IApiClient, ApiClient → API REST
-  Repositories: ITokenRepository, SqliteTokenRepository → SQLite
+  Http: ApiClient → API REST       ← só a implementação
+  Repositories: SqliteTokenRepository → SQLite  ← só a implementação
       ↓
 Shared
   Repositories: IUsuarioRepository, SqliteUsuarioRepository → SQLite
@@ -31,6 +32,7 @@ Regras de dependência (Clean Architecture):
 - `Mobile.Application` referencia apenas `Shared` — nunca `Infrastructure` diretamente
 - `Mobile.Infrastructure` referencia `Mobile.Application` e `Shared`
 - ViewModels nunca acessam `IDbConnection` ou repositórios diretamente
+- **Interfaces (`IApiClient`, `ITokenRepository`) ficam em `Application`; implementações em `Infrastructure`**
 
 ### Fluxo de Renovação de Token
 
@@ -57,7 +59,7 @@ public static class Sha256Helper
 }
 ```
 
-### `IApiClient` / `ApiClient` — `Mobile.Infrastructure/Http/`
+### `IApiClient` / `ApiClient` — Interface em `Mobile.Application/Http/`, Implementação em `Mobile.Infrastructure/Http/`
 
 ```csharp
 public interface IApiClient
@@ -68,7 +70,7 @@ public interface IApiClient
 
 `ApiClient` usa `IHttpClientFactory` com base URL configurável via `appsettings` por ambiente.
 
-### `ITokenRepository` / `SqliteTokenRepository` — `Mobile.Infrastructure/Repositories/`
+### `ITokenRepository` / `SqliteTokenRepository` — Interface em `Mobile.Application/Auth/`, Implementação em `Mobile.Infrastructure/Repositories/`
 
 ```csharp
 public interface ITokenRepository
@@ -138,7 +140,7 @@ public partial class LoginViewModel : ObservableObject
 ### Migration SQLite — `V003__adicionar_colunas_auth.sql`
 
 ```sql
-ALTER TABLE usuarios ADD COLUMN senha_hash TEXT NOT NULL DEFAULT '';
+-- Nota: senha_hash já existe na V001 — NÃO duplicar aqui
 
 CREATE TABLE IF NOT EXISTS tokens (
     id            TEXT PRIMARY KEY,

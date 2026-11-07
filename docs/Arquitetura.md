@@ -164,7 +164,7 @@ O app **nunca redireciona para Login** enquanto houver dados de usuário no SQLi
 1. Login:
    App → POST /auth/login { email, senhaHash }
    API → { accessToken, refreshToken, expiresAt }
-   App salva tokens no Secure Storage do SO (Keychain/Keystore)
+   App salva tokens no SQLite local (tabela `tokens`) via `ITokenRepository`
 
 2. Chamada normal (token válido):
    App verifica expiresAt → ainda válido
@@ -172,13 +172,13 @@ O app **nunca redireciona para Login** enquanto houver dados de usuário no SQLi
 
 3. Renovação silenciosa (token expirado):
    App verifica expiresAt → expirado
-   App → POST /auth/refresh { refreshToken }
+   App → POST /auth/refresh { refreshToken do SQLite }
    API → { novoAccessToken, novoExpiresAt }
-   App → [endpoint] Authorization: Bearer <novoAccessToken>
+   App salva novos tokens no SQLite → [endpoint] Authorization: Bearer <novoAccessToken>
 
 4. Refresh falho (token inválido/revogado):
    App → POST /auth/refresh → 401
-   App faz novo login silencioso usando hash do SQLite
+   App faz novo login silencioso usando hash do SQLite (tabela tokens.senha_hash)
    App → POST /auth/login { email, senhaHash do SQLite }
 
 5. Login silencioso também falha (conta deletada no servidor):
