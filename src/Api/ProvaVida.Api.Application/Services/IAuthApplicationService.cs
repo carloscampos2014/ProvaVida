@@ -26,14 +26,14 @@ public interface IAuthApplicationService
     Task<Result<Usuario>> RegisterAsync(CadastrarUsuarioCommand command);
 
     /// <summary>
-    /// Autentica um usuário e retorna os tokens de acesso.
+    /// Autentica um usuário e retorna os dados do usuário junto com os tokens de acesso.
     /// </summary>
     /// <param name="command">Credenciais do usuário (e-mail + hash SHA-256).</param>
     /// <returns>
-    /// <see cref="Result{TokenResponse}"/> com os tokens se credenciais válidas;
+    /// <see cref="Result{LoginResponseDto}"/> com dados do usuário e tokens se credenciais válidas;
     /// falha com mensagem genérica se credenciais inválidas (sem revelar qual campo está errado).
     /// </returns>
-    Task<Result<TokenResponse>> LoginAsync(LoginCommand command);
+    Task<Result<LoginResponseDto>> LoginAsync(LoginCommand command);
 
     /// <summary>
     /// Renova os tokens de autenticação usando o refresh token atual (Refresh Token Rotation).

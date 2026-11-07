@@ -40,7 +40,7 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - Branch: `feature/fase-2-token-manager`
   - _Requirements: RF-205_
 
-- [ ] 5. Implementar `IAuthMobileService` e `AuthMobileService`
+- [x] 5. Implementar `IAuthMobileService` e `AuthMobileService`
   - Criar `src/Mobile/ProvaVida.Mobile.Application/Auth/IAuthMobileService.cs` e `AuthMobileService.cs`
   - Métodos: `RegisterAsync(RegisterRequest)`, `LoginAsync(string email, string senha)`, `LogoutAsync()`
   - `LoginAsync`: gerar hash via `Sha256Helper` → chamar API → salvar `Usuario`, tokens e hash no SQLite via `SessionManager` e `TokenRepository`

@@ -95,7 +95,7 @@ public class AuthApplicationService : IAuthApplicationService
     }
 
     /// <inheritdoc />
-    public async Task<Result<TokenResponse>> LoginAsync(LoginCommand command)
+    public async Task<Result<LoginResponseDto>> LoginAsync(LoginCommand command)
     {
         try
         {
@@ -103,14 +103,14 @@ public class AuthApplicationService : IAuthApplicationService
             var validator = new LoginValidator();
             var validation = await validator.ValidateAsync(command);
             if (!validation.IsValid)
-                return Result<TokenResponse>.Fail("Credenciais inválidas.");
+                return Result<LoginResponseDto>.Fail("Credenciais inválidas.");
 
             // Busca o usuário por e-mail
             var usuarioResult = await _usuarioRepository.GetByEmailAsync(command.Email);
             if (!usuarioResult.Success || usuarioResult.Data is null)
             {
                 _logger.LogWarning("Tentativa de login com e-mail não cadastrado.");
-                return Result<TokenResponse>.Fail("Credenciais inválidas.");
+                return Result<LoginResponseDto>.Fail("Credenciais inválidas.");
             }
 
             var usuario = usuarioResult.Data;
@@ -119,7 +119,7 @@ public class AuthApplicationService : IAuthApplicationService
             if (!PasswordHashHelper.Verify(command.SenhaHash, usuario.SenhaHash, usuario.SenhaSalt))
             {
                 _logger.LogWarning("Tentativa de login com senha incorreta para e-mail {Email}.", command.Email);
-                return Result<TokenResponse>.Fail("Credenciais inválidas.");
+                return Result<LoginResponseDto>.Fail("Credenciais inválidas.");
             }
 
             // Gera tokens
@@ -140,7 +140,15 @@ public class AuthApplicationService : IAuthApplicationService
 
             _logger.LogInformation("Login bem-sucedido para usuário {UsuarioId}.", usuario.Id);
 
-            return Result<TokenResponse>.Ok(new TokenResponse(
+            return Result<LoginResponseDto>.Ok(new LoginResponseDto(
+                UsuarioId: usuario.Id,
+                Nome: usuario.Nome,
+                Email: usuario.Email,
+                Whatsapp: usuario.Whatsapp,
+                ContatoEmergenciaNome: usuario.ContatoEmergenciaNome,
+                ContatoEmergenciaEmail: usuario.ContatoEmergenciaEmail,
+                ContatoEmergenciaWhatsapp: usuario.ContatoEmergenciaWhatsapp,
+                CriadoEm: usuario.CriadoEm,
                 AccessToken: accessToken,
                 RefreshToken: refreshTokenValue,
                 TokenType: "Bearer",
@@ -150,7 +158,7 @@ public class AuthApplicationService : IAuthApplicationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro inesperado ao processar login para {Email}.", command.Email);
-            return Result<TokenResponse>.Fail("Erro interno ao processar o login.");
+            return Result<LoginResponseDto>.Fail("Erro interno ao processar o login.");
         }
     }
 
