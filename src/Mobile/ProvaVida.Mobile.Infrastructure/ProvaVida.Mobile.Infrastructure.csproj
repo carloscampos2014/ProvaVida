@@ -21,6 +21,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\V001__criar_tabela_usuarios.sql" />
     <EmbeddedResource Include="Migrations\V002__criar_tabela_checkins.sql" />
+    <EmbeddedResource Include="Migrations\V003__adicionar_colunas_auth.sql" />
   </ItemGroup>
 
 </Project>
