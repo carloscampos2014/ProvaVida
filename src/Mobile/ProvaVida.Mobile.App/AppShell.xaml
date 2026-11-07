@@ -7,6 +7,13 @@
     xmlns:pages="clr-namespace:ProvaVida.Mobile.App.Pages"
     Title="Enzojb Prova de Vida">
 
+    <!-- LoginPage: rota inicial padrão — OnStart navega para Check-in se já logado -->
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate pages:LoginPage}"
+        Route="LoginPage"
+        Shell.NavBarIsVisible="False" />
+
     <ShellContent
         Title="Início"
         ContentTemplate="{DataTemplate local:MainPage}"
