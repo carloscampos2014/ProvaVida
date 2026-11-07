@@ -11,11 +11,14 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - Criar `src/Mobile/ProvaVida.Mobile.Infrastructure/Http/IApiClient.cs` e `ApiClient.cs` — wrapper de `HttpClient` com `PostAsync<TRequest, TResponse>` e base URL configurável via appsettings
   - Testes TDD: `Sha256Helper_DeveGerarHashCorreto`, `Sha256Helper_HashDeveSerDiferenteDaSenha`
   - Branch: `feature/fase-2-sha256-apiclient`
+  - ⚠️ **Pré-trabalho pendente:** `IApiClient.cs` foi criado em `Mobile.Infrastructure/Http/` (errado). Mover para `Mobile.Application/Http/` antes de iniciar a Task 2 para evitar ciclo de referência. Branch: `feature/fase-2-mover-iapiclient`
   - _Requirements: RF-201, RNF-201_
 
 - [ ] 2. Criar migration SQLite V003 e `ITokenRepository`
-  - Criar `src/Mobile/ProvaVida.Mobile.Infrastructure/Migrations/V003__adicionar_colunas_auth.sql` como `EmbeddedResource`
-  - Criar `src/Mobile/ProvaVida.Mobile.Infrastructure/Repositories/ITokenRepository.cs` e `SqliteTokenRepository.cs` com: `SaveAsync`, `GetByUsuarioIdAsync`, `DeleteByUsuarioIdAsync`
+  - Criar `src/Mobile/ProvaVida.Mobile.Infrastructure/Migrations/V003__adicionar_colunas_auth.sql` como `EmbeddedResource` — apenas a tabela `tokens` (NÃO adicionar `senha_hash` em `usuarios`, já existe na V001)
+  - Criar `src/Mobile/ProvaVida.Mobile.Application/Auth/ITokenRepository.cs` — interface em Application (evita ciclo de referência)
+  - Criar `src/Mobile/ProvaVida.Mobile.Infrastructure/Repositories/SqliteTokenRepository.cs` — implementação em Infrastructure
+  - Métodos: `SaveAsync`, `GetByUsuarioIdAsync`, `DeleteByUsuarioIdAsync`
   - XML docs em interface e classe
   - Testes TDD: `SqliteTokenRepository_SaveAsync_DevePersistirToken`, `SqliteTokenRepository_DeleteAsync_DeveRemoverToken`
   - Branch: `feature/fase-2-migration-token-repository`
