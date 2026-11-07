@@ -114,7 +114,6 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <param name="request">Refresh token a ser revogado.</param>
     /// <returns>204 No Content se bem-sucedido, 400 Bad Request se não encontrado.</returns>
-    [Authorize]
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
