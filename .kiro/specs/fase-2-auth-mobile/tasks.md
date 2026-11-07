@@ -14,7 +14,7 @@ Implementar autenticação completa no app Mobile MAUI: hash SHA-256 local, ApiC
   - ⚠️ **Pré-trabalho pendente:** `IApiClient.cs` foi criado em `Mobile.Infrastructure/Http/` (errado). Mover para `Mobile.Application/Http/` antes de iniciar a Task 2 para evitar ciclo de referência. Branch: `feature/fase-2-mover-iapiclient`
   - _Requirements: RF-201, RNF-201_
 
-- [ ] 2. Criar migration SQLite V003 e `ITokenRepository`
+- [x] 2. Criar migration SQLite V003 e `ITokenRepository`
   - Criar `src/Mobile/ProvaVida.Mobile.Infrastructure/Migrations/V003__adicionar_colunas_auth.sql` como `EmbeddedResource` — apenas a tabela `tokens` (NÃO adicionar `senha_hash` em `usuarios`, já existe na V001)
   - Criar `src/Mobile/ProvaVida.Mobile.Application/Auth/ITokenRepository.cs` — interface em Application (evita ciclo de referência)
   - Criar `src/Mobile/ProvaVida.Mobile.Infrastructure/Repositories/SqliteTokenRepository.cs` — implementação em Infrastructure
