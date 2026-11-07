@@ -53,16 +53,13 @@ public class AuthApplicationService : IAuthApplicationService
                 return Result<Usuario>.Fail(erros);
             }
 
-            // Verifica e-mail duplicado
-            var todos = await _usuarioRepository.GetAllAsync();
-            if (todos.Success && todos.Data is not null)
-            {
-                var emailExiste = todos.Data.Any(u =>
-                    u.Email.Equals(command.Email, StringComparison.OrdinalIgnoreCase));
+            // Verifica e-mail duplicado via query direta — sem carregar todos os registros
+            var emailCheck = await _usuarioRepository.GetByEmailAsync(command.Email);
+            if (emailCheck.Success)
+                return Result<Usuario>.Fail("E-mail já cadastrado.");
 
-                if (emailExiste)
-                    return Result<Usuario>.Fail("E-mail já cadastrado.");
-            }
+            // Deriva hash seguro PBKDF2 a partir do SHA-256 recebido do mobile
+            var (senhaHashServidor, senhaSalt) = PasswordHashHelper.Hash(command.SenhaHash);
 
             // Cria o usuário
             var usuario = new Usuario
@@ -71,7 +68,8 @@ public class AuthApplicationService : IAuthApplicationService
                 Nome = command.Nome,
                 Email = command.Email.ToLowerInvariant(),
                 Whatsapp = command.Whatsapp,
-                SenhaHash = command.SenhaHash,
+                SenhaHash = senhaHashServidor,
+                SenhaSalt = senhaSalt,
                 ContatoEmergenciaNome = command.ContatoEmergenciaNome,
                 ContatoEmergenciaEmail = command.ContatoEmergenciaEmail.ToLowerInvariant(),
                 ContatoEmergenciaWhatsapp = command.ContatoEmergenciaWhatsapp,
@@ -86,7 +84,7 @@ public class AuthApplicationService : IAuthApplicationService
                 return Result<Usuario>.Fail(resultado.MessageErro);
             }
 
-            _logger.LogWarning("Usuário {UsuarioId} cadastrado com sucesso.", usuario.Id);
+            _logger.LogInformation("Usuário {UsuarioId} cadastrado com sucesso.", usuario.Id);
             return Result<Usuario>.Ok(usuario);
         }
         catch (Exception ex)
@@ -107,18 +105,20 @@ public class AuthApplicationService : IAuthApplicationService
             if (!validation.IsValid)
                 return Result<TokenResponse>.Fail("Credenciais inválidas.");
 
-            // Busca o usuário por e-mail e hash
-            var todos = await _usuarioRepository.GetAllAsync();
-            if (!todos.Success || todos.Data is null)
-                return Result<TokenResponse>.Fail("Credenciais inválidas.");
-
-            var usuario = todos.Data.FirstOrDefault(u =>
-                u.Email.Equals(command.Email, StringComparison.OrdinalIgnoreCase) &&
-                u.SenhaHash == command.SenhaHash);
-
-            if (usuario is null)
+            // Busca o usuário por e-mail
+            var usuarioResult = await _usuarioRepository.GetByEmailAsync(command.Email);
+            if (!usuarioResult.Success || usuarioResult.Data is null)
             {
-                _logger.LogWarning("Tentativa de login com credenciais inválidas para e-mail {Email}.", command.Email);
+                _logger.LogWarning("Tentativa de login com e-mail não cadastrado.");
+                return Result<TokenResponse>.Fail("Credenciais inválidas.");
+            }
+
+            var usuario = usuarioResult.Data;
+
+            // Verifica a senha usando comparação em tempo constante
+            if (!PasswordHashHelper.Verify(command.SenhaHash, usuario.SenhaHash, usuario.SenhaSalt))
+            {
+                _logger.LogWarning("Tentativa de login com senha incorreta para e-mail {Email}.", command.Email);
                 return Result<TokenResponse>.Fail("Credenciais inválidas.");
             }
 
@@ -138,7 +138,7 @@ public class AuthApplicationService : IAuthApplicationService
 
             await _refreshTokenRepository.SaveAsync(refreshToken);
 
-            _logger.LogWarning("Login bem-sucedido para usuário {UsuarioId}.", usuario.Id);
+            _logger.LogInformation("Login bem-sucedido para usuário {UsuarioId}.", usuario.Id);
 
             return Result<TokenResponse>.Ok(new TokenResponse(
                 AccessToken: accessToken,
@@ -197,7 +197,7 @@ public class AuthApplicationService : IAuthApplicationService
 
             await _refreshTokenRepository.SaveAsync(novoRefreshToken);
 
-            _logger.LogWarning("Refresh token rotacionado para usuário {UsuarioId}.", usuarioResult.Data.Id);
+            _logger.LogInformation("Refresh token rotacionado para usuário {UsuarioId}.", usuarioResult.Data.Id);
 
             return Result<TokenResponse>.Ok(new TokenResponse(
                 AccessToken: novoAccessToken,
@@ -227,7 +227,7 @@ public class AuthApplicationService : IAuthApplicationService
 
             await _refreshTokenRepository.RevokeAsync(command.RefreshToken);
 
-            _logger.LogWarning("Logout realizado, refresh token revogado para usuário {UsuarioId}.", tokenEntity.UsuarioId);
+            _logger.LogInformation("Logout realizado, refresh token revogado para usuário {UsuarioId}.", tokenEntity.UsuarioId);
 
             return Result.Ok();
         }

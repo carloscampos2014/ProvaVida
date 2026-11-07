@@ -60,7 +60,7 @@ public class JwtTokenService : ITokenService
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        _logger.LogWarning("Access Token gerado para usuário {UsuarioId}.", usuario.Id);
+        _logger.LogInformation("Access Token gerado para usuário {UsuarioId}.", usuario.Id);
 
         return tokenString;
     }
