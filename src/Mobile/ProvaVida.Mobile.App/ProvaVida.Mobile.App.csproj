@@ -19,6 +19,12 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
+		<!-- Requerido pelo CommunityToolkit.Mvvm 8.x para [ObservableProperty] com partial properties -->
+		<LangVersion>preview</LangVersion>
+
+		<!-- Suprimir CA1416 (platform-specific API): esperado em apps MAUI multi-plataforma -->
+		<NoWarn>$(NoWarn);CA1416</NoWarn>
+
 		<!-- Enable XAML source generation for faster build times and improved performance.
 		     This generates C# code from XAML at compile time instead of runtime inflation.
 		     To disable, remove this line.

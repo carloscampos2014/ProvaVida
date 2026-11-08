@@ -23,19 +23,19 @@ public partial class LoginViewModel : ObservableObject
 
     /// <summary>E-mail digitado pelo usuário.</summary>
     [ObservableProperty]
-    private string email = string.Empty;
+    public partial string Email { get; set; } = string.Empty;
 
     /// <summary>Senha digitada pelo usuário (texto puro — hash gerado no serviço).</summary>
     [ObservableProperty]
-    private string senha = string.Empty;
+    public partial string Senha { get; set; } = string.Empty;
 
     /// <summary>Indica que uma operação está em andamento (exibe ActivityIndicator).</summary>
     [ObservableProperty]
-    private bool isLoading;
+    public partial bool IsLoading { get; set; }
 
     /// <summary>Mensagem de erro exibida abaixo do formulário. Vazio = sem erro.</summary>
     [ObservableProperty]
-    private string mensagemErro = string.Empty;
+    public partial string MensagemErro { get; set; } = string.Empty;
 
     /// <summary>
     /// Valida conectividade, chama o serviço de autenticação e navega para Check-in em caso de sucesso.
@@ -70,7 +70,6 @@ public partial class LoginViewModel : ObservableObject
             if (resultado.Success)
             {
                 // RF-203.4 — dados e tokens já foram persistidos pelo serviço; navegar para Check-in
-                // A rota //CheckinPage será registrada na Task 8; por ora usa MainPage como placeholder
                 await Shell.Current.GoToAsync("//MainPage");
             }
             else

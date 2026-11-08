@@ -27,9 +27,8 @@ public class AuthFlowIntegrationTests : IAsyncLifetime
     public AuthFlowIntegrationTests()
     {
         var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST") ?? "tcp://localhost:2375";
-        _postgres = new PostgreSqlBuilder()
+        _postgres = new PostgreSqlBuilder("postgres:16-alpine")
             .WithDockerEndpoint(dockerEndpoint)
-            .WithImage("postgres:16-alpine")
             .WithDatabase("provavida_test")
             .WithUsername("test")
             .WithPassword("test")

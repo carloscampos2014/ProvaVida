@@ -27,47 +27,47 @@ public partial class CadastroViewModel : ObservableObject
 
     /// <summary>Nome completo do usuário.</summary>
     [ObservableProperty]
-    private string nome = string.Empty;
+    public partial string Nome { get; set; } = string.Empty;
 
     /// <summary>E-mail do usuário.</summary>
     [ObservableProperty]
-    private string email = string.Empty;
+    public partial string Email { get; set; } = string.Empty;
 
     /// <summary>Senha em texto puro — hash SHA-256 gerado antes de enviar à API.</summary>
     [ObservableProperty]
-    private string senha = string.Empty;
+    public partial string Senha { get; set; } = string.Empty;
 
     /// <summary>Confirmação da senha — usada apenas para validação local, nunca enviada.</summary>
     [ObservableProperty]
-    private string confirmacaoSenha = string.Empty;
+    public partial string ConfirmacaoSenha { get; set; } = string.Empty;
 
     /// <summary>WhatsApp do usuário (somente dígitos, 10 ou 11 caracteres).</summary>
     [ObservableProperty]
-    private string whatsapp = string.Empty;
+    public partial string Whatsapp { get; set; } = string.Empty;
 
     // ── Contato de emergência ─────────────────────────────────────────────────
 
     /// <summary>Nome do contato de emergência.</summary>
     [ObservableProperty]
-    private string contatoNome = string.Empty;
+    public partial string ContatoNome { get; set; } = string.Empty;
 
     /// <summary>E-mail do contato de emergência.</summary>
     [ObservableProperty]
-    private string contatoEmail = string.Empty;
+    public partial string ContatoEmail { get; set; } = string.Empty;
 
     /// <summary>WhatsApp do contato de emergência (somente dígitos, 10 ou 11 caracteres).</summary>
     [ObservableProperty]
-    private string contatoWhatsapp = string.Empty;
+    public partial string ContatoWhatsapp { get; set; } = string.Empty;
 
     // ── Estado da UI ──────────────────────────────────────────────────────────
 
     /// <summary>Indica que uma operação está em andamento (exibe ActivityIndicator).</summary>
     [ObservableProperty]
-    private bool isLoading;
+    public partial bool IsLoading { get; set; }
 
     /// <summary>Mensagem de erro exibida abaixo do formulário. Vazio = sem erro.</summary>
     [ObservableProperty]
-    private string mensagemErro = string.Empty;
+    public partial string MensagemErro { get; set; } = string.Empty;
 
     /// <summary>
     /// Valida conectividade e campos, computa hash SHA-256, chama o serviço de cadastro
