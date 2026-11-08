@@ -1,5 +1,6 @@
 using Dapper;
 using ProvaVida.Mobile.Infrastructure.Data;
+using ProvaVida.Shared.Common;
 using ProvaVida.Shared.Entities;
 using ProvaVida.Shared.Repositories;
 
@@ -65,4 +66,81 @@ public class SqliteCheckinRepository : DapperRepository<Checkin>, ICheckinReposi
 
     /// <inheritdoc/>
     protected override string DeleteSql => "DELETE FROM checkins WHERE id = @Id";
+
+    /// <inheritdoc/>
+    public virtual async Task<Result<IEnumerable<Checkin>>> GetByUsuarioIdAsync(Guid usuarioId)
+    {
+        const string sql = @"
+            SELECT id,
+                   usuario_id             AS UsuarioId,
+                   data, latitude, longitude,
+                   identificacao_aparelho AS IdentificacaoAparelho,
+                   sincronizado,
+                   criado_em              AS CriadoEm
+            FROM checkins
+            WHERE usuario_id = @UsuarioId
+            ORDER BY data DESC";
+        try
+        {
+            using var conn = _factory.Create();
+            var items = await conn.QueryAsync<Checkin>(sql, new { UsuarioId = usuarioId });
+            return Result<IEnumerable<Checkin>>.Ok(items);
+        }
+        catch (Exception ex)
+        {
+            return Result<IEnumerable<Checkin>>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<Result<Checkin>> GetByUsuarioIdAndDataAsync(Guid usuarioId, DateOnly data)
+    {
+        const string sql = @"
+            SELECT id,
+                   usuario_id             AS UsuarioId,
+                   data, latitude, longitude,
+                   identificacao_aparelho AS IdentificacaoAparelho,
+                   sincronizado,
+                   criado_em              AS CriadoEm
+            FROM checkins
+            WHERE usuario_id = @UsuarioId
+              AND data = @Data";
+        try
+        {
+            using var conn = _factory.Create();
+            var entity = await conn.QueryFirstOrDefaultAsync<Checkin>(sql, new { UsuarioId = usuarioId, Data = data });
+            return entity is null
+                ? Result<Checkin>.Fail("Check-in não encontrado para a data informada")
+                : Result<Checkin>.Ok(entity);
+        }
+        catch (Exception ex)
+        {
+            return Result<Checkin>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<Result<IEnumerable<Checkin>>> GetPendingSyncAsync()
+    {
+        const string sql = @"
+            SELECT id,
+                   usuario_id             AS UsuarioId,
+                   data, latitude, longitude,
+                   identificacao_aparelho AS IdentificacaoAparelho,
+                   sincronizado,
+                   criado_em              AS CriadoEm
+            FROM checkins
+            WHERE sincronizado = 0
+            ORDER BY data DESC";
+        try
+        {
+            using var conn = _factory.Create();
+            var items = await conn.QueryAsync<Checkin>(sql);
+            return Result<IEnumerable<Checkin>>.Ok(items);
+        }
+        catch (Exception ex)
+        {
+            return Result<IEnumerable<Checkin>>.Fail(ex.Message);
+        }
+    }
 }
