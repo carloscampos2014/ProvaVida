@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:ProvaVida.Mobile.App.ViewModels"
+    x:Class="ProvaVida.Mobile.App.Pages.CheckinPage"
+    x:DataType="vm:CheckinViewModel"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource Surface}">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="32,48,32,32"
+            Spacing="0">
+
+            <!-- Cabeçalho -->
+            <VerticalStackLayout
+                Spacing="8"
+                Margin="0,0,0,40">
+
+                <Image
+                    Source="appicon.png"
+                    HeightRequest="72"
+                    WidthRequest="72"
+                    HorizontalOptions="Center"
+                    SemanticProperties.Description="Logo Prova de Vida" />
+
+                <Label
+                    Text="Prova de Vida"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource TextPrimary}"
+                    HorizontalOptions="Center"
+                    SemanticProperties.HeadingLevel="Level1" />
+
+                <Label
+                    Text="Check-in diário"
+                    FontSize="15"
+                    TextColor="{StaticResource TextSecondary}"
+                    HorizontalOptions="Center"
+                    SemanticProperties.HeadingLevel="Level2" />
+
+            </VerticalStackLayout>
+
+            <!-- ActivityIndicator (exibido durante qualquer operação) -->
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                Color="{StaticResource Primary}"
+                Margin="0,0,0,16"
+                HorizontalOptions="Center"
+                SemanticProperties.Description="Carregando..." />
+
+            <!-- Área de conteúdo (oculta durante carregamento para evitar flicker) -->
+            <VerticalStackLayout
+                IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                Spacing="0">
+
+                <!-- Card: check-in já realizado hoje -->
+                <Border
+                    IsVisible="{Binding JaFezCheckin}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{StaticResource Primary}"
+                    StrokeThickness="1.5"
+                    BackgroundColor="{StaticResource PrimaryLight}"
+                    Padding="20,16"
+                    Margin="0,0,0,20">
+                    <VerticalStackLayout Spacing="12">
+
+                        <Label
+                            Text="✓ Check-in realizado hoje"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource Primary}"
+                            SemanticProperties.HeadingLevel="Level3" />
+
+                        <!-- Detalhes do check-in -->
+                        <Grid
+                            ColumnDefinitions="Auto,*"
+                            RowDefinitions="Auto,Auto,Auto,Auto"
+                            RowSpacing="8"
+                            ColumnSpacing="16">
+
+                            <!-- Data -->
+                            <Label
+                                Grid.Row="0" Grid.Column="0"
+                                Text="Data"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextSecondary}"
+                                MinimumWidthRequest="90" />
+                            <Label
+                                Grid.Row="0" Grid.Column="1"
+                                Text="{Binding CheckinHoje.Data, StringFormat='{0:dd/MM/yyyy}'}"
+                                FontSize="13"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                            <!-- Horário -->
+                            <Label
+                                Grid.Row="1" Grid.Column="0"
+                                Text="Horário"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextSecondary}" />
+                            <Label
+                                Grid.Row="1" Grid.Column="1"
+                                Text="{Binding CheckinHoje.CriadoEm, StringFormat='{0:HH:mm}'}"
+                                FontSize="13"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                            <!-- Latitude -->
+                            <Label
+                                Grid.Row="2" Grid.Column="0"
+                                Text="Latitude"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextSecondary}" />
+                            <Label
+                                Grid.Row="2" Grid.Column="1"
+                                Text="{Binding CheckinHoje.Latitude, StringFormat='{0:F5}°'}"
+                                FontSize="13"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                            <!-- Longitude -->
+                            <Label
+                                Grid.Row="3" Grid.Column="0"
+                                Text="Longitude"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource TextSecondary}" />
+                            <Label
+                                Grid.Row="3" Grid.Column="1"
+                                Text="{Binding CheckinHoje.Longitude, StringFormat='{0:F5}°'}"
+                                FontSize="13"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                        </Grid>
+
+                        <!-- Status de sincronização: sincronizado -->
+                        <Label
+                            IsVisible="{Binding CheckinHoje.Sincronizado}"
+                            Text="● Sincronizado com o servidor"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource Primary}"
+                            Margin="0,4,0,0"
+                            SemanticProperties.Description="Check-in sincronizado com o servidor" />
+
+                        <!-- Status de sincronização: pendente -->
+                        <Label
+                            IsVisible="{Binding CheckinHoje.Sincronizado, Converter={StaticResource InvertedBoolConverter}}"
+                            Text="● Salvo localmente · será sincronizado quando houver internet"
+                            FontSize="12"
+                            TextColor="{StaticResource TextSecondary}"
+                            Margin="0,4,0,0"
+                            LineBreakMode="WordWrap"
+                            SemanticProperties.Description="Check-in salvo localmente, aguardando sincronização" />
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: nenhum check-in hoje -->
+                <Border
+                    IsVisible="{Binding JaFezCheckin, Converter={StaticResource InvertedBoolConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{StaticResource Border}"
+                    StrokeThickness="1.5"
+                    BackgroundColor="{StaticResource White}"
+                    Padding="20,16"
+                    Margin="0,0,0,20">
+                    <VerticalStackLayout Spacing="8">
+                        <Label
+                            Text="Nenhum check-in hoje"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextPrimary}"
+                            SemanticProperties.HeadingLevel="Level3" />
+                        <Label
+                            Text="Registre sua prova de vida tocando no botão abaixo."
+                            FontSize="14"
+                            TextColor="{StaticResource TextSecondary}"
+                            LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- Botão Fazer Check-in (IsEnabled gerenciado pelo CanExecute do comando) -->
+            <Button
+                Text="Fazer Check-in"
+                Command="{Binding FazerCheckinCommand}"
+                BackgroundColor="{StaticResource Primary}"
+                TextColor="{StaticResource White}"
+                FontSize="16"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                HeightRequest="52"
+                Margin="0,0,0,0"
+                SemanticProperties.Hint="Botão para registrar check-in diário" />
+
+            <!-- Mensagem de erro -->
+            <Border
+                IsVisible="{Binding MensagemErro, Converter={StaticResource StringNotEmptyConverter}}"
+                StrokeShape="RoundRectangle 8"
+                Stroke="{StaticResource Danger}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource DangerLight}"
+                Padding="12,10"
+                Margin="0,12,0,0">
+                <Label
+                    Text="{Binding MensagemErro}"
+                    TextColor="{StaticResource Danger}"
+                    FontSize="13"
+                    LineBreakMode="WordWrap" />
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
