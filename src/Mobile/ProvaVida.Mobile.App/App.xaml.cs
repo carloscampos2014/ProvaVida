@@ -66,10 +66,10 @@ public partial class App : Microsoft.Maui.Controls.Application
             return;
         }
 
-        // RF-206.3 — usuário logado → navegar para Check-in (MainPage como placeholder)
+        // RF-206.3 — usuário logado → navegar para Check-in
         if (await _sessionManager.IsLoggedInAsync())
         {
-            await Shell.Current.GoToAsync("//MainPage");
+            await Shell.Current.GoToAsync("//CheckinPage");
             return;
         }
 

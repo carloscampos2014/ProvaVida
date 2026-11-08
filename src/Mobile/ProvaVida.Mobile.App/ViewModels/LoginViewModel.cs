@@ -70,7 +70,7 @@ public partial class LoginViewModel : ObservableObject
             if (resultado.Success)
             {
                 // RF-203.4 — dados e tokens já foram persistidos pelo serviço; navegar para Check-in
-                await Shell.Current.GoToAsync("//MainPage");
+                await Shell.Current.GoToAsync("//CheckinPage");
             }
             else
             {

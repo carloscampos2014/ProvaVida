@@ -15,6 +15,12 @@
         Shell.NavBarIsVisible="False" />
 
     <ShellContent
+        Title="Check-in"
+        ContentTemplate="{DataTemplate pages:CheckinPage}"
+        Route="CheckinPage"
+        Shell.NavBarIsVisible="False" />
+
+    <ShellContent
         Title="Início"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
