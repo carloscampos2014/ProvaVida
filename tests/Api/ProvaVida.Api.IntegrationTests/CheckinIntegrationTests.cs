@@ -2,11 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Claims;
-using System.Text;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.IdentityModel.Tokens;
 using ProvaVida.Shared.Dtos;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -22,9 +19,6 @@ public class CheckinIntegrationTests : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgres;
     private WebApplicationFactory<Program> _factory = null!;
-
-    // Segredo JWT exclusivo destes testes (>= 32 chars para HMAC-SHA256)
-    private const string TestJwtSecret = "checkin-integration-test-secret-min32c";
 
     public CheckinIntegrationTests()
     {
@@ -45,7 +39,7 @@ public class CheckinIntegrationTests : IAsyncLifetime
         // Env vars precisam estar definidas ANTES de WebApplicationFactory construir o host,
         // pois Program.cs as lê via Environment.GetEnvironmentVariable.
         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", _postgres.GetConnectionString());
-        Environment.SetEnvironmentVariable("JWT_SECRET", TestJwtSecret);
+        Environment.SetEnvironmentVariable("JWT_SECRET", "checkin-integration-test-secret-min32c");
 
         _factory = new WebApplicationFactory<Program>();
 
@@ -68,9 +62,8 @@ public class CheckinIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task Post_Checkins_ComJwtValido_DeveRetornar201ComCheckinResponse()
     {
-        // Arrange
-        var usuarioId = Guid.NewGuid();
-        var client = CriarClienteComJwt(usuarioId);
+        // Arrange — registrar usuário real para satisfazer FK checkins.usuario_id → usuarios.id
+        var (client, usuarioId) = await CriarClienteComUsuarioRealAsync();
         var request = CheckinRequestDeTeste(DateOnly.FromDateTime(DateTime.Today));
 
         // Act
@@ -113,11 +106,9 @@ public class CheckinIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task Post_Checkins_Duplicado_MesmoUsuarioMesmaData_DeveRetornar409()
     {
-        // Arrange — dois clientes com o mesmo usuário (mesmo JWT)
-        var usuarioId = Guid.NewGuid();
-        var client = CriarClienteComJwt(usuarioId);
+        // Arrange — registrar usuário real para satisfazer FK
+        var (client, _) = await CriarClienteComUsuarioRealAsync();
         var data = DateOnly.FromDateTime(DateTime.Today);
-
         var request = CheckinRequestDeTeste(data);
 
         // Primeiro check-in — deve criar com sucesso
@@ -135,37 +126,49 @@ public class CheckinIntegrationTests : IAsyncLifetime
 
     // ────────────────────── Helpers privados ──────────────────────
 
-    /// <summary>Cria um <see cref="HttpClient"/> com Bearer token JWT para o usuário informado.</summary>
-    private HttpClient CriarClienteComJwt(Guid usuarioId)
+    /// <summary>
+    /// Registra um novo usuário via /auth/register, faz login via /auth/login e retorna
+    /// um cliente HTTP autenticado com o JWT real emitido pela API.
+    /// Necessário porque checkins.usuario_id tem FK para usuarios.id.
+    /// </summary>
+    private async Task<(HttpClient client, Guid usuarioId)> CriarClienteComUsuarioRealAsync()
     {
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false
         });
-        var jwt = GerarJwtTeste(usuarioId);
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-        return client;
-    }
 
-    /// <summary>Gera um JWT de teste assinado com <see cref="TestJwtSecret"/>.</summary>
-    private static string GerarJwtTeste(Guid usuarioId)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(TestJwtSecret));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        // SHA-256 simulado válido (64 hex chars)
+        var sha256Hash = new string('a', 64);
+        var email = $"checkin_{Guid.NewGuid():N}@test.com";
 
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, usuarioId.ToString()),
-            new Claim(ClaimTypes.Email, "teste@provavida.com"),
-            new Claim(ClaimTypes.Name, "Usuário de Teste")
-        };
+        // Registrar usuário real no banco
+        var registerRequest = new RegisterRequest(
+            Nome: "Usuário Teste Checkin",
+            Email: email,
+            Whatsapp: "11999998888",
+            SenhaHash: sha256Hash,
+            ContatoEmergenciaNome: "Contato Emergência",
+            ContatoEmergenciaEmail: "contato@test.com",
+            ContatoEmergenciaWhatsapp: "11888887777"
+        );
+        var registerResponse = await client.PostAsJsonAsync("/auth/register", registerRequest);
+        registerResponse.EnsureSuccessStatusCode();
 
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: credentials);
+        // Login para obter JWT real com o usuarioId persistido no banco
+        var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(email, sha256Hash));
+        loginResponse.EnsureSuccessStatusCode();
+        var tokens = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>();
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        // Extrair usuarioId do JWT — JwtTokenService serializa ClaimTypes.NameIdentifier como "nameid"
+        var jwtHandler = new JwtSecurityTokenHandler();
+        var jwtToken = jwtHandler.ReadJwtToken(tokens!.AccessToken);
+        var usuarioId = Guid.Parse(jwtToken.Claims.First(c => c.Type == "nameid").Value);
+
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
+
+        return (client, usuarioId);
     }
 
     /// <summary>Retorna um <see cref="CheckinRequest"/> válido para a data informada.</summary>
