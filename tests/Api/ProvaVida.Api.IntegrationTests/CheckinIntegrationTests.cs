@@ -1,7 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using ProvaVida.Shared.Dtos;
@@ -160,13 +160,13 @@ public class CheckinIntegrationTests : IAsyncLifetime
         loginResponse.EnsureSuccessStatusCode();
         var tokens = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>();
 
-        // Extrair usuarioId do JWT — JwtTokenService serializa ClaimTypes.NameIdentifier como "nameid"
-        var jwtHandler = new JwtSecurityTokenHandler();
-        var jwtToken = jwtHandler.ReadJwtToken(tokens!.AccessToken);
-        var usuarioId = Guid.Parse(jwtToken.Claims.First(c => c.Type == "nameid").Value);
+        // Ler o usuarioId direto do response do register (evita parsing de claims JWT)
+        using var registerDoc = await JsonDocument.ParseAsync(
+            await registerResponse.Content.ReadAsStreamAsync());
+        var usuarioId = Guid.Parse(registerDoc.RootElement.GetProperty("id").GetString()!);
 
         client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
+            new AuthenticationHeaderValue("Bearer", tokens!.AccessToken);
 
         return (client, usuarioId);
     }
