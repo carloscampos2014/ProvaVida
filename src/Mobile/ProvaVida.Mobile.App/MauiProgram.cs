@@ -60,8 +60,15 @@ public static class MauiProgram
 
         // ── HTTP / API ────────────────────────────────────────────────────────
 
-        // Base URL configurável: Development = localhost:5001; Produção = VM Oracle (RNF-206)
+        // Base URL configurável por ambiente (RNF-206)
+        // Development Windows: porta 5268 (launchSettings.json perfil http)
+        // Development WSL2: porta 5001 (serviço no Linux acessível via localhost)
+        // Produção: URL da VM Oracle via appsettings.json
+#if DEBUG
+        var apiBaseUrl = "http://localhost:5268/";
+#else
         var apiBaseUrl = "http://localhost:5001/";
+#endif
         builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
         {
             client.BaseAddress = new Uri(apiBaseUrl);
