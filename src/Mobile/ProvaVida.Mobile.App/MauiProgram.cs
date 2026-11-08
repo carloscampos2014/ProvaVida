@@ -2,11 +2,13 @@ using Microsoft.Extensions.Logging;
 using ProvaVida.Mobile.Application.Auth;
 using ProvaVida.Mobile.Application.Http;
 using ProvaVida.Mobile.Application.Navigation;
+using ProvaVida.Mobile.Application.Services;
 using ProvaVida.Mobile.Infrastructure.Data;
 using ProvaVida.Mobile.Infrastructure.Http;
 using ProvaVida.Mobile.Infrastructure.Repositories;
 using ProvaVida.Mobile.App.Navigation;
 using ProvaVida.Mobile.App.Pages;
+using ProvaVida.Mobile.App.Services;
 using ProvaVida.Mobile.App.ViewModels;
 using ProvaVida.Shared.Repositories;
 
@@ -86,6 +88,18 @@ public static class MauiProgram
         builder.Services.AddTransient<ITokenManager, TokenManager>();
         builder.Services.AddTransient<IAuthMobileService, AuthMobileService>();
 
+        // ── Serviços de device / conectividade / localização ─────────────────
+
+        // Singletons: wrappers sobre APIs estáticas do MAUI Essentials (RF-303, RF-304)
+        builder.Services.AddSingleton<ILocationService, MauiLocationService>();
+        builder.Services.AddSingleton<IConnectivityService, MauiConnectivityService>();
+        builder.Services.AddSingleton<IDeviceInfoService, MauiDeviceInfoService>();
+
+        // ── Serviços de check-in ──────────────────────────────────────────────
+
+        // Transient: sem estado entre requests (RF-302, RF-303, RF-304)
+        builder.Services.AddTransient<ICheckinMobileService, CheckinMobileService>();
+
         // ── ViewModels e Pages ────────────────────────────────────────────────
 
         builder.Services.AddTransient<MainPage>();
@@ -93,6 +107,8 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<CadastroViewModel>();
         builder.Services.AddTransient<CadastroPage>();
+        builder.Services.AddTransient<CheckinViewModel>();
+        builder.Services.AddTransient<CheckinPage>();
 
         return builder.Build();
     }
