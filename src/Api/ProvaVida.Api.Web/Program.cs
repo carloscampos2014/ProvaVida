@@ -74,10 +74,9 @@ var migrator = new DatabaseMigrator(connectionString, migrationLogger);
 migrator.Migrate();
 
 // Scalar UI
-app.MapScalarApiReference(options =>
+app.MapScalarApiReference("/scalar/{documentName}", options =>
 {
     options.WithTitle("ProvaVida API");
-    options.WithEndpointPrefix("/scalar/{documentName}");
 });
 app.MapOpenApi();
 
