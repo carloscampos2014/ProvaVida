@@ -32,6 +32,9 @@ builder.Services.AddScoped<IRefreshTokenRepository, PostgresRefreshTokenReposito
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthApplicationService, AuthApplicationService>();
 
+// Serviços de check-in
+builder.Services.AddScoped<ICheckinCommandService, CheckinCommandService>();
+
 // JWT Bearer — lê de env var com fallback para Jwt:Secret na configuração
 var jwtSecret =
     Environment.GetEnvironmentVariable("JWT_SECRET")
@@ -87,3 +90,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Necessário para WebApplicationFactory nos testes de integração
+public partial class Program { }
