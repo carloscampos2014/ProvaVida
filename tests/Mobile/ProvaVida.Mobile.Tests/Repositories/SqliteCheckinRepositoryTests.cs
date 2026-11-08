@@ -95,6 +95,73 @@ public class SqliteCheckinRepositoryTests
         result.MessageErro.Should().Contain("Conexão inválida");
     }
 
+    // ── Testes dos métodos especializados — GetByUsuarioIdAndDataAsync ────────
+
+    [Fact]
+    public async Task GetByUsuarioIdAndDataAsync_DeveRetornarCheckin_QuandoEncontrado()
+    {
+        var checkin = CriarCheckinValido();
+        var repo = new FakeGetByUsuarioIdAndDataRepository(new Mock<IDbConnectionFactory>().Object, checkin);
+
+        var result = await repo.GetByUsuarioIdAndDataAsync(checkin.UsuarioId, checkin.Data);
+
+        result.Success.Should().BeTrue();
+        result.Data.Should().NotBeNull();
+        result.Data!.UsuarioId.Should().Be(checkin.UsuarioId);
+        result.Data.Data.Should().Be(checkin.Data);
+    }
+
+    [Fact]
+    public async Task GetByUsuarioIdAndDataAsync_DeveRetornarFail_QuandoNaoEncontrado()
+    {
+        var repo = new FakeGetByUsuarioIdAndDataNotFoundRepository(new Mock<IDbConnectionFactory>().Object);
+
+        var result = await repo.GetByUsuarioIdAndDataAsync(Guid.NewGuid(), DateOnly.FromDateTime(DateTime.Today));
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task GetByUsuarioIdAndDataAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new SqliteCheckinRepository(factory);
+
+        var result = await repo.GetByUsuarioIdAndDataAsync(Guid.NewGuid(), DateOnly.FromDateTime(DateTime.Today));
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
+    // ── Testes dos métodos especializados — GetPendingSyncAsync ──────────────
+
+    [Fact]
+    public async Task GetPendingSyncAsync_DeveRetornarNaoSincronizados()
+    {
+        var naoSincronizado = CriarCheckinValido();
+        naoSincronizado.Sincronizado = false;
+        var repo = new FakeGetPendingSyncRepository(new Mock<IDbConnectionFactory>().Object, [naoSincronizado]);
+
+        var result = await repo.GetPendingSyncAsync();
+
+        result.Success.Should().BeTrue();
+        result.Data.Should().HaveCount(1);
+        result.Data!.First().Sincronizado.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetPendingSyncAsync_DeveRetornarFail_QuandoConexaoLancaExcecao()
+    {
+        var factory = CriarFactoryQueExplode();
+        var repo = new SqliteCheckinRepository(factory);
+
+        var result = await repo.GetPendingSyncAsync();
+
+        result.Success.Should().BeFalse();
+        result.MessageErro.Should().Contain("Conexão inválida");
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────
 
     private static IDbConnectionFactory CriarFactoryQueExplode()
@@ -142,6 +209,36 @@ public class SqliteCheckinRepositoryTests
         {
             await Task.CompletedTask;
             return Result.Ok();
+        }
+    }
+
+    private class FakeGetByUsuarioIdAndDataRepository(IDbConnectionFactory factory, Checkin checkin)
+        : SqliteCheckinRepository(factory)
+    {
+        public override async Task<Result<Checkin>> GetByUsuarioIdAndDataAsync(Guid usuarioId, DateOnly data)
+        {
+            await Task.CompletedTask;
+            return Result<Checkin>.Ok(checkin);
+        }
+    }
+
+    private class FakeGetByUsuarioIdAndDataNotFoundRepository(IDbConnectionFactory factory)
+        : SqliteCheckinRepository(factory)
+    {
+        public override async Task<Result<Checkin>> GetByUsuarioIdAndDataAsync(Guid usuarioId, DateOnly data)
+        {
+            await Task.CompletedTask;
+            return Result<Checkin>.Fail("Check-in não encontrado para a data informada");
+        }
+    }
+
+    private class FakeGetPendingSyncRepository(IDbConnectionFactory factory, IEnumerable<Checkin> pendentes)
+        : SqliteCheckinRepository(factory)
+    {
+        public override async Task<Result<IEnumerable<Checkin>>> GetPendingSyncAsync()
+        {
+            await Task.CompletedTask;
+            return Result<IEnumerable<Checkin>>.Ok(pendentes);
         }
     }
 }
