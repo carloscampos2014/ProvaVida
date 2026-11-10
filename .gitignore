@@ -43,6 +43,7 @@ TestResults/
 
 ## Kiro — estado de workflows e agentes (gerado automaticamente)
 .agents/
+.agent/
 
 ## OS
 .DS_Store
@@ -57,3 +58,4 @@ TesteProVidaApi.ps1
 # Configurações locais com secrets (connection strings, jwt secrets, etc.)
 **/appsettings.Development.json
 **/appsettings.Local.json
+GEMINI.md
